@@ -74,7 +74,7 @@ updated_catch = data.frame(year = catch_df[,'qtr'], seas = 1, fleet = catch_df[,
                            catch = catch_df[,'Catch'], catch_se = 0.01)
 updated_catch = updated_catch %>% add_row(data.frame(year = -999, seas = 1, fleet = 1, catch = 0, catch_se = 0.01), .before = 1) # shouldnt we also add for all fleets?
 dat_1$catch = updated_catch
-# Last year = 2022
+# Last year = 2022:
 dat_1$endyr = 304
 
 # Write SS files:
