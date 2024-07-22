@@ -1,5 +1,6 @@
 require(r4ss)
 require(here)
+require(dplyr)
 
 # Set working directiry using here():
 proj_dir = here::here()
@@ -30,10 +31,11 @@ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss
 # -------------------------------------------------------------------------
 # Start implementing configurations ---------------------------------------
 
-# Run 2021 assessment again -----------------------------------------------
+
+# Run 2021 assessment with new SS exe -------------------------------------
 
 config_name = '0_last_assessment'
-tmp_dir = file.path(shrpoint_path, SS_folder, config_name)
+tmp_dir = file.path(shrpoint_path, SS_config, config_name)
 dir.create(tmp_dir)
 
 # Temporary files:
@@ -55,6 +57,37 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
 
 
 # Update catch data until 2022 --------------------------------------------
+
+config_name = '1_update_catch'
+tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+dir.create(tmp_dir)
+
+# Temporary files:
+dat_1 = dat_0
+ctl_1 = base_ctl
+fore_1 = base_fore
+start_1 = base_start
+
+# Updated catch data frame:
+catch_df = read.csv(file.path(shrpoint_path, SS_data, 'catch.csv'))
+updated_catch = data.frame(year = catch_df[,'qtr'], seas = 1, fleet = catch_df[,'ModelFleet'], 
+                           catch = catch_df[,'Catch'], catch_se = 0.01)
+updated_catch = updated_catch %>% add_row(data.frame(year = -999, seas = 1, fleet = 1, catch = 0, catch_se = 0.01), .before = 1) # shouldnt we also add for all fleets?
+dat_1$catch = updated_catch
+# Last year = 2022
+dat_1$endyr = 304
+
+# Write SS files:
+SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+
+# Run model:
+r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
+
+
+# -------------------------------------------------------------------------
 
 # Continue....
 
