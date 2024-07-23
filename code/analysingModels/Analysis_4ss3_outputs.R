@@ -1,5 +1,6 @@
 #
-#       READ ss3 outputs of different and create a summary performance table
+#       READ ss3 outputs of different scenarios
+#               Create a summary performance table
 #       compare ss3 outputs of different scenarios
 #............................................................
 
@@ -14,7 +15,7 @@ library(ggplot2)
 proj_dir = here::here()
 setwd(proj_dir)
 
-source("code/analysis/auxiliary_functions_4analysis.R")
+source("code/analysingModels/auxiliary_functions_4analysis.R")
 # Sharepoint path:
 source('sharepoint_path.R')
 setwd(shrpoint_path)
