@@ -93,6 +93,6 @@ data <- data79 %>% mutate(season=1,cv=0.2) %>%
                            
                            AssessmentAreaName=='2' ~ 23,
                            AssessmentAreaName=='3' ~ 24,TRUE ~ 25)) %>% 
-  select(qtr,season,fleet,pr,cv)
+  select(qtr,season,fleet,pr_7994_m8,cv)
 
 write.csv(data,file=file.path('data','ss3_inputs','4A_io','scaled_cpue.csv' ), row.names = FALSE)

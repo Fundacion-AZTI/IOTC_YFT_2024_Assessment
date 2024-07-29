@@ -17,7 +17,7 @@ library(ggplot2)
 proj_dir = here::here()
 setwd(proj_dir)
 
-source("code/analysingModels/auxiliary_functions_4analysingModels.R")
+source(here("code", "analysingModels","auxiliary_functions_4analysingModels.R")
 # Sharepoint path:
 source('sharepoint_path.R')
 setwd(shrpoint_path)
@@ -165,7 +165,7 @@ dir_table <- "output/tables/"
   
   
   #...................................................
-  #### READ, PLOT AND PERFORMANCE TABLE ####
+  #### STEPWISE- READ, PLOT AND PERFORMANCE TABLE ####
   #...................................................
   
   
@@ -190,7 +190,7 @@ dir_table <- "output/tables/"
   
   #...................................................
   #
-  #### COMPARISON F AND SSB ####
+  #### STEPWISE - COMPARISON F AND SSB ####
   #
   #...................................................
   
@@ -212,7 +212,7 @@ dir_table <- "output/tables/"
     scale_color_discrete(labels=levels(sub_df_long$scenario))+
     xlab("Year")+ ylab("F/Fmsy")+theme_fun()
   
-  SavePlot('Stepwise_F',15,10)
+  SavePlot('Stepwise_update_F',15,10)
   
   ### end ###
   
@@ -231,23 +231,23 @@ dir_table <- "output/tables/"
     scale_color_discrete(labels=levels(sub_df_long$scenario))+xlab("Year")+ ylab("SSB")+
     theme_fun()
   
-  SavePlot('Stepwise_SSB',15,10)
+  SavePlot('Stepwise_update_SSB',15,10)
   
   
   #### end ####
   
   
   #...................................................
-  ### sub analysis
+  ### STEPWISE sub analysis
   #...................................................
   
-  sub_scs <- c("4A_io_2021_v33017",
-               "4A_io_lin_v33022_FixedParam2_Fl11")  
-  sub_scs_wd <-paste0("models/base_win_vs_lin/",sub_scs)
+  sub_scs <- c(scs,"03_update_only_length_until_296")  
+  sub_scs_wd <-paste0("models/update/",sub_scs)
+  mod_sum <- aggregate.ssMod(sub_scs, sub_scs_wd)
   ### Comparison f
   df <- mod_sum$Fvalue
-  df <- df %>% rename_at(1:length(scs),~scs)
-  df_long <- df %>% pivot_longer(cols =scs, names_to = "scenario", values_to = "value")
+  df <- df %>% rename_at(1:length(sub_scs),~sub_scs)
+  df_long <- df %>% pivot_longer(cols =sub_scs, names_to = "scenario", values_to = "value")
   
   sub_df_long <- df_long %>% filter(scenario %in% sub_scs)
   sub_df_long$scenario <- as.factor(as.character(sub_df_long$scenario))
@@ -259,16 +259,17 @@ dir_table <- "output/tables/"
     xlab("Year")+ ylab("F/Fmsy")+theme_fun()
   
   
-  SavePlot('Stepwise_F',15,10)
+  SavePlot('Stepwise_and_update_lengthOnly_F',15,10)
   
   ### end ###
   
   
-  # Comparison SSB
+  # STEPWISE SUB- ANALYSIS Comparison SSB
   
   df <- mod_sum$SpawnBio
-  df <- df %>% rename_at(1:length(scs),~scs)
-  df_long <- df %>% pivot_longer(cols =scs, names_to = "scenario", values_to = "value")
+  df <- df %>% rename_at(1:length(sub_scs),~sub_scs)
+  df_long <- df %>% pivot_longer(cols =sub_scs, names_to = "scenario", values_to = "value")
+  
   sub_df_long <- df_long %>% filter(scenario %in% sub_scs)
   sub_df_long$scenario <- as.factor(as.character(sub_df_long$scenario))
   levels(sub_df_long$scenario) <- droplevels(sub_df_long$scenario)
@@ -278,7 +279,7 @@ dir_table <- "output/tables/"
     scale_color_discrete(labels=levels(sub_df_long$scenario))+xlab("Year")+ ylab("SSB")+
     theme_fun()
   
-  SavePlot('Stepwise_SSB',15,10)
+  SavePlot('Stepwise_and_update_lengthOnly_SSB',15,10)
   
   #### end ####
   
