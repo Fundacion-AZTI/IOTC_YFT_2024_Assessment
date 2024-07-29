@@ -14,7 +14,7 @@ setwd(proj_dir)
 source('sharepoint_path.R')
 
 # Read auxiliary functions:
-source(here('code', 'ss', 'inputs', 'auxiliary_functions.R'))
+source(here('code', 'inputs', 'auxiliary_functions.R'))
 
 # DEFINITION OF REGIONS 2010
 # Note that the boundaries of Area R3 and R4 were changed for the assessment in 2010, 
