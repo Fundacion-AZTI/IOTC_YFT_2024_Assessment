@@ -41,3 +41,12 @@ transform_to_stdgrid = function(df) { # input will be a data.frame with single r
   return(out_df)
 }
 
+
+# -------------------------------------------------------------------------
+# Make grid plot:
+
+plot_grid = function(plot_data, grid_var) {
+  # TODO
+}
+
+

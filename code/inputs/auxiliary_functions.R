@@ -6,10 +6,11 @@ get.lat.from.id = function(id) {
   id = as.character(id)
   size_grid_ = substr(id,1,1)
   
-  size_lat_ = ifelse(size_grid_==2,10,
-                     ifelse(size_grid_==3,10,
-                            ifelse(size_grid_==4,20,
-                                   ifelse(size_grid_==5,1,5))))
+  size_lat_ = ifelse(size_grid_==1,30, # corrected based on metadata
+                     ifelse(size_grid_==2,10,
+                       ifelse(size_grid_==3,10,
+                              ifelse(size_grid_==4,20,
+                                     ifelse(size_grid_==5,1,5)))))
   quadrant =substr(id,2,2)
   lat_label  = substr(id,3,4)
   lat = as.numeric(lat_label)+size_lat_/2
@@ -20,10 +21,11 @@ get.long.from.id = function(id) {
   id = as.character(id)
   size_grid_ = substr(id,1,1)
   
-  size_long_ = ifelse(size_grid_==2,20,
-                      ifelse(size_grid_==3,10,
-                             ifelse(size_grid_==4,20,
-                                    ifelse(size_grid_==5,1,5))))
+  size_long_ = ifelse(size_grid_==1,30, # corrected based on metadata
+                      ifelse(size_grid_==2,20,
+                        ifelse(size_grid_==3,10,
+                               ifelse(size_grid_==4,20,
+                                      ifelse(size_grid_==5,1,5)))))
   
   quadrant = substr(id,2,2)
   long_label  = substr(id,5,7)
