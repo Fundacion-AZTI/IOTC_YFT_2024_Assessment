@@ -1,9 +1,8 @@
-require(dplyr)
-require(purrr)
-require(ggplot2)
 source('sharepoint_path.R')
 source('code/data_exploration/auxiliary_functions.R')
 data_folder = 'data/processed'
+# Length bin column names (lowercase):
+C_labels = c(paste0("l0", seq(from = 10, to = 98, by = 2)), paste0("l", seq(from = 100, to = 198, by = 2)))
 
 # -------------------------------------------------------------------------
 # Make std grid 
@@ -46,10 +45,15 @@ catch_spt = catch_spt %>% mutate(grid_type = str_sub(grid, 1, 1))
 table(catch_spt$grid_type)
 
 # Do some processing:
-catch_spt = catch_spt %>% mutate(samp_ID = 1:n()) # add samp_ID column
 catchPoints = catch_spt %>% st_as_sf(coords = c("long", "lat"), crs = 4326, remove = FALSE)
 # Find stdGrid that corresponds to each catch point (it takes a while):
 catchStd = st_join(stdGrid, left = TRUE, catchPoints) %>% na.omit
+# Remove sf object since not important for now and may make things slower:
+st_geometry(catchStd) = NULL
+# Aggregate information by std grid:
+catchStd = catchStd %>% group_by(grid_ID, year, quarter, month, fleet, gear, schooltype, area, assessmentarea, assessmentareaname, 
+                             modelarea, fisherycode, modelfishery, modelfleet) %>%
+            summarise_at(c('ncnofish', 'ncmtfish'), sum)
 save(catchStd, file = file.path(shrpoint_path, data_folder, 'catchStd.RData'))
 
 # -------------------------------------------------------------------------
@@ -66,11 +70,17 @@ size_spt_tf = size_spt %>% group_split(samp_ID) %>%
 sizePoints = size_spt_tf %>% st_as_sf(coords = c("long", "lat"), crs = 4326, remove = FALSE)
 # Find stdGrid that corresponds to each size point (it takes a while):
 sizeStd = st_join(stdGrid, left = TRUE, sizePoints) %>% na.omit
+# Remove sf object since not important for now and may make things slower:
+st_geometry(sizeStd) = NULL
+# Aggregate information by std grid (important for 1x1 grids in size data):
+tmp_1 = sizeStd %>% group_by(grid_ID, year, quarter, month, fleet, gear, schooltype, area, assessmentarea, assessmentareaname, 
+                          modelarea, fisherycode, modelfishery, modelfleet) %>%
+          summarise_at('reporting_quality', median)
+tmp_2 = sizeStd %>% group_by(grid_ID, year, quarter, month, fleet, gear, schooltype, area, assessmentarea, assessmentareaname, 
+                          modelarea, fisherycode, modelfishery, modelfleet) %>%
+  summarise_at(c('sno', C_labels), sum)
+# Merge both datasets:
+sizeStd = inner_join(tmp_1, tmp_2)
 save(sizeStd, file = file.path(shrpoint_path, data_folder, 'sizeStd.RData'))
 
-# -------------------------------------------------------------------------
-
-# Limits for plotting later:
-limites = data.frame(xlim1 = min_lon, ylim1 = min_lat,
-                     xlim2 = ceiling((max(MyPoints$Long))/5)*5, ylim2 = ceiling((max(MyPoints$Lat))/5)*5)
-save(limites, file = file.path('data', 'limites.RData'))
+# TODO: find catch information for every size row (do it by season since too many NA when dealing with months)

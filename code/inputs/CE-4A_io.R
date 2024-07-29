@@ -1,8 +1,3 @@
-library(tidyverse)
-library(reshape)
-library(r4ss)
-library(here)
-
 # Spatial configuration:
 spat_config = '4A_io'
 
@@ -14,7 +9,7 @@ setwd(proj_dir)
 source('sharepoint_path.R')
 
 # Read auxiliary functions:
-source(here('code', 'ss', 'inputs', 'auxiliary_functions.R'))
+source(here('code', 'inputs', 'auxiliary_functions.R'))
 
 # DEFINITION OF REGIONS 2010
 # Note that the boundaries of Area R3 and R4 were changed for the assessment in 2010, 
@@ -95,6 +90,8 @@ dHelper = read.csv(file.path(shrpoint_path, 'data/raw', "IOTC-2024-WPTT26(AS) - 
 dHelper = dHelper %>% 
   mutate(Fleet=FLEET, Gear=GEAR_CODE, SchoolType=SCHOOL_TYPE_CODE,FisheryCode=FISHERY) %>% 
   dplyr::select(Fleet,Gear,SchoolType,FisheryCode)
+# Assign FLL to LF in mapping table (mistake, confirmed by Dan):
+dHelper = dHelper %>% mutate_cond(FisheryCode == 'FLL', FisheryCode = 'LF')
 
 Data = Data %>% 
   dplyr::left_join(dHelper,by=c("Gear"="Gear","Fleet"="Fleet","SchoolType"="SchoolType")) %>% 
@@ -107,8 +104,8 @@ Data = plyr::ddply(Data,"Grid",.fun = function(d) {
   d$lat =lat
   d$long = long
   d$Area = 0
-  d$Area =  ifelse(lat > 10 & long < 75,1,
-                   ifelse((lat > -10 & lat < 10 & long  < 60) | (lat > -15 & lat < 10 & long  > 60 & long < 75),2,
+  d$Area =  ifelse(lat > 10 & long <= 75, 1, # originally, it was Long < 75, but produced unassigned areas for GI after GridCell correction
+                   ifelse((lat > -10 & lat < 10 & long  < 60) | (lat > -15 & lat < 10 & long  > 60 & long <= 75),2, # originally, it was Long < 75, but produced unassigned areas for GI after GridCell correction
                           ifelse((lat > -60 & lat < -10 & long > 20 & long < 40) | (lat > -30 & lat < -10 & long > 40 & long  < 60),3,
                                  ifelse((lat > -60 & lat < -30 & long > 40 & long < 60) | (lat > -60 & lat < -15 & long  > 60 & long < 150),4,
                                         ifelse(lat > -15 & long > 75 & long < 150,5,0)))))		

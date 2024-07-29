@@ -1,9 +1,3 @@
-library(tidyverse)
-library(reshape)
-library(r4ss)
-library(here)
-library(readxl)
-
 # Spatial configuration:
 spat_config = '4A_io'
 
@@ -15,7 +9,7 @@ setwd(proj_dir)
 source('sharepoint_path.R')
 
 # Read auxiliary functions:
-source(here('code', 'ss', 'inputs', 'auxiliary_functions.R'))
+source(here('code', 'inputs', 'auxiliary_functions.R'))
 
 # DEFINITION OF REGIONS 2010
 # Note that the boundaries of Area R3 and R4 were changed for the assessment in 2010, 
@@ -25,7 +19,7 @@ source(here('code', 'ss', 'inputs', 'auxiliary_functions.R'))
 # Region 1(2)   15S-10S, 60E-75E - western equatorial
 # Region 2(3)   40S-10S, 35E-60E - Mzbqe Channel, excluding SE corner which is included in R4 (40S-30S, 40E-60E).
 # Region 3(4)   40S-15S, 60E-120E and 40S-30S, 40E-60E; - southern Indian Ocean
-# Region 4(5)   15S-20N, 75E-130E - western Indian Ocean, Bay of Bengal, Timor Sea 
+# Region 4(5)   15S-20N, 75E-130E - eastern Indian Ocean, Bay of Bengal, Timor Sea 
 #
 # DEFINITION OF FISHERIES 2012 MFCL
 # Fishery 1   Gillnet (GI 1a)                              [region 1] 1
@@ -68,6 +62,9 @@ dHelper = dHelper %>%
   mutate(Fleet=FLEET, Gear=GEAR_CODE, SchoolType=SCHOOL_TYPE_CODE,FisheryCode=FISHERY) %>% 
   dplyr::select(Fleet,Gear,SchoolType,FisheryCode)
 
+# Assign FLL to LF in mapping table (mistake, confirmed by Dan):
+dHelper = dHelper %>% mutate_cond(FisheryCode == 'FLL', FisheryCode = 'LF')
+
 
 Data = Data %>% 
   dplyr::filter(!(Gear == 'HOOK' | Gear == 'HATR' | Gear=='PSOB' | (Gear == 'PS' & SchoolType == 'UNCL'))) %>%  # I exclude HATR here but please check again if the HATR LF is good enough now
@@ -78,7 +75,7 @@ Data = Data %>%
   dplyr::mutate(LatCell = 0, LongCell = 0) %>%
   mutate_cond(substring(Grid,1,1) == "5",LatCell=1,LongCell=1) %>%
   mutate_cond(substring(Grid,1,1) == "6",LatCell=5,LongCell=5) %>%
-  mutate_cond(substring(Grid,1,1) == "1",LatCell=30,LongCell=30) %>% # originally, it was 5x10, but based on new metadata, should be 30x30.
+  mutate_cond(substring(Grid,1,1) == "1",LatCell=30,LongCell=30) %>% # originally, it was 5x10, but based on new metadata, should be 30x30 (confirmed by Dan).
   mutate_cond(substring(Grid,1,1) == "2",LatCell=10,LongCell=20) %>%
   mutate_cond(substring(Grid,1,1) == "3",LatCell=10,LongCell=10) %>%
   mutate_cond(substring(Grid,1,1) == "4",LatCell=20,LongCell=20) %>%
@@ -88,16 +85,16 @@ Data = Data %>%
   mutate_cond(quadrant ==2,Lat= -as.numeric(substring(Grid,3,4)) - LatCell/2, Long = as.numeric(substring(Grid,5,7)) + LongCell/2) %>%
   dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,FisheryCode,TnoFish,FirstClassLow,SizeInterval,REPORTING_QUALITY,C001:C150)
 
-
+# Check this, should we assign everything to Area 1 (Long 75)
 Data = plyr::ddply(Data,"Grid",.fun = function(d) {
   Lat = d$Lat[1]
   Long = d$Long[1]
   d$Area = 0
-  d$Area =  ifelse(Lat > 10 & Long < 75,1,
-                   ifelse((Lat > -10 & Lat < 10 & Long  < 60) | (Lat > -15 & Lat < 10 & Long  > 60 & Long < 75),2,
-                          ifelse((Lat > -60 & Lat < -10 & Long > 20 & Long < 40) | (Lat > -30 & Lat < -10 & Long > 40 & Long  < 60),3,
-                                 ifelse((Lat > -60 & Lat < -30 & Long > 40 & Long < 60) | (Lat > -60 & Lat <= -15 & Long  > 60 & Long <= 150),4,
-                                        ifelse(Lat > -15 & Long > 75 & Long < 150,5,0)))))		
+  d$Area =  ifelse(Lat > 10 & Long <= 75, 1, # originally, it was Long < 75, but produced unassiged areas for GI after GridCell correction
+                   ifelse((Lat > -10 & Lat < 10 & Long  < 60) | (Lat > -15 & Lat < 10 & Long  > 60 & Long <= 75), 2, # originally, it was Long < 75, but produced unassiged areas for GI after GridCell correction
+                          ifelse((Lat > -60 & Lat < -10 & Long > 20 & Long < 40) | (Lat > -30 & Lat < -10 & Long > 40 & Long  < 60), 3,
+                                 ifelse((Lat > -60 & Lat < -30 & Long > 40 & Long < 60) | (Lat > -60 & Lat <= -15 & Long  > 60 & Long <= 150), 4,
+                                        ifelse(Lat > -15 & Long > 75 & Long < 150, 5, 0)))))		
   return(d)})					
 
 Data = plyr::ddply(Data,c("Area","FisheryCode"),.fun = function(d) {
@@ -136,9 +133,6 @@ Data = Data %>%
   dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName)) %>% 
   dplyr::mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries))) %>% 
   dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,Area,AssessmentArea,AssessmentAreaName, ModelArea,FisheryCode,ModelFishery,ModelFleet,FirstClassLow,SizeInterval,REPORTING_QUALITY,C001:C150)
-
-# Assign FLL to LF:
-Data = Data %>% mutate_cond(FisheryCode == 'FLL', FisheryCode = 'LF')
 
 # Continue..
 C_labels = c(Paste("C00",1:9),Paste("C0",10:99), Paste("C",100:150))
