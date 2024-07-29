@@ -78,7 +78,7 @@ Data = Data %>%
   dplyr::mutate(LatCell = 0, LongCell = 0) %>%
   mutate_cond(substring(Grid,1,1) == "5",LatCell=1,LongCell=1) %>%
   mutate_cond(substring(Grid,1,1) == "6",LatCell=5,LongCell=5) %>%
-  mutate_cond(substring(Grid,1,1) == "1",LatCell=5,LongCell=10) %>%
+  mutate_cond(substring(Grid,1,1) == "1",LatCell=30,LongCell=30) %>% # originally, it was 5x10, but based on new metadata, should be 30x30.
   mutate_cond(substring(Grid,1,1) == "2",LatCell=10,LongCell=20) %>%
   mutate_cond(substring(Grid,1,1) == "3",LatCell=10,LongCell=10) %>%
   mutate_cond(substring(Grid,1,1) == "4",LatCell=20,LongCell=20) %>%
@@ -86,7 +86,7 @@ Data = Data %>%
   dplyr::mutate(quadrant = as.numeric(substring(Grid,2,2)), Lat=999,Long=999)  %>%
   mutate_cond(quadrant ==1,Lat= as.numeric(substring(Grid,3,4)) + LatCell/2, Long = as.numeric(substring(Grid,5,7)) + LongCell/2) %>%
   mutate_cond(quadrant ==2,Lat= -as.numeric(substring(Grid,3,4)) - LatCell/2, Long = as.numeric(substring(Grid,5,7)) + LongCell/2) %>%
-  dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,FisheryCode,TnoFish,FirstClassLow,SizeInterval,C001:C150)
+  dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,FisheryCode,TnoFish,FirstClassLow,SizeInterval,REPORTING_QUALITY,C001:C150)
 
 
 Data = plyr::ddply(Data,"Grid",.fun = function(d) {
@@ -135,28 +135,34 @@ Data = plyr::ddply(Data,c("Area","FisheryCode"),.fun = function(d) {
 Data = Data %>% 
   dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName)) %>% 
   dplyr::mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries))) %>% 
-  dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,Area,AssessmentArea,AssessmentAreaName, ModelArea,FisheryCode,ModelFishery,ModelFleet,FirstClassLow,SizeInterval,C001:C150)
+  dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,Area,AssessmentArea,AssessmentAreaName, ModelArea,FisheryCode,ModelFishery,ModelFleet,FirstClassLow,SizeInterval,REPORTING_QUALITY,C001:C150)
 
+# Assign FLL to LF:
+Data = Data %>% mutate_cond(FisheryCode == 'FLL', FisheryCode = 'LF')
 
+# Continue..
 C_labels = c(Paste("C00",1:9),Paste("C0",10:99), Paste("C",100:150))
 data = Data %>% 
-  dplyr::group_by(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,Area,AssessmentArea,AssessmentAreaName,ModelArea,FisheryCode,ModelFishery,ModelFleet,FirstClassLow,SizeInterval) %>% 
+  dplyr::group_by(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,Area,AssessmentArea,AssessmentAreaName,ModelArea,FisheryCode,ModelFishery,ModelFleet,FirstClassLow,SizeInterval,REPORTING_QUALITY) %>% 
   dplyr::summarise_at(C_labels,list(Sum)) %>%
   as.data.frame() 
 
 data = data %>%
   dplyr::mutate(sno=rowSums(dplyr::select(data,C001:C150))) %>%
   dplyr::mutate(C095=rowSums(dplyr::select(data,C095:C150))) %>%
-  dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,Area,AssessmentArea, AssessmentAreaName, ModelArea,FisheryCode, ModelFishery,ModelFleet,FirstClassLow,SizeInterval,sno,C001:C095) %>% 
+  dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,Area,AssessmentArea, AssessmentAreaName, ModelArea,FisheryCode, ModelFishery,ModelFleet,FirstClassLow,SizeInterval,REPORTING_QUALITY,sno,C001:C095) %>% 
   tidyr::gather(length,total,C001:C095) %>%
   dplyr::mutate(length = FirstClassLow+(as.numeric(substr(length,2,4))-1)*SizeInterval) %>% 
   dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>% 
   tidyr::spread(length,total,fill=0)
 
+# Save this object for analyses:
+write.csv(data, file = file.path(shrpoint_path, 'data/processed', 'size_grid.csv'), row.names = FALSE)
 
 ###############
 # data output to ss3 
 ###############
+
 L_labels  =  c(Paste("L0",seq(10,98,4)), Paste("L",seq(102,198,4)))
 work = data %>% 
   dplyr::filter(!(Fleet %in% c('TWN','SYC') & Gear == 'LL')) %>%
@@ -170,7 +176,10 @@ work = data %>%
   dplyr::filter(!(ModelFishery == "OT 4" & Year %in% c(1983,2016))) %>%
   dplyr::filter(!(ModelFishery == "TR 4" & Year %in% c(2016:2019))) %>%  # please check if 2020-2022 data needs to be excluded
   dplyr::filter(!(ModelFishery == "TR 1b")) %>%
-  dplyr::filter(!(ModelFishery == "TR 2")) %>%
+  dplyr::filter(!(ModelFishery == "TR 2")) 
+
+# Continue..
+work = work %>%
   dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>% 
   dplyr::summarise_at(L_labels,list(Sum)) %>%
   as.data.frame() %>%
@@ -193,4 +202,4 @@ L_labels  =  c(Paste("L0",seq(10,98,4)), Paste("L",seq(102,198,4)))
 work[,L_labels] = round(work[,L_labels],1)
 
 # Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss_inputs', spat_config, 'size.csv'), row.names = FALSE)
+write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size.csv'), row.names = FALSE)

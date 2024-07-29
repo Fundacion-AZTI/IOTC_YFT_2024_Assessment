@@ -150,6 +150,9 @@ Data = Data %>%
   dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName)) %>% 
   dplyr::mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries)))
 
+# Save this object for analyses:
+write.csv(Data, file = file.path(shrpoint_path, 'data/processed', 'catch_grid.csv'), row.names = FALSE)
+
 data = Data	
 
 ##################  
@@ -196,4 +199,4 @@ work = data	%>%
   mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries)))
 
 # Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss_inputs', spat_config, 'catch.csv'), row.names = FALSE)
+write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'catch.csv'), row.names = FALSE)
