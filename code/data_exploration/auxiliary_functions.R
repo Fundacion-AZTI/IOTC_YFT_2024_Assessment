@@ -1,4 +1,13 @@
 
+
+# -------------------------------------------------------------------------
+# Transform from model time step (quarter) to year-quarter:
+ssts2yq = function(qtr,initial = 1950, base = 13) {
+  yearqtr = (qtr-base)/4+initial+1/8
+  return(yearqtr)
+}
+
+
 # -------------------------------------------------------------------------
 # Repeat rows to create std Grid:
 
@@ -45,8 +54,15 @@ transform_to_stdgrid = function(df) { # input will be a data.frame with single r
 # -------------------------------------------------------------------------
 # Make grid plot:
 
-plot_grid = function(plot_data, grid_var) {
-  # TODO
+add_sf_map = function(my_plot) {
+  
+  out_plot = my_plot + 
+    geom_sf(data = worldmap, fill = "gray60", color = "gray60") +
+    coord_sf(expand = FALSE, xlim = xLim, ylim = yLim) +
+    xlab(NULL) + ylab(NULL) +
+    scale_y_continuous(breaks = yBreaks) + scale_x_continuous(breaks = xBreaks) 
+  return(out_plot)
+  
 }
 
 
