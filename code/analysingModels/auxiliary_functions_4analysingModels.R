@@ -59,10 +59,10 @@ summary.check <- function(sc.nm, ss3,desc){
   colnames(df) <- nms
   #Remove forecast parameters
   pattern <- c("ForeRecr")
-  n_param  <- ss3$parameters   %>%  filter(!grepl(pattern,Label))%>% filter(!is.na(Active_Cnt)) %>% 
+  n_param  <- ss3$parameters   %>%  dplyr::filter(!grepl(pattern,Label)) %>% dplyr::filter(!is.na(Active_Cnt)) %>% 
     summarise(n = n())
   
-  n_param_bound  <- ss3$parameters   %>%  filter(!grepl(pattern,Label)) %>% filter(!is.na(Active_Cnt)) %>%  filter(Status %in% c("LO","HI")) %>% 
+  n_param_bound  <- ss3$parameters   %>%  dplyr::filter(!grepl(pattern,Label)) %>% dplyr::filter(!is.na(Active_Cnt)) %>%   dplyr::filter(Status %in% c("LO","HI")) %>% 
     summarise(n = n())
   
   aux <- c(sc.nm,desc,ss3$likelihoods_used["TOTAL","values"],ss3$maximum_gradient_component, ss3$log_det_hessian,n_param, n_param_bound,ss3$RunTime,ss3$Start_from_par)
