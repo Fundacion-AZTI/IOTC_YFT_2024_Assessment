@@ -32,9 +32,15 @@ min_lon = 25
 min_lat = -60
 stdGrid = st_make_grid(MyPoints, cellsize = c(grid_size, grid_size), offset = c(min_lon, min_lat)) %>%
   st_set_crs(4326) %>% st_sf() %>% dplyr::mutate(grid_ID = 1:n())
-# ggplot(stdGrid) + geom_sf()
 save(stdGrid, file = file.path(shrpoint_path, data_folder, 'stdGrid.RData'))
 # st_centroid(stdGrid) %>% dplyr::mutate(long = sf::st_coordinates(.)[,1], lat = sf::st_coordinates(.)[,2])
+
+# Plot std grid:
+worldmap = ne_countries(scale = "medium", returnclass = "sf")
+
+ggplot(stdGrid) + geom_sf(fill = 'white') +
+geom_sf(data = worldmap, fill = "gray60", color = "gray60") +
+  coord_sf(expand = FALSE, xlim = c(25, 150), ylim = c(-60, 30)) 
 
 # -------------------------------------------------------------------------
 # Create grid for catch data:
