@@ -14,6 +14,7 @@ xBreaks = seq(from = 40, to = 120, by = 30)
 # Define image parameters:
 img_type = '.png'
 img_res = 300 # dpi
+img_width = 170 # max width image
 
 # Theme for ggplot:
 theme_set(theme_bw())

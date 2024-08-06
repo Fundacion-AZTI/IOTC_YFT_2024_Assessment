@@ -11,13 +11,13 @@ ssts2yq = function(qtr,initial = 1950, base = 13) {
 # -------------------------------------------------------------------------
 # Repeat rows to create std Grid:
 
-transform_to_stdgrid = function(df) { # input will be a data.frame with single row
+transform_to_stdgrid = function(df, std_res = 5) { # input will be a data.frame with single row
   
   # - do nothing with grid_type == 5 (1x1) or 6 (5x5)
   # - catch data have all grid_type == 6
   # - when grid_type == 5, information inside the grid will be combined
   # without weighting
-  std_res = 5 # for long and lat, since std grid is 5x5
+  # std_res = 5 # for long and lat, since std grid is 5x5
   if(df$grid_type %in% c('5', '6')) {
     out_df = df
   } else {

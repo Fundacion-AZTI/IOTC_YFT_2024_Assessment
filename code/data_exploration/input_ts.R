@@ -22,6 +22,13 @@ p1 = ggplot(data = plot_data, aes(x = year, y = catch, fill = fisherycode)) +
 ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_catch', img_type)), plot = p1,
        width = 170, height = 130, units = 'mm', dpi = img_res)
 
+p2 = ggplot(data = plot_data, aes(x = year, y = catch, fill = fisherycode)) +
+  geom_col(position = 'fill') +
+  xlab(NULL) + ylab("Catch fraction") +
+  scale_fill_manual(values = fleet_col) +
+  guides(fill = guide_legend(title = NULL)) 
+ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_catch_frac', img_type)), plot = p2,
+       width = 170, height = 130, units = 'mm', dpi = img_res)
 
 # Catch per fleet and area as barplot -------------------------------------
 
@@ -43,6 +50,15 @@ p1 = ggplot(data = plot_data, aes(x = year, y = catch, fill = fisherycode)) +
   guides(fill = guide_legend(title = NULL)) +
   facet_wrap( ~ area)
 ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_catch_area', img_type)), plot = p1,
+       width = 170, height = 130, units = 'mm', dpi = img_res)
+
+p2 = ggplot(data = plot_data, aes(x = year, y = catch, fill = fisherycode)) +
+  geom_col(position = 'fill') +
+  xlab(NULL) + ylab("Catch fraction") +
+  scale_fill_manual(values = fleet_col) +
+  guides(fill = guide_legend(title = NULL)) +
+  facet_wrap( ~ area)
+ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_catch_area_frac', img_type)), plot = p2,
        width = 170, height = 130, units = 'mm', dpi = img_res)
 
 
