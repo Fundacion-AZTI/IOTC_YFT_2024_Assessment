@@ -49,3 +49,42 @@ mutate_cond <- function(.data, condition, ..., envir = parent.frame()) {
 
 Paste <- function (..., sep = "")  paste(..., sep = sep)
 Sum <- function (..., na.rm = T)  sum(..., na.rm = na.rm)
+
+
+growth2stage.f<- function(age, param)
+{
+  Linf <- param[1]
+  k1 <- param[2]
+  k2 <- param[3]
+  astar <- param[4]
+  frac <- param[5]
+  a0 <- param[6]
+  
+  a <- age + a0
+  
+  # calculate a0 for second vb curve relative to a0 for first vb curve
+  a02.rel.a01 <- astar+1/k2*log(1-frac*(1-exp(-k1*astar)))
+  g <- a*0
+  tf <- a<=astar & !is.na(a)
+  g[tf] <- Linf*frac*(1-exp(-k1*a[tf]))
+  tf <- a>astar & !is.na(a)
+  g[tf] <- Linf*(1-exp(-k2*(a[tf] - a02.rel.a01)))
+  g[is.na(a)]<- NA
+  
+  return(g)
+}
+
+sqdiff.2stage <- function(age, len, param) {
+  exp.len <- growth2stage.f(age, param)
+  sqdiff <- (len-exp.len)^2
+  return(sqdiff)
+}
+
+
+calc.age.2stage <- function(FL, param, min.age, max.age) {
+  age.est <- rep(NA,length(FL))
+  for(i in 1:length(FL))
+    age.est[i] <- nlminb(5, sqdiff.2stage, len=FL[i], param=param, lower=min.age, upper=max.age)$par
+  return(age.est)
+}
+

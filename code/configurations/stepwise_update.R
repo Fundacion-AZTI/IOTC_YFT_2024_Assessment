@@ -12,6 +12,7 @@ proj_dir = here::here()
 setwd(proj_dir)
 
 source("code/analysingModels/auxiliary_functions_4analysingModels.R")
+source("code/inputs/auxiliary_functions.R")
 # Sharepoint path:
 source('sharepoint_path.R')
 setwd(shrpoint_path)
@@ -134,10 +135,10 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
 #### end ####
 
 
-
-
+#.......................................................................
 ### Update length data until 2022 --------------------------------------------
-
+  #.......................................................................
+  
   config_name = '03_update_length'
   tmp_dir = file.path(shrpoint_path, SS_config, config_name)
   dir.create(tmp_dir)
@@ -165,11 +166,13 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   #update length
   length_df = read.csv(file.path(shrpoint_path, SS_data, 'size.csv'))
   dat_1$lencomp <- length_df %>% subset(!is.na(ModelFleet ))
+  dat_1_v2 <- dat_1
+  dat_1_v2$lencomp[,-c(1:6)] <- dat_1_v2$lencomp[,-c(1:6)]/100
   # Read base SS inputs (from 2021 assessment)
 
   # Write SS files:
 
-  SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+  SS_writedat(dat_1_v2, outfile = file.path(tmp_dir, 'data_v2.ss'), overwrite = T)
      SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
   SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
   SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
@@ -181,8 +184,9 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   
   
   
-  
-  ### Update ONLY length data until 2022 --------------------------------------------
+  #.......................................................................
+  ### Update ONLY length data until  --------------------------------------------
+  #.......................................................................
   
   config_name = '03_update_only_length_until_296'
   tmp_dir = file.path(shrpoint_path, SS_config, config_name)
@@ -211,9 +215,9 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   
   #### end ####
   
-   
+  #.......................................................................
     ### Update ONLY length LL --------------------------------------------
-  
+  #.......................................................................
   config_name = '03_update_cpue_updateLC_LL'
   tmp_dir = file.path(shrpoint_path, SS_config, config_name)
   dir.create(tmp_dir)
@@ -248,7 +252,9 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   # Run model:
   r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
   
+  #.......................................................................
   ### Update ONLY length LL LF --------------------------------------------
+  #.......................................................................
   
   config_name = '03_update_cpue_updateLC_LL_LF'
   tmp_dir = file.path(shrpoint_path, SS_config, config_name)
@@ -283,6 +289,50 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   # Run model:
   r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
   
+  
+  #.......................................................................
+    ### Update ONLY length LL LF PSFSC --------------------------------------------
+  #.......................................................................
+  
+  config_name = '03_update_cpue_updateLC_LL_LF_PSfsc'
+  tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+  dir.create(tmp_dir)
+  
+  # Temporary files:
+  SS_base = 'models/update/02_update_cpue'
+  
+  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+  base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+  base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+  base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+  
+  dat_1 = base_dat
+  ctl_1 = base_ctl
+  fore_1 = base_fore
+  start_1 = base_start
+  
+  
+  #ONLY update length FL3, 7, 10,11,13
+  LL_flt <- c(3,7,10,11,13,21)
+  PSfsc_flt <- c(6,16,19)
+  
+  length_df = read.csv(file.path(shrpoint_path, SS_data, 'size.csv'))
+  length_df <- length_df %>%  rename_with(.cols = 1:length(names(length_df)),~ names(dat_1$lencomp))
+  dat_1$lencomp <- base_dat$lencomp %>% subset(!(FltSvy %in% c(LL_flt,PSfsc_flt ))) %>% add_row(length_df[length_df$FltSvy %in% c(LL_flt,PSfsc_flt ),])
+  
+  
+  # Write SS files:
+  SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+  SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+  SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+  SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+  
+  # Run model:
+  r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
+  
+  
+  #.......................................................................
+  
   ### Update ONLY length LL LF PSFSC --------------------------------------------
   
   config_name = '03_update_cpue_updateLC_LL_LF_PSfsc'
@@ -322,44 +372,7 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
   
   
-  ### Update ONLY length LL LF PSFSC --------------------------------------------
-  
-  config_name = '03_update_cpue_updateLC_LL_LF_PSfsc'
-  tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-  dir.create(tmp_dir)
-  
-  # Temporary files:
-  SS_base = 'models/update/02_update_cpue'
-  
-  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
-  base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
-  base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
-  base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
-  
-  dat_1 = base_dat
-  ctl_1 = base_ctl
-  fore_1 = base_fore
-  start_1 = base_start
-  
-  
-  #ONLY update length FL3, 7, 10,11,13
-  LL_flt <- c(3,7,10,11,13,21)
-  PSfsc_flt <- c(6,16,19)
-  
-  length_df = read.csv(file.path(shrpoint_path, SS_data, 'size.csv'))
-  length_df <- length_df %>%  rename_with(.cols = 1:length(names(length_df)),~ names(dat_1$lencomp))
-  dat_1$lencomp <- base_dat$lencomp %>% subset(!(FltSvy %in% c(LL_flt,PSfsc_flt ))) %>% add_row(length_df[length_df$FltSvy %in% c(LL_flt,PSfsc_flt ),])
-  
-  
-  # Write SS files:
-  SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
-  SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
-  SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
-  SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
-  
-  # Run model:
-  r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
-  
+  #.......................................................................
   
   ### Update ONLY length LL LF PSFSC HD --------------------------------------------
   
@@ -401,6 +414,8 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
   
   
+  #.......................................................................
+  
   ### Update ONLY length LL LF PSFSC HD LS--------------------------------------------
   
   config_name = '03_update_cpue_updateLC_LL_LF_PSfsc_HD_PSls'
@@ -420,6 +435,8 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   fore_1 = base_fore
   start_1 = base_start
   
+  
+  #.......................................................................
   
   #ONLY update length FL3, 7, 10,11,13
   LL_flt <- c(3,7,10,11,13,21)
@@ -441,6 +458,8 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   # Run model:
   r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
   
+  
+  #.......................................................................
   
   ### Update ONLY length LL LF PSFSC HD LS GI -------------------------------------------
   
@@ -483,6 +502,8 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   # Run model:
   r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
   
+  
+  #.......................................................................
   
   ### Update ONLY length LL LF PSFSC HD LS BB -------------------------------------------
   
@@ -527,6 +548,8 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
   
   
+  #.......................................................................
+  
   ### Update ONLY length LL LF PSFSC HD LS GI BB TR-------------------------------------------
   
   config_name = '03_update_cpue_updateLC_LL_LF_PSfsc_HD_PSls_GI_BB_TR'
@@ -566,6 +589,9 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
   SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
   SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+  
+  
+  #.......................................................................
   
   ### Update ONLY length LL LF PSFSC HD LS GI BB TR OT-------------------------------------------
   
@@ -610,7 +636,7 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   
   
   
-  
+  #.......................................................................
   ### Take care of warnings --------------------------------------------
   
   config_name = '04_update_warnings'
@@ -656,3 +682,271 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   
   #### end ####
   
+  
+  #.......................................................................
+  ### natural mortality 0.462 (based on maximum age 11.7 IO, lower option 0.3 based on maximum age 18, atlantic) --------------------------------------------
+  
+  config_name = '05_update_M'
+  tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+  dir.create(tmp_dir)
+  
+  # Temporary files:
+  # SS base files path (in Sharepoint):
+  SS_base = 'models/update/04_update_warnings'
+  
+  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+  base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+  base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+  base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+  
+  #SS_base = 'models/update/05_update_M'
+  #base_ctlnew = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
+  
+  dat_1 = base_dat
+  ctl_1 = base_ctl
+  fore_1 = base_fore
+  start_1 = base_start
+  
+  #ctl_new = base_ctlnew
+  # #_natM_type:_0=1Parm; 1=N_breakpoints;_2=Lorenzen;_3=agespecific;_4=agespec_withseasinterpolate;_5=Maunder_M;_6=Age-range_Lorenzen
+  ctl_1$natM_type <- 2
+  ctl_1$Lorenzen_refage <- 4.07*4 #fully mature
+  ctl_1$natM <- NULL
+  ctl_1$MG_parms <- ctl_1$MG_parms %>% add_row(  ctl_1$MG_parms[1,],.before=1)
+   
+  row.names(ctl_1$MG_parms )[1] <- "NatM_p_1_Fem_GP_1"
+  ctl_1$MG_parms[1,1:7] <- c(0.1,0.6,0.462,0.462,0,0,-2)
+  
+  
+  SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+  SS_writectl( ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+  SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+  SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+  
+  #.......................................................................
+  ### GROWTH JESSICA FARLEY  - 2 STAGE vB best otpion--------------------------------------------
+  # transtiion age 0.82 years (53 cm)
+  
+
+  
+  config_name = '06_update_Growth'
+  tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+  dir.create(tmp_dir)
+  #read parameters
+  dataGrowth <- read.csv(file=file.path("data","ss3_inputs","FarleyGrowth_Inputss3.csv"))
+  # Temporary files:
+  # SS base files path (in Sharepoint):
+  SS_base = 'models/update/05_update_M'
+  
+  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+  base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+  base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+  base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+  
+  dat_1 = base_dat
+  ctl_1 = base_ctl
+  fore_1 = base_fore
+  start_1 = base_start
+  
+  ctl_1$Growth_Age_for_L2 <- 999
+  
+  ctl_1$MG_parms["L_at_Amax_Fem_GP_1","INIT"] <- 167.47
+  ctl_1$MG_parms["L_at_Amin_Fem_GP_1","INIT"] <- 29.9463
+  ctl_1$MG_parms["VonBert_K_Fem_GP_1","INIT"] <- dataGrowth[1,]
+  ctl_1$MG_parms["Age_K_2_Fem_GP_1","INIT"] <- dataGrowth[2,]
+  ctl_1$MG_parms["Age_K_3_Fem_GP_1","INIT"] <- dataGrowth[3,]
+  ctl_1$MG_parms["Age_K_4_Fem_GP_1","INIT"] <- dataGrowth[4,]
+  ctl_1$MG_parms["Age_K_5_Fem_GP_1","INIT"] <- dataGrowth[5,]
+  ctl_1$MG_parms["Age_K_6_Fem_GP_1","INIT"] <- dataGrowth[6,]
+  ctl_1$MG_parms["Age_K_7_Fem_GP_1","INIT"] <- dataGrowth[7,]
+  ctl_1$MG_parms["Age_K_8_Fem_GP_1","INIT"] <- dataGrowth[8,]
+  ctl_1$MG_parms["Age_K_9_Fem_GP_1","INIT"] <- dataGrowth[9,]
+  ctl_1$MG_parms["Age_K_10_Fem_GP_1","INIT"] <- dataGrowth[10,]
+  ctl_1$MG_parms["Age_K_11_Fem_GP_1","INIT"] <- dataGrowth[11,]
+  ctl_1$MG_parms["Age_K_12_Fem_GP_1","INIT"] <- dataGrowth[12,]
+  ctl_1$MG_parms["Age_K_12_Fem_GP_1","INIT"] <- dataGrowth[13,]
+  
+  SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+  SS_writectl( ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+  SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+  SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+  
+  
+  
+  #.......................................................................
+  ### MATURITY--------------------------------------------
+  # FUNCTIONAL L50 101.7
+  
+  
+  
+  config_name = '07_update_Maturity'
+  tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+  dir.create(tmp_dir)
+  #read parameters
+  dataMat <- read.csv(file=file.path("data","ss3_inputs","maturityInput_ss3.csv"))
+    # Temporary files:
+  # SS base files path (in Sharepoint):
+  SS_base = 'models/update/06_update_Growth'
+  
+  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+  base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+  base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+  base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+  
+  dat_1 = base_dat
+  ctl_1 = base_ctl
+  fore_1 = base_fore
+  start_1 = base_start
+  
+  ctl_1$maturity_option <- 1
+  ctl_1$First_Mature_Age <- 1
+  ctl_1$Age_Maturity <- NULL
+  ctl_1$MG_parms["Mat50%_Fem_GP_1","LO"] <- 50
+  ctl_1$MG_parms["Mat50%_Fem_GP_1","HI"] <- 150
+  ctl_1$MG_parms["Mat50%_Fem_GP_1","INIT"] <- dataMat$L50
+  ctl_1$MG_parms["Mat50%_Fem_GP_1","PRIOR"] <- dataMat$L50
+  ctl_1$MG_parms["Mat_slope_Fem_GP_1","LO"] <- -1
+  ctl_1$MG_parms["Mat_slope_Fem_GP_1","HI"] <- 0
+  ctl_1$MG_parms["Mat_slope_Fem_GP_1","INIT"] <- dataMat$slope
+  ctl_1$MG_parms["Mat_slope_Fem_GP_1","PRIOR"] <- dataMat$slope 
+  
+  SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+  SS_writectl( ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+  SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+  SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+  
+  
+  #.......................................................................
+  ### Update length data until 2022 --------------------------------------------
+  #.......................................................................
+  remotes::install_github("r4ss/r4ss@signif") 
+  config_name = '08_correctionLengthData'
+  tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+  dir.create(tmp_dir)
+  
+  # Temporary files:
+  # SS base files path (in Sharepoint):
+  SS_base = 'models/update/07_update_Maturity'
+  # Temporary files:
+  
+  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+  base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+  base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+  base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+  
+  dat_1 = base_dat
+  ctl_1 = base_ctl
+  fore_1 = base_fore
+  start_1 = base_start
+  
+  
+  
+  #update length
+  length_df = read.csv(file.path(shrpoint_path, SS_data, 'size.csv'))
+  dat_1$lencomp <- length_df %>% subset(!is.na(ModelFleet ))
+    # Read base SS inputs (from 2021 assessment)
+  
+  # Write SS files:
+  
+  SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+  SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+  SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+  SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+  
+  # Run model:
+  r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
+  
+  #### end ####
+  
+  
+  
+  #.......................................................................
+  ### Update PS selectivity --------------------------------------------
+  #.......................................................................
+  remotes::install_github("r4ss/r4ss@signif") 
+  config_name = '09_selectivity_PS'
+  tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+  dir.create(tmp_dir)
+  
+  # Temporary files:
+  # SS base files path (in Sharepoint):
+  SS_base = 'models/update/08_correctionLengthData'
+  # Temporary files:
+  
+  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+  base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+  base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+  base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+  
+  dat_1 = base_dat
+  ctl_1 = base_ctl
+  fore_1 = base_fore
+  start_1 = base_start
+  
+  
+  
+  #ESTIMATE NEW SETTINGS FOR PURSE SEINERS
+  
+ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY6(6)",1:3] <- c(0,2,2)
+ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY8(8)",1:3] <- c(0,2,2)
+  # Read base SS inputs (from 2021 assessment)
+  
+  # Write SS files:
+  
+  SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+  SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+  SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+  SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+  
+  # Run model:
+  r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-maxfn 0 -phase 50 -nohess')
+  
+ #after running read control file change the parameters in the control file
+  SS_base = 'models/update/09_selectivity_PS'
+  
+   new_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
+  
+  
+  ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY6(6)",1:3] <- c(0,2,0)
+  ctl_1$size_selex_parms["SizeSel_Spline_GradLo_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_GradLo_FISHERY6(6)",]
+  ctl_1$size_selex_parms["SizeSel_Spline_GradHi_FISHERY6(6)",] <-  new_ctl$size_selex_parms["SizeSel_Spline_GradHi_FISHERY6(6)",]
+  ctl_1$size_selex_parms["SizeSel_Spline_Knot_1_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_1_FISHERY6(6)",]
+  ctl_1$size_selex_parms["SizeSel_Spline_Knot_2_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_2_FISHERY6(6)",]
+  ctl_1$size_selex_parms["SizeSel_Spline_Knot_3_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_3_FISHERY6(6)",]
+  ctl_1$size_selex_parms["SizeSel_Spline_Knot_4_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_4_FISHERY6(6)",]
+ ctl_1$size_selex_parms["SizeSel_Spline_Knot_5_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_5_FISHERY6(6)",]
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_1_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_1_FISHERY6(6)",] 
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_2_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_2_FISHERY6(6)",] 
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_3_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_3_FISHERY6(6)",] 
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_4_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_4_FISHERY6(6)",] 
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_5_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_5_FISHERY6(6)",]
+  
+ ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY8(8)",1:3] <- c(0,2,0)
+ ctl_1$size_selex_parms["SizeSel_Spline_GradLo_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_GradLo_FISHERY8(8)",]
+ ctl_1$size_selex_parms["SizeSel_Spline_GradHi_FISHERY8(8)",] <-  new_ctl$size_selex_parms["SizeSel_Spline_GradHi_FISHERY8(8)",]
+ ctl_1$size_selex_parms["SizeSel_Spline_Knot_1_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_1_FISHERY8(8)",]
+ ctl_1$size_selex_parms["SizeSel_Spline_Knot_2_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_2_FISHERY8(8)",]
+ ctl_1$size_selex_parms["SizeSel_Spline_Knot_3_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_3_FISHERY8(8)",]
+ ctl_1$size_selex_parms["SizeSel_Spline_Knot_4_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_4_FISHERY8(8)",]
+ ctl_1$size_selex_parms["SizeSel_Spline_Knot_5_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_5_FISHERY8(8)",]
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_1_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_1_FISHERY8(8)",] 
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_2_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_2_FISHERY8(8)",] 
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_3_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_3_FISHERY8(8)",] 
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_4_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_4_FISHERY8(8)",] 
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_5_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_5_FISHERY8(8)",]
+ 
+ 
+ #### end ####
+  
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
+ 

@@ -123,7 +123,7 @@ dir_table <- "output/tables/"
   
   
   #...................................................
-  ### sub analysis
+  #### sub analysis ####
   #...................................................
   
   sub_scs <- c("4A_io_2021_v33017",
@@ -182,12 +182,18 @@ dir_table <- "output/tables/"
   #...................................................
   
   
-  scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings")  
+  scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings","05_update_M","06_update_Growth","07_update_Maturity",
+           "08_correctionLengthData")  
+
   desc <- c("BaseCase", "update catch","update cpue","update warnings",
-            "update all-increase boundary OT region 4 (FL14) param1 and tother warnings")  
+            "update all-increase boundary OT region 4 (FL14) param1 and tother warnings","Natural mortality age 4.07 years M=0.467",
+            "Farley 2023 growth","Maturity Zudaire et al. 2022","r4ss write_ssdat function updated")
+  
+  scs <- c("08_correctionLengthData")
+  desc <- "r4ss write_ssdat function updated"
   scs_wd <-paste0("models/update/",scs)
   
-  plot_ss3 <- FALSE
+  plot_ss3 <- TRUE
   add_perf_table <- TRUE
   
   for(i in 1:length(scs)){
@@ -223,8 +229,8 @@ dir_table <- "output/tables/"
   sub_df_long  <- sub_df_long %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))%>%
     mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
   
-  ggplot(sub_df_long,aes(x=Yr,y=value,group =scenario,colour = scenario))+geom_point( size = 1)+
-    geom_line( )+xlim(200,298)+
+  ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario,colour = scenario))+geom_point( size = 1)+
+    geom_line( )+xlim(1995,2023)+
     scale_color_discrete(labels=levels(sub_df_long$scenario))+
     xlab("Year")+ ylab("F/Fmsy")+theme_fun()
   
@@ -246,7 +252,7 @@ dir_table <- "output/tables/"
     mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
   
   ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario,colour = scenario))+geom_point(   size = 1)+
-    geom_line( )+xlim(1995,2023)+ylim(0,2.5e6)+
+    geom_line( )+xlim(1950,2023)+ylim(0,4.5e6)+
     scale_color_discrete(labels=levels(sub_df_long$scenario))+xlab("Year")+ ylab("SSB")+
     theme_fun()
   
