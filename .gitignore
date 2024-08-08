@@ -3,5 +3,6 @@
 .Rhistory
 .RData
 .Ruserdata
+.RDataTmp
 .quarto/
 /.quarto/
