@@ -33,6 +33,18 @@ get.long.from.id = function(id) {
   long = ifelse(quadrant == 1  | quadrant == 2,long, -long+360)
 }
 
+get_4Aarea_from_lonlat = function(Long, Lat) {
+  # Areas: 1 (1a), 2 (1b), 3 (2), 4 (3), 5 (4)
+  out_area =  ifelse(Lat > 10 & Long <= 75, 1, # originally, it was Long < 75, but produced unassiged areas for GI after GridCell correction
+                     ifelse((Lat > -10 & Lat < 10 & Long  < 60) | (Lat > -15 & Lat < 10 & Long  > 60 & Long <= 75), 2, # originally, it was Long < 75, but produced unassiged areas for GI after GridCell correction
+                            ifelse((Lat > -60 & Lat < -10 & Long > 20 & Long < 40) | (Lat > -30 & Lat < -10 & Long > 40 & Long  < 60), 3,
+                                   ifelse((Lat > -60 & Lat < -30 & Long > 40 & Long < 60) | (Lat > -60 & Lat <= -15 & Long  > 60 & Long <= 150), 4,
+                                          ifelse(Lat > -15 & Long > 75 & Long < 150, 5, 0)))))		
+  return(out_area)
+  
+}
+
+
 qtr2yearqtr = function(qtr,initial,base) {
   yearqtr = (qtr-base)/4+initial+1/8
 }
@@ -51,6 +63,7 @@ Paste <- function (..., sep = "")  paste(..., sep = sep)
 Sum <- function (..., na.rm = T)  sum(..., na.rm = na.rm)
 
 
+<<<<<<< Updated upstream
 growth2stage.f<- function(age, param)
 {
   Linf <- param[1]
@@ -88,3 +101,42 @@ calc.age.2stage <- function(FL, param, min.age, max.age) {
   return(age.est)
 }
 
+=======
+# -------------------------------------------------------------------------
+# Filter LF data for SS input:
+
+filter_LF_4A = function(data) {
+  
+  work = data %>% 
+    dplyr::filter(!(Fleet %in% c('TWN','SYC') & Gear == 'LL')) %>%
+    dplyr::filter(!(ModelFishery == "LL 1a" & Year %in% c(1970:1995, 2010:2020))) %>% # please check if 2020-2022 data needs to be excluded
+    dplyr::filter(!(ModelFishery == "LL 1b" & Year %in% c(1950:1959))) %>%
+    dplyr::filter(!(ModelFishery == "LL 2" & Year %in% c(1950:1959))) %>%
+    dplyr::filter(!(ModelFishery == "LL 3" & Year %in% c(1950:1959))) %>%
+    dplyr::filter(!(ModelFishery == "LL 4" & Year %in% c(1950:1959,2001:2005,2015,2019))) %>%  # please check if 2020-2022 data needs to be excluded
+    dplyr::filter(!(ModelFishery == "GI 4" & Year %in% c(1975:1987))) %>%
+    dplyr::filter(!(ModelFishery == "HD 1a" & Year %in% c(1950:2007))) %>%
+    dplyr::filter(!(ModelFishery == "OT 4" & Year %in% c(1983,2016))) %>%
+    dplyr::filter(!(ModelFishery == "TR 4" & Year %in% c(2016:2019))) %>%  # please check if 2020-2022 data needs to be excluded
+    dplyr::filter(!(ModelFishery == "TR 1b")) %>%
+    dplyr::filter(!(ModelFishery == "TR 2")) 
+  
+  return(work)
+
+}
+
+
+# -------------------------------------------------------------------------
+# Get area from lon lat:
+get_area_4A = function(data) { # columns should be named Lat Long
+  
+  data = data %>% mutate(Area = ifelse(Lat > 10 & Long <= 75, 1, # originally, it was Long < 75, but produced unassigned areas for GI after GridCell correction
+         ifelse((Lat > -10 & Lat < 10 & Long  < 60) | (Lat > -15 & Lat < 10 & Long  > 60 & Long <= 75), 2, # originally, it was Long < 75, but produced unassigned areas for GI after GridCell correction
+                ifelse((Lat > -60 & Lat < -10 & Long > 20 & Long < 40) | (Lat > -30 & Lat < -10 & Long > 40 & Long  < 60), 3,
+                       ifelse((Lat > -60 & Lat < -30 & Long > 40 & Long < 60) | (Lat > -60 & Lat <= -15 & Long  > 60 & Long <= 150), 4,
+                              ifelse(Lat > -15 & Long > 75 & Long < 150, 5, 0)))))
+  )
+  return(data)
+  
+}
+>>>>>>> Stashed changes
