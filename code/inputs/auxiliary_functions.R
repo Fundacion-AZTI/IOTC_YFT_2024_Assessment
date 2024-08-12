@@ -63,7 +63,6 @@ Paste <- function (..., sep = "")  paste(..., sep = sep)
 Sum <- function (..., na.rm = T)  sum(..., na.rm = na.rm)
 
 
-<<<<<<< Updated upstream
 growth2stage.f<- function(age, param)
 {
   Linf <- param[1]
@@ -101,7 +100,6 @@ calc.age.2stage <- function(FL, param, min.age, max.age) {
   return(age.est)
 }
 
-=======
 # -------------------------------------------------------------------------
 # Filter LF data for SS input:
 
@@ -139,4 +137,3 @@ get_area_4A = function(data) { # columns should be named Lat Long
   return(data)
   
 }
->>>>>>> Stashed changes
