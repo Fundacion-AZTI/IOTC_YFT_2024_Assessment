@@ -109,7 +109,8 @@ Data = plyr::ddply(Data,"Grid",.fun = function(d) {
                           ifelse((lat > -60 & lat < -10 & long > 20 & long < 40) | (lat > -30 & lat < -10 & long > 40 & long  < 60),3,
                                  ifelse((lat > -60 & lat < -30 & long > 40 & long < 60) | (lat > -60 & lat < -15 & long  > 60 & long < 150),4,
                                         ifelse(lat > -15 & long > 75 & long < 150,5,0)))))		
-  return(d)})					
+  return(d)}
+)					
 
 Data = plyr::ddply(Data,c("Area","FisheryCode"),.fun = function(d) {
   d$AssessmentArea = d$Area
@@ -192,7 +193,7 @@ work = data	%>%
   group_by(Year,Quarter,ModelFishery) %>% 
   summarise(Catch = sum(Catch)) %>% as.data.frame() %>%	
   #spread(ModelFishery,Catch,fill=0) %>% 
-  mutate(qtr =yearqtr2qtr(Year,Quarter,1950,13)) %>%
+  mutate(qtr = yearqtr2qtr(Year,Quarter,1950,13)) %>%
   mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries)))
 
 # Save SS catch input

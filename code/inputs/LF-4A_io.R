@@ -1,10 +1,6 @@
 # Spatial configuration:
 spat_config = '4A_io'
 
-# Set working directiry using here():
-proj_dir = here()
-setwd(proj_dir)
-
 # Sharepoint path:
 source('sharepoint_path.R')
 
@@ -44,134 +40,58 @@ source(here('code', 'inputs', 'auxiliary_functions.R'))
 # Fishery 20  Purse-seine - log schools (LS 4)            [region 5] 4
 # Fishery 21  Longline - fresh tuna (FL 4)                [region 5] 4
 
-###############
-# read data from standard SF table
-##############
+# Initial length bins (wrong) in IOTC dataset:
+# This was an error in the 2021, which did not include half of the length bins. Confirmed by Dan
+L_labels_wrong  =  c(Paste("L0",seq(10,98,4)), Paste("L",seq(102,198,4)))
 
-ModelFisheries <- c('GI 1a','HD 1a','LL 1a','OT 1a','BB 1b','FS 1b','LL 1b','LS 1b','TR 1b','LL 2','LL 3','GI 4','LL 4','OT 4','TR 4','FS 2','LS 2','TR 2','FS 4','LS 4','LF 4')
+# Initial length bins (correct) in IOTC dataset:
+L_labels  =  c(Paste("L0",seq(10,98,2)), Paste("L",seq(100,198,2))) 
 
-Data = read.csv(file.path(shrpoint_path, 'data/raw',  "IOTC-2024-WPTT26(AS) - YFT - Size frequencies.csv"))
+# Length bins in the SS model:
+L_labels_SS  =  c(Paste("L0",seq(10,98,4)), Paste("L",seq(102,198,4)))
 
-Data = Data %>% 
-  dplyr::select(YEAR,MONTH_START,FLEET_CODE,GEAR_CODE,FISHING_GROUND_CODE,SCHOOL_TYPE_CODE,FIRST_CLASS_LOW,SIZE_INTERVAL, NO_FISH, REPORTING_QUALITY,C001:C150) %>% 
-  mutate(Year = YEAR, Month=MONTH_START, Fleet=FLEET_CODE, Gear = GEAR_CODE, SchoolType =SCHOOL_TYPE_CODE, Grid=FISHING_GROUND_CODE, TnoFish = NO_FISH, Quality= REPORTING_QUALITY,FirstClassLow=FIRST_CLASS_LOW,SizeInterval=SIZE_INTERVAL)  
+# -------------------------------------------------------------------------
+# Get LF input with bug, without weighting and Nsamp 5 ------------------------------
 
+# Read preprocessed data (see LF-preprocessing):
+data = read.csv(file.path(shrpoint_path, 'data/processed', 'size_grid.csv'))
 
-dHelper = read.csv(file.path(shrpoint_path, 'data/raw', "IOTC-2024-WPTT26(AS) - YFT - Fishery mapping.csv"))
-dHelper = dHelper %>% 
-  mutate(Fleet=FLEET, Gear=GEAR_CODE, SchoolType=SCHOOL_TYPE_CODE,FisheryCode=FISHERY) %>% 
-  dplyr::select(Fleet,Gear,SchoolType,FisheryCode)
-
-# Assign FLL to LF in mapping table (mistake, confirmed by Dan):
-dHelper = dHelper %>% mutate_cond(FisheryCode == 'FLL', FisheryCode = 'LF')
-
-
-Data = Data %>% 
-  dplyr::filter(!(Gear == 'HOOK' | Gear == 'HATR' | Gear=='PSOB' | (Gear == 'PS' & SchoolType == 'UNCL'))) %>%  # I exclude HATR here but please check again if the HATR LF is good enough now
-  dplyr::filter(!substring(Grid,1,1) == "9") %>%
-  dplyr::left_join(dHelper,by=c("Gear"="Gear","Fleet"="Fleet","SchoolType"="SchoolType")) %>% 
-  mutate_cond(FisheryCode=='PS',FisheryCode=SchoolType) %>%
-  dplyr::mutate(Quarter = floor((Month-1)/3) + 1) %>%
-  dplyr::mutate(LatCell = 0, LongCell = 0) %>%
-  mutate_cond(substring(Grid,1,1) == "5",LatCell=1,LongCell=1) %>%
-  mutate_cond(substring(Grid,1,1) == "6",LatCell=5,LongCell=5) %>%
-  mutate_cond(substring(Grid,1,1) == "1",LatCell=30,LongCell=30) %>% # originally, it was 5x10, but based on new metadata, should be 30x30 (confirmed by Dan).
-  mutate_cond(substring(Grid,1,1) == "2",LatCell=10,LongCell=20) %>%
-  mutate_cond(substring(Grid,1,1) == "3",LatCell=10,LongCell=10) %>%
-  mutate_cond(substring(Grid,1,1) == "4",LatCell=20,LongCell=20) %>%
-  dplyr::filter(!(LatCell == 0 & LongCell == 0)) %>%
-  dplyr::mutate(quadrant = as.numeric(substring(Grid,2,2)), Lat=999,Long=999)  %>%
-  mutate_cond(quadrant ==1,Lat= as.numeric(substring(Grid,3,4)) + LatCell/2, Long = as.numeric(substring(Grid,5,7)) + LongCell/2) %>%
-  mutate_cond(quadrant ==2,Lat= -as.numeric(substring(Grid,3,4)) - LatCell/2, Long = as.numeric(substring(Grid,5,7)) + LongCell/2) %>%
-  dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,FisheryCode,TnoFish,FirstClassLow,SizeInterval,REPORTING_QUALITY,C001:C150)
-
-# Check this, should we assign everything to Area 1 (Long 75)
-Data = plyr::ddply(Data,"Grid",.fun = function(d) {
-  Lat = d$Lat[1]
-  Long = d$Long[1]
-  d$Area = 0
-  d$Area =  ifelse(Lat > 10 & Long <= 75, 1, # originally, it was Long < 75, but produced unassiged areas for GI after GridCell correction
-                   ifelse((Lat > -10 & Lat < 10 & Long  < 60) | (Lat > -15 & Lat < 10 & Long  > 60 & Long <= 75), 2, # originally, it was Long < 75, but produced unassiged areas for GI after GridCell correction
-                          ifelse((Lat > -60 & Lat < -10 & Long > 20 & Long < 40) | (Lat > -30 & Lat < -10 & Long > 40 & Long  < 60), 3,
-                                 ifelse((Lat > -60 & Lat < -30 & Long > 40 & Long < 60) | (Lat > -60 & Lat <= -15 & Long  > 60 & Long <= 150), 4,
-                                        ifelse(Lat > -15 & Long > 75 & Long < 150, 5, 0)))))		
-  return(d)})					
-
-Data = plyr::ddply(Data,c("Area","FisheryCode"),.fun = function(d) {
-  d$AssessmentArea = d$Area
-  d = mutate_cond(d,FisheryCode=='FS' & Area ==1, AssessmentArea = 2)
-  d = mutate_cond(d,FisheryCode=='FS' & Area ==4, AssessmentArea = 5)
-  d = mutate_cond(d,FisheryCode=='LS' & Area ==1, AssessmentArea = 2)
-  d = mutate_cond(d,FisheryCode=='LS' & Area ==4, AssessmentArea = 5)
-  d = mutate_cond(d,FisheryCode=='LF', AssessmentArea = 5)
-  d = mutate_cond(d,FisheryCode=='BB', AssessmentArea = 2)
-  d = mutate_cond(d,FisheryCode=='GI' & (Area == 2 | Area==3), AssessmentArea = 1)
-  d = mutate_cond(d,FisheryCode=='GI' & Area == 4, AssessmentArea = 5)
-  d = mutate_cond(d,FisheryCode=='HD', AssessmentArea = 1)
-  d = mutate_cond(d,FisheryCode=='TR' & Area == 1, AssessmentArea = 2)
-  d = mutate_cond(d,FisheryCode=='TR' & Area == 4, AssessmentArea = 5)
-  d = mutate_cond(d,FisheryCode=='OT' & (Area == 2 | Area==3), AssessmentArea = 1)
-  d = mutate_cond(d,FisheryCode=='OT' & Area == 4, AssessmentArea = 5)
-  return(d)})	
-
-Data = plyr::ddply(Data,c("Area","FisheryCode"),.fun = function(d) {
-  d$AssessmentAreaName = d$AssessmentArea
-  d$ModelArea = d$AssessmentArea
-  d = mutate_cond(d,AssessmentArea=='1',AssessmentAreaName = '1a')
-  d = mutate_cond(d,AssessmentArea=='2',AssessmentAreaName = '1b')
-  d = mutate_cond(d,AssessmentArea=='3',AssessmentAreaName = '2')
-  d = mutate_cond(d,AssessmentArea=='4',AssessmentAreaName = '3')
-  d = mutate_cond(d,AssessmentArea=='5',AssessmentAreaName = '4')
-  d = mutate_cond(d,AssessmentArea=='1',ModelArea = '1')
-  d = mutate_cond(d,AssessmentArea=='2',ModelArea = '1')
-  d = mutate_cond(d,AssessmentArea=='3',ModelArea = '2')
-  d = mutate_cond(d,AssessmentArea=='4',ModelArea = '3')
-  d = mutate_cond(d,AssessmentArea=='5',ModelArea = '4')	
-  return(d)})
-
-Data = Data %>% 
-  dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName)) %>% 
-  dplyr::mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries))) %>% 
-  dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,Area,AssessmentArea,AssessmentAreaName, ModelArea,FisheryCode,ModelFishery,ModelFleet,FirstClassLow,SizeInterval,REPORTING_QUALITY,C001:C150)
-
+# Filter data based on some criteria:
+work = filter_LF_4A(data) 
 # Continue..
-C_labels = c(Paste("C00",1:9),Paste("C0",10:99), Paste("C",100:150))
-data = Data %>% 
-  dplyr::group_by(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,Area,AssessmentArea,AssessmentAreaName,ModelArea,FisheryCode,ModelFishery,ModelFleet,FirstClassLow,SizeInterval,REPORTING_QUALITY) %>% 
-  dplyr::summarise_at(C_labels,list(Sum)) %>%
-  as.data.frame() 
+work = work %>%
+  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>% 
+  dplyr::summarise_at(L_labels_wrong,list(Sum)) %>%
+  as.data.frame() %>%
+  tidyr::gather(length,total,L010:L198) %>%
+  dplyr::mutate(length=as.numeric(substr(length,2,4))) %>%
+  dplyr::mutate(length=length-(length-10) %% 4) %>%
+  dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>%
+  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter,length) %>% 
+  dplyr::summarise_at("total",list(Sum)) %>% 
+  tidyr::spread(length,total,fill=0) %>% 
+  as.data.frame()
 
-data = data %>%
-  dplyr::mutate(sno=rowSums(dplyr::select(data,C001:C150))) %>%
-  dplyr::mutate(C095=rowSums(dplyr::select(data,C095:C150))) %>%
-  dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,Area,AssessmentArea, AssessmentAreaName, ModelArea,FisheryCode, ModelFishery,ModelFleet,FirstClassLow,SizeInterval,REPORTING_QUALITY,sno,C001:C095) %>% 
-  tidyr::gather(length,total,C001:C095) %>%
-  dplyr::mutate(length = FirstClassLow+(as.numeric(substr(length,2,4))-1)*SizeInterval) %>% 
-  dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>% 
-  tidyr::spread(length,total,fill=0)
+work = work %>%
+  dplyr::mutate(sno=rowSums(dplyr::select(work,L010:L198))) %>%
+  dplyr::filter(sno >= 20) %>%	
+  dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0,Nsamp = 5) %>%
+  dplyr::select(Yr,Seas,ModelFleet,Gender,Part,Nsamp,L010:L198) %>%
+  dplyr::arrange(ModelFleet,Yr)		
+work[,L_labels_SS] = round(work[,L_labels_SS],1)
 
-# Save this object for analyses:
-write.csv(data, file = file.path(shrpoint_path, 'data/processed', 'size_grid.csv'), row.names = FALSE)
+# Save SS catch input
+write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-bug.csv'), row.names = FALSE)
 
-###############
-# data output to ss3 
-###############
 
-L_labels  =  c(Paste("L0",seq(10,98,4)), Paste("L",seq(102,198,4)))
-work = data %>% 
-  dplyr::filter(!(Fleet %in% c('TWN','SYC') & Gear == 'LL')) %>%
-  dplyr::filter(!(ModelFishery == "LL 1a" & Year %in% c(1970:1995, 2010:2020))) %>% # please check if 2020-2022 data needs to be excluded
-  dplyr::filter(!(ModelFishery == "LL 1b" & Year %in% c(1950:1959))) %>%
-  dplyr::filter(!(ModelFishery == "LL 2" & Year %in% c(1950:1959))) %>%
-  dplyr::filter(!(ModelFishery == "LL 3" & Year %in% c(1950:1959))) %>%
-  dplyr::filter(!(ModelFishery == "LL 4" & Year %in% c(1950:1959,2001:2005,2015,2019))) %>%  # please check if 2020-2022 data needs to be excluded
-  dplyr::filter(!(ModelFishery == "GI 4" & Year %in% c(1975:1987))) %>%
-  dplyr::filter(!(ModelFishery == "HD 1a" & Year %in% c(1950:2007))) %>%
-  dplyr::filter(!(ModelFishery == "OT 4" & Year %in% c(1983,2016))) %>%
-  dplyr::filter(!(ModelFishery == "TR 4" & Year %in% c(2016:2019))) %>%  # please check if 2020-2022 data needs to be excluded
-  dplyr::filter(!(ModelFishery == "TR 1b")) %>%
-  dplyr::filter(!(ModelFishery == "TR 2")) 
+# -------------------------------------------------------------------------
+# Get LF input without bug, without weighting and Nsamp 5 ------------------------------
 
+# Read preprocessed data (see LF-preprocessing):
+data = read.csv(file.path(shrpoint_path, 'data/processed', 'size_grid.csv'))
+
+# Filter data based on some criteria:
+work = filter_LF_4A(data) 
 # Continue..
 work = work %>%
   dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>% 
@@ -189,11 +109,105 @@ work = work %>%
 work = work %>%
   dplyr::mutate(sno=rowSums(dplyr::select(work,L010:L198))) %>%
   dplyr::filter(sno >= 20) %>%	
-  dplyr::mutate(Yr =  (13-1)+4*(Year-1950)+ Quarter, Seas = 1,Gender=0,Part=0,Nsamp = 5) %>%
+  dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0,Nsamp = 5) %>%
   dplyr::select(Yr,Seas,ModelFleet,Gender,Part,Nsamp,L010:L198) %>%
   dplyr::arrange(ModelFleet,Yr)		
-L_labels  =  c(Paste("L0",seq(10,98,4)), Paste("L",seq(102,198,4)))
-work[,L_labels] = round(work[,L_labels],1)
+work[,L_labels_SS] = round(work[,L_labels_SS],1)
 
 # Save SS catch input
 write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size.csv'), row.names = FALSE)
+
+# -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# Get LF input without bug, without weighting and Nsamp from catch-weighted Rep Quality ---------
+# You will need to run the make_grid.R script before running the following lines
+
+load(file.path(shrpoint_path, 'data/processed', 'mergedStd_5.RData'))
+data = mergedStd
+# Change columns names to make it work:
+colnames(data) = str_to_title(colnames(data))
+colnames(data)[c(6:9)] = c('FisheryCode', 'ModelArea', 'ModelFleet', 'ModelFishery')
+
+# Filter data based on some criteria:
+work = filter_LF_4A(data) 
+# 1. Do the aggregation for length bins (traditional way):
+work1 = work %>%
+  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>% 
+  dplyr::summarise_at(L_labels,list(Sum)) %>%
+  as.data.frame() %>%
+  tidyr::gather(length,total,L010:L198) %>%
+  dplyr::mutate(length=as.numeric(substr(length,2,4))) %>%
+  dplyr::mutate(length=length-(length-10) %% 4) %>%
+  dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>%
+  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter,length) %>% 
+  dplyr::summarise_at("total",list(Sum)) %>% 
+  tidyr::spread(length,total,fill=0) %>% 
+  as.data.frame()
+# 2. Do the aggregation for reporting quality (weighted mean)
+work2 = work %>%
+  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>%
+  summarise(RepQual = weighted.mean(Reporting_quality, Ncnofish))
+# Merge both:
+work = left_join(work1, work2)
+work = work %>% relocate(RepQual, .after = Quarter) 
+
+# Apply last filters to have the same data:
+work = work %>%
+  # dplyr::mutate(sno=rowSums(dplyr::select(work,L010:L198))) %>%
+  # dplyr::filter(sno >= 20) %>%	# No need to apply this filter since we are using RepQuality. Confirm with team
+  dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0) %>%
+  dplyr::select(Yr,Seas,ModelFleet,Gender,Part,RepQual,L010:L198) %>%
+  dplyr::arrange(ModelFleet,Yr)		
+work[,L_labels_SS] = round(work[,L_labels_SS],1)
+
+# Save SS catch input
+write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size_RQ-w.csv'), row.names = FALSE)
+
+# -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# Get LF input without bug, weighting LF and Rep Quality ---------
+# You will need to run the make_grid.R script before running the following lines
+
+load(file.path(shrpoint_path, 'data/processed', 'mergedStd_5.RData'))
+data = mergedStd
+# Change columns names to make it work:
+colnames(data) = str_to_title(colnames(data))
+colnames(data)[c(6:9)] = c('FisheryCode', 'ModelArea', 'ModelFleet', 'ModelFishery')
+
+# Filter data based on some criteria:
+work = filter_LF_4A(data) 
+# 1. Do the aggregation for length bins (traditional way):
+work1 = work %>% ungroup() %>%
+  dplyr::mutate(Samp_sum = rowSums(across(all_of(L_labels)))) %>% # First calculate row sum 
+  dplyr::mutate(across(all_of(L_labels))/Samp_sum) %>% # then get proportions by row
+  dplyr::mutate(across(all_of(L_labels), ~ .x*Ncnofish)) %>% # then weight by catch in numbers
+  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>% 
+  dplyr::summarise_at(L_labels,list(Sum)) %>%
+  as.data.frame() %>%
+  tidyr::gather(length,total,L010:L198) %>%
+  dplyr::mutate(length=as.numeric(substr(length,2,4))) %>%
+  dplyr::mutate(length=length-(length-10) %% 4) %>%
+  dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>%
+  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter,length) %>% 
+  dplyr::summarise_at("total",list(Sum)) %>% 
+  tidyr::spread(length,total,fill=0) %>% 
+  as.data.frame()
+# 2. Do the aggregation for reporting quality (weighted mean)
+work2 = work %>%
+  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>%
+  summarise(RepQual = weighted.mean(Reporting_quality, Ncnofish))
+# Merge both:
+work = left_join(work1, work2)
+work = work %>% relocate(RepQual, .after = Quarter) 
+
+# Apply last filters to have the same data:
+work = work %>%
+  # dplyr::mutate(sno=rowSums(dplyr::select(work,L010:L198))) %>%
+  # dplyr::filter(sno >= 20) %>%	# No need to apply this filter since we are using RepQuality. Confirm with team
+  dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0) %>%
+  dplyr::select(Yr,Seas,ModelFleet,Gender,Part,RepQual,L010:L198) %>%
+  dplyr::arrange(ModelFleet,Yr)		
+work[,L_labels_SS] = round(work[,L_labels_SS],1)
+
+# Save SS catch input
+write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size_LF-w_RQ-w.csv'), row.names = FALSE)

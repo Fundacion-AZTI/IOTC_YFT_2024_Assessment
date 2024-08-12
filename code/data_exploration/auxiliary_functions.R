@@ -1,7 +1,7 @@
 
 
 # -------------------------------------------------------------------------
-# Transform from model time step (quarter) to year-quarter:
+# Transform from SS model time step (quarter) to year-quarter:
 ssts2yq = function(qtr,initial = 1950, base = 13) {
   yearqtr = (qtr-base)/4+initial+1/8
   return(yearqtr)
