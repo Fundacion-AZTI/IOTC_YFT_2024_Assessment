@@ -4,7 +4,7 @@
 source('sharepoint_path.R')
 
 # Read auxiliary functions:
-source(here('code', 'inputs', 'auxiliary_functions.R'))
+source(here('code', 'auxiliary_functions.R'))
 
 ###############
 # read data from standard SF table
@@ -48,42 +48,16 @@ table(Data$Area)
 
 # -------------------------------------------------------------------------
 
-Data = plyr::ddply(Data,c("Area","FisheryCode"),.fun = function(d) {
-  d$AssessmentArea = d$Area
-  d = mutate_cond(d,FisheryCode=='FS' & Area ==1, AssessmentArea = 2)
-  d = mutate_cond(d,FisheryCode=='FS' & Area ==4, AssessmentArea = 5)
-  d = mutate_cond(d,FisheryCode=='LS' & Area ==1, AssessmentArea = 2)
-  d = mutate_cond(d,FisheryCode=='LS' & Area ==4, AssessmentArea = 5)
-  d = mutate_cond(d,FisheryCode=='LF', AssessmentArea = 5)
-  d = mutate_cond(d,FisheryCode=='BB', AssessmentArea = 2)
-  d = mutate_cond(d,FisheryCode=='GI' & (Area == 2 | Area==3), AssessmentArea = 1)
-  d = mutate_cond(d,FisheryCode=='GI' & Area == 4, AssessmentArea = 5)
-  d = mutate_cond(d,FisheryCode=='HD', AssessmentArea = 1)
-  d = mutate_cond(d,FisheryCode=='TR' & Area == 1, AssessmentArea = 2)
-  d = mutate_cond(d,FisheryCode=='TR' & Area == 4, AssessmentArea = 5)
-  d = mutate_cond(d,FisheryCode=='OT' & (Area == 2 | Area==3), AssessmentArea = 1)
-  d = mutate_cond(d,FisheryCode=='OT' & Area == 4, AssessmentArea = 5)
-  return(d)})	
+# Create area columns:
+Data = create_4Aarea_cols(Data)
 
-Data = plyr::ddply(Data,c("Area","FisheryCode"),.fun = function(d) {
-  d$AssessmentAreaName = d$AssessmentArea
-  d$ModelArea = d$AssessmentArea
-  d = mutate_cond(d,AssessmentArea=='1',AssessmentAreaName = '1a')
-  d = mutate_cond(d,AssessmentArea=='2',AssessmentAreaName = '1b')
-  d = mutate_cond(d,AssessmentArea=='3',AssessmentAreaName = '2')
-  d = mutate_cond(d,AssessmentArea=='4',AssessmentAreaName = '3')
-  d = mutate_cond(d,AssessmentArea=='5',AssessmentAreaName = '4')
-  d = mutate_cond(d,AssessmentArea=='1',ModelArea = '1')
-  d = mutate_cond(d,AssessmentArea=='2',ModelArea = '1')
-  d = mutate_cond(d,AssessmentArea=='3',ModelArea = '2')
-  d = mutate_cond(d,AssessmentArea=='4',ModelArea = '3')
-  d = mutate_cond(d,AssessmentArea=='5',ModelArea = '4')	
-  return(d)})
-
+# Create ModelFleet column:
 Data = Data %>% 
   dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName)) %>% 
-  dplyr::mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries))) %>% 
-  dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,Area,AssessmentArea,AssessmentAreaName, ModelArea,FisheryCode,ModelFishery,ModelFleet,FirstClassLow,SizeInterval,REPORTING_QUALITY,C001:C150)
+  dplyr::mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries)))
+
+# Select important variables:
+Data = Data %>% dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,Area,AssessmentArea,AssessmentAreaName, ModelArea,FisheryCode,ModelFishery,ModelFleet,FirstClassLow,SizeInterval,REPORTING_QUALITY,C001:C150)
 
 # Continue..
 C_labels = c(Paste("C00",1:9),Paste("C0",10:99), Paste("C",100:150))
