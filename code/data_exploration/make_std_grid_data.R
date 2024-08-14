@@ -36,7 +36,7 @@ table(catch_spt$grid_type)
 size_spt = size_spt %>% mutate(grid_type = str_sub(grid, 1, 1))
 # Do some processing:
 size_spt = size_spt %>% mutate(samp_ID = 1:n()) # add samp_ID column
-# Transform to std grid (from irregular grids to grid_size):
+# Transform to std grid (from larger irregular grids to grid_size):
 size_spt_tf = size_spt %>% group_split(samp_ID) %>% 
   purrr::map(~ transform_to_stdgrid(.x, std_res = grid_size)) %>% 
   list_rbind()

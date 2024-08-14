@@ -181,7 +181,11 @@ transform_to_stdgrid = function(df, std_res = 5) { # input will be a data.frame 
     long_range = c(df$long - long_res*0.5 + std_res*0.5, df$long + long_res*0.5 - std_res*0.5)
     tmp_grid = expand.grid(long = seq(from = long_range[1], to = long_range[2], by = std_res),
                            lat = seq(from = lat_range[1], to = lat_range[2], by = std_res))
-    out_df = df %>% dplyr::slice(rep(1:n(), each = nrow(tmp_grid)))
+    n_rep = nrow(tmp_grid)
+    out_df = df %>% dplyr::slice(rep(1:n(), each = n_rep))
+    # Divide sno and len freq by number of rows
+    out_df = out_df %>% mutate(sno = sno/n_rep)
+    out_df = out_df %>% mutate(across(l010:l198 , ~ ./n_rep))
     # Replace long lat values:
     out_df$long = tmp_grid$long
     out_df$lat = tmp_grid$lat
