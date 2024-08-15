@@ -950,3 +950,39 @@ ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY8(8)",1:3] <- c(0,2,2)
  # Run model:
  r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
  
+ 
+ #.......................................................................
+ ### Update LF selectivity --------------------------------------------
+ #.......................................................................
+
+ config_name = '09_selectivity_LF'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/09_selectivity_PS'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+dat_1$lencomp <- base_dat$lencomp  %>% dplyr::filter(!(fleet==21 & year<=260))
+ 
+# Write SS files:
+
+SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+x<- base_dat$lencomp$year[base_dat$lencomp$fleet==1 & base_dat$lencomp$year<=296]
+y <- dat_1$lencomp$year[dat_1$lencomp$fleet==1 & dat_1$lencomp$year<=296]  
+setdiff(y, c(x, y))
