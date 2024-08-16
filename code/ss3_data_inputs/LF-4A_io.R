@@ -40,6 +40,8 @@ source(here('code', 'auxiliary_functions.R'))
 # Fishery 20  Purse-seine - log schools (LS 4)            [region 5] 4
 # Fishery 21  Longline - fresh tuna (FL 4)                [region 5] 4
 
+ModelFisheries <- c('GI 1a','HD 1a','LL 1a','OT 1a','BB 1b','FS 1b','LL 1b','LS 1b','TR 1b','LL 2','LL 3','GI 4','LL 4','OT 4','TR 4','FS 2','LS 2','TR 2','FS 4','LS 4','LF 4')
+
 # Initial length bins (wrong) in IOTC dataset:
 # This was an error in the 2021, which did not include half of the length bins. Confirmed by Dan
 L_labels_wrong  =  c(Paste("L0",seq(10,98,4)), Paste("L",seq(102,198,4)))

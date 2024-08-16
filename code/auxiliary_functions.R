@@ -19,18 +19,41 @@ add_sf_map = function(my_plot) {
   
 }
 
+
 # -------------------------------------------------------------------------
-# Get longitude and latitude information from Grid (Dan's function)
+# Get grid dimension (latitude and longitude) from grid type:
+get_grid_lat_dim = function(grid_type) {
+  
+  grid_type = as.numeric(grid_type)
+  out_val = ifelse(grid_type==1, 30, # Type 1, corrected based on metadata
+                     ifelse(grid_type==2, 10, # Type 2
+                            ifelse(grid_type==3, 10, # Type 3
+                                   ifelse(grid_type==4, 20, # Type 4
+                                          ifelse(grid_type==5, 1, 5))))) # Type 5 (dim = 1) and 6 (dim = 5)
+  return(out_val)
+  
+}
+get_grid_lon_dim = function(grid_type) {
+  
+  grid_type = as.numeric(grid_type)
+  out_val = ifelse(grid_type==1, 30, # Type 1, corrected based on metadata
+                   ifelse(grid_type==2, 20, # Type 2
+                          ifelse(grid_type==3, 10, # Type 3
+                                 ifelse(grid_type==4, 20, # Type 4
+                                        ifelse(grid_type==5, 1, 5))))) # Type 5 (dim = 1) and 6 (dim = 5)
+  return(out_val)
+  
+}
+
+
+# -------------------------------------------------------------------------
+# Get longitude and latitude center from Grid (Dan's function)
 
 get.lat.from.id = function(id) {
   id = as.character(id)
   size_grid_ = substr(id,1,1)
   
-  size_lat_ = ifelse(size_grid_==1,30, # corrected based on metadata
-                     ifelse(size_grid_==2,10,
-                            ifelse(size_grid_==3,10,
-                                   ifelse(size_grid_==4,20,
-                                          ifelse(size_grid_==5,1,5)))))
+  size_lat_ = get_grid_lat_dim(size_grid_)
   quadrant =substr(id,2,2)
   lat_label  = substr(id,3,4)
   lat = as.numeric(lat_label)+size_lat_/2
@@ -41,11 +64,7 @@ get.long.from.id = function(id) {
   id = as.character(id)
   size_grid_ = substr(id,1,1)
   
-  size_long_ = ifelse(size_grid_==1,30, # corrected based on metadata
-                      ifelse(size_grid_==2,20,
-                             ifelse(size_grid_==3,10,
-                                    ifelse(size_grid_==4,20,
-                                           ifelse(size_grid_==5,1,5)))))
+  size_long_ = get_grid_lon_dim(size_grid_)
   
   quadrant = substr(id,2,2)
   long_label  = substr(id,5,7)
@@ -151,7 +170,7 @@ filter_LF_4A = function(data) {
 # -------------------------------------------------------------------------
 # Repeat rows to create std Grid:
 
-transform_to_stdgrid = function(df, std_res = 5) { # input will be a data.frame with single row
+transform_to_stdgrid = function(df, std_res = 5, len_df = TRUE) { # input will be a data.frame with single row
   
   # - do nothing with grid_type == 5 (1x1) or 6 (5x5)
   # - catch data have all grid_type == 6
@@ -161,22 +180,8 @@ transform_to_stdgrid = function(df, std_res = 5) { # input will be a data.frame 
   if(df$grid_type %in% c('5', '6')) {
     out_df = df
   } else {
-    if(df$grid_type %in% c('4')) {
-      lat_res = 20 # lat size
-      long_res = 20 # long size
-    }
-    if(df$grid_type %in% c('3')) {
-      lat_res = 10 # lat size
-      long_res = 10 # long size
-    }
-    if(df$grid_type %in% c('2')) {
-      lat_res = 10 # lat size
-      long_res = 20 # long size
-    }
-    if(df$grid_type %in% c('1')) {
-      lat_res = 30 # lat size
-      long_res = 30 # long size
-    }
+    lat_res = get_grid_lat_dim(df$grid_type)
+    long_res = get_grid_lon_dim(df$grid_type)
     lat_range = c(df$lat - lat_res*0.5 + std_res*0.5, df$lat + lat_res*0.5 - std_res*0.5)
     long_range = c(df$long - long_res*0.5 + std_res*0.5, df$long + long_res*0.5 - std_res*0.5)
     tmp_grid = expand.grid(long = seq(from = long_range[1], to = long_range[2], by = std_res),
@@ -184,8 +189,10 @@ transform_to_stdgrid = function(df, std_res = 5) { # input will be a data.frame 
     n_rep = nrow(tmp_grid)
     out_df = df %>% dplyr::slice(rep(1:n(), each = n_rep))
     # Divide sno and len freq by number of rows
-    out_df = out_df %>% mutate(sno = sno/n_rep)
-    out_df = out_df %>% mutate(across(l010:l198 , ~ ./n_rep))
+    if(len_df) {
+      out_df = out_df %>% mutate(sno = sno/n_rep)
+      out_df = out_df %>% mutate(across(l010:l198 , ~ ./n_rep))
+    }
     # Replace long lat values:
     out_df$long = tmp_grid$long
     out_df$lat = tmp_grid$lat
@@ -193,6 +200,27 @@ transform_to_stdgrid = function(df, std_res = 5) { # input will be a data.frame 
   
   return(out_df)
 }
+
+
+# -------------------------------------------------------------------------
+# Calculate area on land:
+
+calculate_area_on_land = function(dat) {
+  
+  library(rgeos)
+  library(rnaturalearth)
+  world_map = rnaturalearth::ne_countries(scale = 'small', returnclass = c("sf"))
+  wm = as(world_map, "Spatial")
+  cs = gUnaryUnion(wm, id=as.character(wm$continent))
+  cs_sf = st_as_sf(cs)
+  inter_grid = st_intersection(cs_sf, dat)
+  if(nrow(inter_grid) > 0) area_on_land = sum(as.numeric(st_area(inter_grid)))*1e-06 # in km2
+  else area_on_land = 0
+  
+  return(area_on_land)
+  
+}
+
 
 # -------------------------------------------------------------------------
 # Several growth-related functions:
