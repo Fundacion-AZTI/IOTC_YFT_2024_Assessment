@@ -1,6 +1,6 @@
 source('sharepoint_path.R')
-source('code/data_exploration/parameters_for_plots.R')
-source('code/data_exploration/auxiliary_functions.R')
+source('code/parameters_for_plots.R')
+source('code/auxiliary_functions.R')
 
 data_folder = 'data/processed'
 # Length bin column names (lowercase):
@@ -25,67 +25,86 @@ size_spt = size_spt %>% mutate(grid = as.character(grid))
 # Remember that Long Lat columns are the centroid of the IOTC grid, calculated in LF or CE scripts.
 
 # -------------------------------------------------------------------------
-# Create a standard grid (5x5) in the IO:
-
-merged_spt = rbind(catch_spt[,c('long', 'lat')], size_spt[,c('long', 'lat')])
-MyPoints = merged_spt %>% st_as_sf(coords = c("long", "lat"), crs = 4326, remove = FALSE)
-range(MyPoints$long)
-range(MyPoints$lat)
-# Specify lower left corner:
-min_lon = 25
-min_lat = -60
-stdGrid = st_make_grid(MyPoints, cellsize = c(grid_size, grid_size), offset = c(min_lon, min_lat)) %>%
-  st_set_crs(4326) %>% st_sf() %>% dplyr::mutate(grid_ID = 1:n())
-save(stdGrid, file = file.path(shrpoint_path, data_folder, paste0('stdGrid_', grid_size,'.RData')))
-
-# Plot std grid:
-worldmap = ne_countries(scale = "medium", returnclass = "sf")
-
-ggplot(stdGrid) + geom_sf(fill = 'white') +
-geom_sf(data = worldmap, fill = "gray60", color = "gray60") +
-  coord_sf(expand = FALSE, xlim = c(25, 150), ylim = c(-60, 30)) 
-
-# -------------------------------------------------------------------------
-# Create grid for catch data:
-# See IOTC code
+# Spatially standardize catch data (e.g., from 30x30 to grid_size x grid_size):
 catch_spt = catch_spt %>% mutate(grid_type = str_sub(grid, 1, 1))
 # No need to standardize catch data since grid type is always 6 (5x5, same as std grid)
 # Double check this:
 table(catch_spt$grid_type)
 
-# Do some processing:
-catchPoints = catch_spt %>% st_as_sf(coords = c("long", "lat"), crs = 4326, remove = FALSE)
-# Find stdGrid that corresponds to each catch point (it takes a while):
-catchStd = st_join(stdGrid, left = TRUE, catchPoints) %>% na.omit
-# Remove sf object since not important for now and may make things slower:
-st_geometry(catchStd) = NULL
-# Aggregate information by std grid:
-# These variables are aggregated without any kind of weighting: month, schooltype, gear
-catchStd = catchStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode, modelarea, modelfleet) %>%
-            summarise_at(c('ncnofish', 'ncmtfish'), sum)
-save(catchStd, file = file.path(shrpoint_path, data_folder, paste0('catchStd_', grid_size,'.RData')))
-
 # -------------------------------------------------------------------------
-# Create grid for size data:
-# See IOTC code
-
+# Spatially standardize catch data (e.g., from 30x30 to grid_size x grid_size):
 size_spt = size_spt %>% mutate(grid_type = str_sub(grid, 1, 1))
 # Do some processing:
 size_spt = size_spt %>% mutate(samp_ID = 1:n()) # add samp_ID column
-# Transform to std grid (from irregular grids to grid_size):
+# Transform to std grid (from larger irregular grids to grid_size):
 size_spt_tf = size_spt %>% group_split(samp_ID) %>% 
   purrr::map(~ transform_to_stdgrid(.x, std_res = grid_size)) %>% 
   list_rbind()
+
+
+# -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# Create a standard grid (5x5) in the IO based on std points of catch and size data:
+
+merged_spt = rbind(catch_spt[,c('long', 'lat')], size_spt_tf[,c('long', 'lat')])
+MyPoints = merged_spt %>% st_as_sf(coords = c("long", "lat"), crs = 4326, remove = FALSE)
+range(MyPoints$long)
+range(MyPoints$lat)
+# Specify lower left corner:
+min_lon = 20
+min_lat = -60
+stdGrid = st_make_grid(MyPoints, cellsize = c(grid_size, grid_size), offset = c(min_lon, min_lat)) %>%
+  st_set_crs(4326) %>% st_sf() %>% dplyr::mutate(grid_ID = 1:n())
+save(stdGrid, file = file.path(shrpoint_path, data_folder, paste0('stdGrid_', grid_size,'.RData')))
+
+# Create points std Grid to get lon lat information later:
+stdGridPoint = st_centroid(stdGrid) %>% 
+  dplyr::mutate(lon = sf::st_coordinates(.)[,1], lat = sf::st_coordinates(.)[,2])
+st_geometry(stdGridPoint) = NULL
+
+# Plot std grid:
+worldmap = ne_countries(scale = "medium", returnclass = "sf")
+
+ggplot(stdGrid) + geom_sf(fill = 'white') +
+  geom_sf(data = worldmap, fill = "gray60", color = "gray60") +
+  coord_sf(expand = FALSE, xlim = c(15, 165), ylim = c(-65, 35)) 
+
+
+# -------------------------------------------------------------------------
+# Merge std grid with catch data:
+catchPoints = catch_spt %>% st_as_sf(coords = c("long", "lat"), crs = 4326, remove = FALSE)
+dim(catchPoints)
+# Find stdGrid that corresponds to each catch point (it takes a while):
+catchStd = st_join(stdGrid, left = TRUE, catchPoints) %>% na.omit
+dim(catchStd)
+# Remove sf object since not important for now and may make things slower:
+st_geometry(catchStd) = NULL
+# Aggregate information by std grid:
+# These variables are aggregated without any kind of weighting: month, schooltype
+catchStd = catchStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode, modelarea, modelfleet, modelfishery) %>%
+  summarise_at(c('ncnofish', 'ncmtfish'), sum)
+# Get lon lat information:
+catchStd = left_join(catchStd, stdGridPoint, by = 'grid_ID')
+# Save:
+save(catchStd, file = file.path(shrpoint_path, data_folder, paste0('catchStd_', grid_size,'.RData')))
+
+
+# -------------------------------------------------------------------------
+# Merge std grid with size data:
 sizePoints = size_spt_tf %>% st_as_sf(coords = c("long", "lat"), crs = 4326, remove = FALSE)
+dim(sizePoints)
+sum(is.na(sizePoints$reporting_quality)) # check no NAs
 # Find stdGrid that corresponds to each size point (it takes a while):
-sizeStd = st_join(stdGrid, left = TRUE, sizePoints) %>% na.omit
+sizeStd = st_join(stdGrid, left = TRUE, sizePoints) %>% dplyr::filter(!is.na(year))
+dim(sizeStd)
+sum(is.na(sizeStd$reporting_quality)) # check no NAs
 # Remove sf object since not important for now and may make things slower:
 st_geometry(sizeStd) = NULL
 # Aggregate information by std grid (important for 1x1 grids in size data):
-# These variables are aggregated without any kind of weighting: month, schooltype, gear
-tmp_1 = sizeStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode, modelarea, modelfleet) %>%
-          summarise_at('reporting_quality', median)
-tmp_2 = sizeStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode, modelarea, modelfleet) %>%
+# These variables are aggregated without any kind of weighting: month, schooltype
+tmp_1 = sizeStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode, modelarea, modelfleet, modelfishery) %>%
+          summarise_at('reporting_quality', mean) # IMPORTANT: mean reporting quality
+tmp_2 = sizeStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode, modelarea, modelfleet, modelfishery) %>%
   summarise_at(c('sno', C_labels), sum)
 # Merge both datasets:
 sizeStd = inner_join(tmp_1, tmp_2)
@@ -93,9 +112,13 @@ save(sizeStd, file = file.path(shrpoint_path, data_folder, paste0('sizeStd_', gr
 
 
 # -------------------------------------------------------------------------
-
+# -------------------------------------------------------------------------
 # Merged size with catch data:
 mergedStd = left_join(sizeStd, catchStd)
+mergedStd = mergedStd %>% select(-c('lon', 'lat')) # remove these since will be added later
+
+# Missing catch grid information (%)
+sum(is.na(mergedStd$ncnofish))/nrow(mergedStd)
 
 # Obtain imputation data frame (to fill in missing catch information for some grids):
 
@@ -126,30 +149,20 @@ mergedStd = left_join(mergedStd, catchStdAgg4,
                       by = c('year', 'fisherycode'),
                       suffix = c('', '_4'))
 
-# Plot percentage of imputation by aggregation level:
-imputationLevel = data.frame(level1 = sum(is.na(mergedStd$ncnofish))/nrow(mergedStd),
-                             level2 = sum(is.na(mergedStd$ncnofish_1))/nrow(mergedStd),
-                             level3 = sum(is.na(mergedStd$ncnofish_2))/nrow(mergedStd),
-                             level4 = sum(is.na(mergedStd$ncnofish_3))/nrow(mergedStd))
-imputationLevel = tidyr::gather(imputationLevel)
-imputationLevel = imputationLevel %>% dplyr::add_row(key = 'level0', value = 1 - sum(imputationLevel$value), .before = 1)
-imputationLevel = imputationLevel %>% mutate(perc = value*100, key = factor(key, labels = 0:4))
-
-p1 = ggplot(imputationLevel, aes(x = key, y = perc)) +
-  geom_bar(stat = "identity") +
-  xlab('Imputation level') + ylab('% of grid observations')
-ggsave(file.path(shrpoint_path, plot_dir, paste0('imputation_grid_', grid_size, img_type)), plot = p1,
-       width = img_width*0.5, height = 70, units = 'mm', dpi = img_res)
-
 # Now fill in NA in catch columns based on levels of imputation:
+mergedStd = mergedStd %>% mutate(type_imputation = if_else(!is.na(ncnofish), 0, NA))
 mergedStd = mergedStd %>% mutate(ncnofish = if_else(is.na(ncnofish), ncnofish_1, ncnofish), 
-                                 ncmtfish = if_else(is.na(ncmtfish), ncmtfish_1, ncmtfish))
+                                 ncmtfish = if_else(is.na(ncmtfish), ncmtfish_1, ncmtfish),
+                                 type_imputation = if_else(is.na(type_imputation) & !is.na(ncnofish), 1, type_imputation))
 mergedStd = mergedStd %>% mutate(ncnofish = if_else(is.na(ncnofish), ncnofish_2, ncnofish), 
-                                 ncmtfish = if_else(is.na(ncmtfish), ncmtfish_2, ncmtfish))
+                                 ncmtfish = if_else(is.na(ncmtfish), ncmtfish_2, ncmtfish),
+                                 type_imputation = if_else(is.na(type_imputation) & !is.na(ncnofish), 2, type_imputation))
 mergedStd = mergedStd %>% mutate(ncnofish = if_else(is.na(ncnofish), ncnofish_3, ncnofish), 
-                                 ncmtfish = if_else(is.na(ncmtfish), ncmtfish_3, ncmtfish))
+                                 ncmtfish = if_else(is.na(ncmtfish), ncmtfish_3, ncmtfish),
+                                 type_imputation = if_else(is.na(type_imputation) & !is.na(ncnofish), 3, type_imputation))
 mergedStd = mergedStd %>% mutate(ncnofish = if_else(is.na(ncnofish), ncnofish_4, ncnofish), 
-                                 ncmtfish = if_else(is.na(ncmtfish), ncmtfish_4, ncmtfish))
+                                 ncmtfish = if_else(is.na(ncmtfish), ncmtfish_4, ncmtfish),
+                                 type_imputation = if_else(is.na(type_imputation) & !is.na(ncnofish), 4, type_imputation))
 
 # Remove imputation columns:
 mergedStd = mergedStd %>% select(-c('ncnofish_1', 'ncnofish_2', 'ncnofish_3', 'ncnofish_4',
@@ -159,6 +172,21 @@ mergedStd = mergedStd %>% select(-c('ncnofish_1', 'ncnofish_2', 'ncnofish_3', 'n
 sum(is.na(mergedStd$ncnofish))
 sum(is.na(mergedStd$ncmtfish))
 
+# Make imputation plot:
+imputationLevel = mergedStd %>% group_by(type_imputation) %>% summarise(n = n()) %>% mutate(perc = (n/sum(n))*100)
+sum(imputationLevel$perc)
+p1 = ggplot(imputationLevel, aes(x = factor(type_imputation), y = perc)) +
+  geom_bar(stat = "identity") +
+  xlab('Imputation level') + ylab('% of grid observations')
+ggsave(file.path(shrpoint_path, plot_dir, paste0('imputation_grid_', grid_size, img_type)), plot = p1,
+       width = img_width*0.5, height = 70, units = 'mm', dpi = img_res)
+
+# Check if imputation methods did not produce outliers:
+ggplot(data = mergedStd) + geom_boxplot(aes(x = factor(type_imputation), y = ncnofish)) + facet_wrap(~ fisherycode)
+ggplot(data = mergedStd) + geom_boxplot(aes(x = factor(type_imputation), y = ncmtfish)) + facet_wrap(~ fisherycode)
+
+# Get lon lat information:
+mergedStd = left_join(mergedStd, stdGridPoint, by = 'grid_ID')
+
 # Save merged data frame:
 save(mergedStd, file = file.path(shrpoint_path, data_folder, paste0('mergedStd_', grid_size,'.RData')))
-

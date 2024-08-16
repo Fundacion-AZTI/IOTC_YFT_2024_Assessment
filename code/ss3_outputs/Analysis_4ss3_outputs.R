@@ -25,8 +25,7 @@ library(here)
 
 proj_dir = here::here()
 setwd(proj_dir)
-source(here('code', 'inputs', 'auxiliary_functions.R'))
-source(here("code", "analysingModels","auxiliary_functions_4analysingModels.R"))
+source(here('code', 'auxiliary_functions.R'))
 # Sharepoint path:
 source('sharepoint_path.R')
 setwd(shrpoint_path)

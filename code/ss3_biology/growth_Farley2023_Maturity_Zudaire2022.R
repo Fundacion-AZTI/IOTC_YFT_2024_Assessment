@@ -8,11 +8,7 @@ library(dplyr)
 library(r4ss)
 library(here)
 
-proj_dir = here::here()
-setwd(proj_dir)
-
-source("code/analysingModels/auxiliary_functions_4analysingModels.R")
-source("code/inputs/auxiliary_functions.R")
+source("code/auxiliary_functions.R")
 # Sharepoint path:
 source('sharepoint_path.R')
 setwd(shrpoint_path)
@@ -96,7 +92,7 @@ sub_scs <- c("06_update_Growth")
 scs_wd <-paste0("models/update/",sub_scs)
 
 sc_ss3 <- SS_output(dir=scs_wd,  repfile = "Report.sso",covar=F)
-library(ggthemes)
+
 #Plot Farleys growth
 cols <- c("varA" = "black", "varB" = "red")
 df2 <-sc_ss3$endgrowth

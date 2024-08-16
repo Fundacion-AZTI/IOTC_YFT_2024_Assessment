@@ -1,7 +1,7 @@
 # Read path and parameters for plots:
 source('sharepoint_path.R')
-source(here('code/data_exploration', 'parameters_for_plots.R'))
-source(here('code/data_exploration', 'auxiliary_functions.R'))
+source(here('code', 'parameters_for_plots.R'))
+source(here('code', 'auxiliary_functions.R'))
 theme_set(theme_classic())
 
 # Read grid data:

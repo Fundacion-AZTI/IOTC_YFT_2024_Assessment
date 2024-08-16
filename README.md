@@ -4,7 +4,7 @@ This Github repository is used to conduct the 2024 Yellowfin assessment in the I
 
 > :loudspeaker: **Goal**
 >
-> The main goal of this Github repository is to replicate all the 2024 SS configurations using R code, which will improve the collaboration among stock assessors and the communication of results. This automatization can save a lot of time during the assessment process.
+> The main goal of this Github repository is to replicate all the 2024 SS configurations using R code, which will improve the collaboration among stock assessors and the communication of results.
 
 These following folders can be found in this repository:
 
@@ -16,7 +16,7 @@ These following folders can be found in this repository:
 
 You also need to have access to the Sharepoint to read the raw data and store the SS files. In the Sharepoint, you can find the following main folders:
 
--   `data`: store the raw data provided by the IOTC Secretariat (`data/raw`), the processed data to make figures (`data/processed`), and the SS inputs for different SS spatial configurations (`data/ss_inputs`).
+-   `data`: store the raw data provided by the IOTC Secretariat (`data/raw`), the processed data to make figures (`data/processed`), and the SS inputs for different SS spatial configurations (`data/ss_inputs`). There raw data can be found online [here](https://iotc.org/documents/WPTT/26AS/Data/01).
 -   `models`: store the base SS files (e.g., the 2021 SS files, `models/base`) that will be then modified to create the 2024 configurations. Only include one set of base files (`control.ss`, `data.ss`, `forecast.ss`, `starter.ss`) per spatial configuration. This folder also store the SS configurations for the 2024 assessment by spatial configuration (`models/configurations`). Use the R scripts in `code/ss/configurations` in the Github repository to create the 2024 configurations.
 -   `output`: store figures and tables from the data analysis and SS.
 
