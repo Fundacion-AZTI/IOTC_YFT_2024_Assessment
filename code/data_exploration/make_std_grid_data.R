@@ -44,7 +44,7 @@ size_spt_tf = size_spt %>% group_split(samp_ID) %>%
 
 # -------------------------------------------------------------------------
 # -------------------------------------------------------------------------
-# Create a standard grid (5x5) in the IO based on std points of catch and size data:
+# Create a standard grid in the IO based on std points of catch and size data:
 
 merged_spt = rbind(catch_spt[,c('long', 'lat')], size_spt_tf[,c('long', 'lat')])
 MyPoints = merged_spt %>% st_as_sf(coords = c("long", "lat"), crs = 4326, remove = FALSE)
@@ -55,6 +55,17 @@ min_lon = 20
 min_lat = -60
 stdGrid = st_make_grid(MyPoints, cellsize = c(grid_size, grid_size), offset = c(min_lon, min_lat)) %>%
   st_set_crs(4326) %>% st_sf() %>% dplyr::mutate(grid_ID = 1:n())
+
+# Calculate area on land of each grid (in km2):
+IDvec = stdGrid$grid_ID
+stdGrid = stdGrid %>% mutate(area_on_land = NA)
+for(i in seq_along(IDvec)) {
+  tmp = stdGrid %>% dplyr::filter(grid_ID == IDvec[i])
+  stdGrid$area_on_land[i] = calculate_area_on_land(tmp)
+}
+# Calculate grid area and proportion on land:
+stdGrid$grid_area = as.numeric(st_area(stdGrid))*1e-06 # in km2
+stdGrid = stdGrid %>% mutate(portion_on_land = area_on_land/grid_area)
 save(stdGrid, file = file.path(shrpoint_path, data_folder, paste0('stdGrid_', grid_size,'.RData')))
 
 # Create points std Grid to get lon lat information later:
@@ -63,12 +74,11 @@ stdGridPoint = st_centroid(stdGrid) %>%
 st_geometry(stdGridPoint) = NULL
 
 # Plot std grid:
-worldmap = ne_countries(scale = "medium", returnclass = "sf")
-
-ggplot(stdGrid) + geom_sf(fill = 'white') +
-  geom_sf(data = worldmap, fill = "gray60", color = "gray60") +
-  coord_sf(expand = FALSE, xlim = c(15, 165), ylim = c(-65, 35)) 
-
+ggplot() +
+  geom_sf(data = worldmap, fill = 'grey60', color = "gray60") +
+  geom_sf(data = stdGrid, fill = NA) +
+  coord_sf(expand = FALSE, xlim = c(15, 165), ylim = c(-65, 35))
+  
 
 # -------------------------------------------------------------------------
 # Merge std grid with catch data:
@@ -76,7 +86,7 @@ catchPoints = catch_spt %>% st_as_sf(coords = c("long", "lat"), crs = 4326, remo
 dim(catchPoints)
 # Find stdGrid that corresponds to each catch point (it takes a while):
 catchStd = st_join(stdGrid, left = TRUE, catchPoints) %>% na.omit
-dim(catchStd)
+dim(catchStd) # should be the same as before
 # Remove sf object since not important for now and may make things slower:
 st_geometry(catchStd) = NULL
 # Aggregate information by std grid:
@@ -96,14 +106,14 @@ dim(sizePoints)
 sum(is.na(sizePoints$reporting_quality)) # check no NAs
 # Find stdGrid that corresponds to each size point (it takes a while):
 sizeStd = st_join(stdGrid, left = TRUE, sizePoints) %>% dplyr::filter(!is.na(year))
-dim(sizeStd)
+dim(sizeStd) # should be the same as before
 sum(is.na(sizeStd$reporting_quality)) # check no NAs
 # Remove sf object since not important for now and may make things slower:
 st_geometry(sizeStd) = NULL
 # Aggregate information by std grid (important for 1x1 grids in size data):
 # These variables are aggregated without any kind of weighting: month, schooltype
 tmp_1 = sizeStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode, modelarea, modelfleet, modelfishery) %>%
-          summarise_at('reporting_quality', mean) # IMPORTANT: mean reporting quality
+          summarise_at(c('reporting_quality', 'portion_on_land'), mean) # IMPORTANT: mean reporting quality
 tmp_2 = sizeStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode, modelarea, modelfleet, modelfishery) %>%
   summarise_at(c('sno', C_labels), sum)
 # Merge both datasets:
@@ -114,8 +124,8 @@ save(sizeStd, file = file.path(shrpoint_path, data_folder, paste0('sizeStd_', gr
 # -------------------------------------------------------------------------
 # -------------------------------------------------------------------------
 # Merged size with catch data:
-mergedStd = left_join(sizeStd, catchStd)
-mergedStd = mergedStd %>% select(-c('lon', 'lat')) # remove these since will be added later
+# Remove some unnecessary columns from catch data:
+mergedStd = left_join(sizeStd, catchStd %>% select(-c('area_on_land', 'grid_area', 'portion_on_land', 'lon', 'lat')))
 
 # Missing catch grid information (%)
 sum(is.na(mergedStd$ncnofish))/nrow(mergedStd)
