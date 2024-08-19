@@ -36,10 +36,12 @@ table(catch_spt$grid_type)
 size_spt = size_spt %>% mutate(grid_type = str_sub(grid, 1, 1))
 # Do some processing:
 size_spt = size_spt %>% mutate(samp_ID = 1:n()) # add samp_ID column
+dim(size_spt)
 # Transform to std grid (from larger irregular grids to grid_size):
 size_spt_tf = size_spt %>% group_split(samp_ID) %>% 
   purrr::map(~ transform_to_stdgrid(.x, std_res = grid_size)) %>% 
   list_rbind()
+dim(size_spt_tf)
 
 
 # -------------------------------------------------------------------------
@@ -57,15 +59,10 @@ stdGrid = st_make_grid(MyPoints, cellsize = c(grid_size, grid_size), offset = c(
   st_set_crs(4326) %>% st_sf() %>% dplyr::mutate(grid_ID = 1:n())
 
 # Calculate area on land of each grid (in km2):
-IDvec = stdGrid$grid_ID
-stdGrid = stdGrid %>% mutate(area_on_land = NA)
-for(i in seq_along(IDvec)) {
-  tmp = stdGrid %>% dplyr::filter(grid_ID == IDvec[i])
-  stdGrid$area_on_land[i] = calculate_area_on_land(tmp)
-}
-# Calculate grid area and proportion on land:
-stdGrid$grid_area = as.numeric(st_area(stdGrid))*1e-06 # in km2
-stdGrid = stdGrid %>% mutate(portion_on_land = area_on_land/grid_area)
+stdGrid_temp = stdGrid %>% group_split(grid_ID) %>% 
+                purrr::map(~ calculate_area_on_land(.x)) %>%
+                list_rbind() %>% select(-geometry)
+stdGrid = left_join(stdGrid, stdGrid_temp, by = 'grid_ID')
 save(stdGrid, file = file.path(shrpoint_path, data_folder, paste0('stdGrid_', grid_size,'.RData')))
 
 # Create points std Grid to get lon lat information later:
@@ -89,6 +86,7 @@ catchStd = st_join(stdGrid, left = TRUE, catchPoints) %>% na.omit
 dim(catchStd) # should be the same as before
 # Remove sf object since not important for now and may make things slower:
 st_geometry(catchStd) = NULL
+# Do not remove grids on land since we are assuming those are correct and we dont want to remove catch information
 # Aggregate information by std grid:
 # These variables are aggregated without any kind of weighting: month, schooltype
 catchStd = catchStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode, modelarea, modelfleet, modelfishery) %>%
@@ -103,17 +101,28 @@ save(catchStd, file = file.path(shrpoint_path, data_folder, paste0('catchStd_', 
 # Merge std grid with size data:
 sizePoints = size_spt_tf %>% st_as_sf(coords = c("long", "lat"), crs = 4326, remove = FALSE)
 dim(sizePoints)
-sum(is.na(sizePoints$reporting_quality)) # check no NAs
+sum(is.na(sizePoints$reporting_quality)) # check no NAs for reporting quality
 # Find stdGrid that corresponds to each size point (it takes a while):
 sizeStd = st_join(stdGrid, left = TRUE, sizePoints) %>% dplyr::filter(!is.na(year))
 dim(sizeStd) # should be the same as before
 sum(is.na(sizeStd$reporting_quality)) # check no NAs
 # Remove sf object since not important for now and may make things slower:
 st_geometry(sizeStd) = NULL
+# Remove extrapolated grids (i.e., grid_type = 1:4) that are 99.9% on land:
+sizeStd = sizeStd %>% dplyr::filter(!(grid_type %in% as.character(1:4) & portion_on_land >= 0.999))
+dim(sizeStd)
+# Now correct sno and length freq for extrapolated grids (divide proportionally)
+# Do it in two parts to save some time:
+df_1 = sizeStd %>% dplyr::filter(grid_type %in% as.character(5:6))
+df_2 = sizeStd %>% dplyr::filter(grid_type %in% as.character(1:4)) %>% group_split(samp_ID) %>% 
+  purrr::map(~ correct_size_comp(.x)) %>% 
+  list_rbind()
+sizeStd = rbind(df_1, df_2)
+
 # Aggregate information by std grid (important for 1x1 grids in size data):
 # These variables are aggregated without any kind of weighting: month, schooltype
 tmp_1 = sizeStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode, modelarea, modelfleet, modelfishery) %>%
-          summarise_at(c('reporting_quality', 'portion_on_land'), mean) # IMPORTANT: mean reporting quality
+          summarise_at(c('reporting_quality'), mean) # IMPORTANT: mean reporting quality
 tmp_2 = sizeStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode, modelarea, modelfleet, modelfishery) %>%
   summarise_at(c('sno', C_labels), sum)
 # Merge both datasets:

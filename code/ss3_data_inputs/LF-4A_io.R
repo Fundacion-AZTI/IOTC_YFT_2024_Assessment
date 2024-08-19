@@ -42,7 +42,7 @@ source(here('code', 'auxiliary_functions.R'))
 
 ModelFisheries <- c('GI 1a','HD 1a','LL 1a','OT 1a','BB 1b','FS 1b','LL 1b','LS 1b','TR 1b','LL 2','LL 3','GI 4','LL 4','OT 4','TR 4','FS 2','LS 2','TR 2','FS 4','LS 4','LF 4')
 
-# Initial length bins (wrong) in IOTC dataset:
+# Initial length bins (with bug) in IOTC dataset:
 # This was an error in the 2021, which did not include half of the length bins. Confirmed by Dan
 L_labels_wrong  =  c(Paste("L0",seq(10,98,4)), Paste("L",seq(102,198,4)))
 
@@ -139,6 +139,44 @@ work[,L_labels_SS] = round(work[,L_labels_SS],1)
 write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size.csv'), row.names = FALSE)
 
 # -------------------------------------------------------------------------
+# Get LF input without bug, and Nsamp is Rep Quality without weighting ---------
+
+# Filter data based on some criteria:
+work = filter_LF_4A(data) 
+# 1. Do the aggregation for length bins (traditional way):
+work1 = work %>%
+  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>% 
+  dplyr::summarise_at(L_labels,list(Sum)) %>%
+  as.data.frame() %>%
+  tidyr::gather(length,total,L010:L198) %>%
+  dplyr::mutate(length=as.numeric(substr(length,2,4))) %>%
+  dplyr::mutate(length=length-(length-10) %% 4) %>%
+  dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>%
+  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter,length) %>% 
+  dplyr::summarise_at("total",list(Sum)) %>% 
+  tidyr::spread(length,total,fill=0) %>% 
+  as.data.frame()
+# 2. Do the aggregation for reporting quality (simple mean)
+work2 = work %>%
+  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>%
+  summarise(RepQual = mean(REPORTING_QUALITY))
+# Merge both:
+work = left_join(work1, work2)
+work = work %>% relocate(RepQual, .after = Quarter) 
+
+work = work %>%
+  dplyr::mutate(sno=rowSums(dplyr::select(work,L010:L198))) %>%
+  dplyr::filter(sno >= 20) %>%	# Filter Nsamp >= 20
+  dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0,Nsamp = 5) %>%
+  dplyr::select(Yr,Seas,ModelFleet,Gender,Part,Nsamp,L010:L198) %>%
+  dplyr::arrange(ModelFleet,Yr)		
+work[,L_labels_SS] = round(work[,L_labels_SS],1)
+
+# Save SS catch input
+write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size_RQ.csv'), row.names = FALSE)
+
+
+# -------------------------------------------------------------------------
 # Get LF input without bug, without weighting and Nsamp from catch-weighted Rep Quality ---------
 
 # Filter data based on some criteria:
@@ -215,4 +253,4 @@ work = work %>%
 work[,L_labels_SS] = round(work[,L_labels_SS],1)
 
 # Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size_LF-w_RQ-w.csv'), row.names = FALSE)
+write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-w_RQ-w.csv'), row.names = FALSE)

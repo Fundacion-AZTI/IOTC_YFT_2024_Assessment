@@ -139,6 +139,7 @@ grid_centers_tmp = grid_centers_tmp %>% group_split(grid_ID) %>%
   
 # Filter intersect grids:
 grid_borders_std = stdGrid[unique(unlist(st_intersects(grid_centers_tmp, stdGrid))), ]
+grid_borders_std = grid_borders_std %>% dplyr::filter(portion_on_land < 0.999) # filter portion on land
 grid_centers_std = st_centroid(grid_borders_std) 
 
 # Make plot:
@@ -153,7 +154,7 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('map_size_grid_std', img_type))
        width = img_width, height = 130, units = 'mm', dpi = img_res)
 
 
-# Add 4A lines to size grid -----------------------------------------------
+# Add 4A lines to raw size grid -----------------------------------------------
 
 p3 = ggplot() +
   geom_segment(data = reg_lines_4A, aes(x = lon1, y = lat1, xend = lon2, yend = lat2)) +
@@ -165,6 +166,21 @@ p3 = ggplot() +
   xlab(NULL) + ylab(NULL) +
   scale_y_continuous(breaks = yBreaks) + scale_x_continuous(breaks = xBreaks)
 ggsave(file.path(shrpoint_path, plot_dir, paste0('map_size_grid_4A', img_type)), plot = p3,
+       width = img_width, height = 130, units = 'mm', dpi = img_res)
+
+
+# Add 4A lines to STD size grid -----------------------------------------------
+
+p4 = ggplot() +
+  geom_segment(data = reg_lines_4A, aes(x = lon1, y = lat1, xend = lon2, yend = lat2)) +
+  geom_segment(data = reg_lines_1ab, aes(x = lon1, y = lat1, xend = lon2, yend = lat2), linetype = 2) +
+  geom_sf(data = worldmap, fill = "gray60", color = "gray60") +
+  geom_sf(data = grid_borders_std, fill = 'blue', col = 'white', alpha = 0.3) +
+  geom_sf(data = grid_centers_std, color = 'red', shape = 4, size = 2) +
+  coord_sf(expand = FALSE, xlim = xLim, ylim = yLim) +
+  xlab(NULL) + ylab(NULL) +
+  scale_y_continuous(breaks = yBreaks) + scale_x_continuous(breaks = xBreaks)
+ggsave(file.path(shrpoint_path, plot_dir, paste0('map_size_grid_std_4A', img_type)), plot = p4,
        width = img_width, height = 130, units = 'mm', dpi = img_res)
 
 

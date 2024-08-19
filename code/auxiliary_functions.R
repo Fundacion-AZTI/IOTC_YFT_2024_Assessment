@@ -170,41 +170,74 @@ filter_LF_4A = function(data) {
 # -------------------------------------------------------------------------
 # Repeat rows to create std Grid:
 
-transform_to_stdgrid = function(df, std_res = 5, len_df = TRUE) { # input will be a data.frame with single row
+transform_to_stdgrid = function(df, std_res = 5) { # input will be a data.frame with single row
   
   # - do nothing with grid_type == 5 (1x1) or 6 (5x5)
   # - catch data have all grid_type == 6
-  # - when grid_type == 5, information inside the grid will be combined
-  # without weighting
-  # std_res = 5 # for long and lat, since std grid is 5x5
-  if(df$grid_type %in% c('5', '6')) {
+  # - when grid_type == 5, information inside the grid will be combined without weighting
+  if(df$grid_type %in% c('5', '6')) { # Do nothing
     out_df = df
   } else {
     lat_res = get_grid_lat_dim(df$grid_type)
     long_res = get_grid_lon_dim(df$grid_type)
     lat_range = c(df$lat - lat_res*0.5 + std_res*0.5, df$lat + lat_res*0.5 - std_res*0.5)
     long_range = c(df$long - long_res*0.5 + std_res*0.5, df$long + long_res*0.5 - std_res*0.5)
+    # lower left corner:
+    # min_lat_grid = min(lat_range) - std_res*0.5
+    # min_lon_grid = min(long_range) - std_res*0.5
+    # These are centroids of new grids:
     tmp_grid = expand.grid(long = seq(from = long_range[1], to = long_range[2], by = std_res),
                            lat = seq(from = lat_range[1], to = lat_range[2], by = std_res))
-    n_rep = nrow(tmp_grid)
+    # # Now let's find if some grids are completely on land. If so, exclude them:
+    # # Create grid sf object:
+    # tmp_points = tmp_grid %>% st_as_sf(coords = c("long", "lat"), crs = 4326, remove = FALSE)
+    # tmp_grid_sf = st_make_grid(tmp_points, cellsize = c(std_res, std_res), offset = c(min_lon_grid, min_lat_grid)) %>%
+    #                   st_set_crs(4326) %>% st_sf() %>% dplyr::mutate(grid_ID = 1:n())
+    # # Calculate area on land:
+    # tmp_grid_sf_2 = tmp_grid_sf %>% group_split(grid_ID) %>%
+    #   purrr::map(~ calculate_area_on_land(.x)) %>%
+    #   list_rbind() %>% select(-geometry)
+    # tmp_grid_sf = left_join(tmp_grid_sf, tmp_grid_sf_2, by = 'grid_ID')
+    # tmp_point_sf = st_centroid(tmp_grid_sf) %>%
+    #                   dplyr::mutate(long = round(sf::st_coordinates(.)[,1], 1),
+    #                                 lat = round(sf::st_coordinates(.)[,2], 1))
+    # st_geometry(tmp_point_sf) = NULL
+    # # Filter grid 99.9% on land
+    # tmp_point_sf = tmp_point_sf %>% dplyr::filter(portion_on_land < 0.999)
+    tmp_point_sf = tmp_grid
+    # Continue code:
+    n_rep = nrow(tmp_point_sf)
     out_df = df %>% dplyr::slice(rep(1:n(), each = n_rep))
-    # Divide sno and len freq by number of rows
-    if(len_df) {
-      out_df = out_df %>% mutate(sno = sno/n_rep)
-      out_df = out_df %>% mutate(across(l010:l198 , ~ ./n_rep))
-    }
+    # # Divide sno and len freq by number of rows
+    # if(len_df) {
+    #   out_df = out_df %>% mutate(sno = sno/n_rep)
+    #   out_df = out_df %>% mutate(across(l010:l198 , ~ ./n_rep))
+    # }
     # Replace long lat values:
-    out_df$long = tmp_grid$long
-    out_df$lat = tmp_grid$lat
+    out_df$long = tmp_point_sf$long
+    out_df$lat = tmp_point_sf$lat
   }
   
   return(out_df)
 }
 
+# -------------------------------------------------------------------------
+# Correct sno and size composition for extrapolated grids (grid type = 1:4)
+correct_size_comp = function(df) {
+  
+  n_rep = nrow(df)
+  out_df = df %>% mutate(sno = sno/n_rep)
+  out_df = out_df %>% mutate(across(l010:l198 , ~ ./n_rep))
+  return(out_df)
+}
+
 
 # -------------------------------------------------------------------------
-# Calculate area on land:
-
+# Calculate area on land for a sf grid object (i.e., one row):
+# Create three new columns to the data.frame:
+# - grid_area (km)
+# - area_on_land (km): area of grid on land
+# - portion_on_land: portion of grid on land
 calculate_area_on_land = function(dat) {
   
   library(rgeos)
@@ -214,10 +247,16 @@ calculate_area_on_land = function(dat) {
   cs = gUnaryUnion(wm, id=as.character(wm$continent))
   cs_sf = st_as_sf(cs)
   inter_grid = st_intersection(cs_sf, dat)
-  if(nrow(inter_grid) > 0) area_on_land = sum(as.numeric(st_area(inter_grid)))*1e-06 # in km2
-  else area_on_land = 0
+  if(nrow(inter_grid) > 0) {
+    area_on_land = sum(as.numeric(st_area(inter_grid)))*1e-06 # in km2
+  } else { area_on_land = 0 }
   
-  return(area_on_land)
+  # Calculate grid area and proportion on land:
+  dat = dat %>% mutate(area_on_land = area_on_land,
+                       grid_area = as.numeric(st_area(dat))*1e-06, # in km2
+                       portion_on_land = round(area_on_land/grid_area, digits = 3))
+
+  return(dat)
   
 }
 
