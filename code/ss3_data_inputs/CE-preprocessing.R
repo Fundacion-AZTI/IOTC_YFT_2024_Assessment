@@ -1,4 +1,5 @@
 # This script will do the preprocessing of the CE data regardless the number of areas in the SS model
+rm(list = ls())
 
 # Sharepoint path:
 source('sharepoint_path.R')
@@ -9,9 +10,6 @@ source(here('code', 'auxiliary_functions.R'))
 
 # -------------------------------------------------------------------------
 # -------------------------------------------------------------------------
-
-
-ModelFisheries <- c('GI 1a','HD 1a','LL 1a','OT 1a','BB 1b','FS 1b','LL 1b','LS 1b','TR 1b','LL 2','LL 3','GI 4','LL 4','OT 4','TR 4','FS 2','LS 2','TR 2','FS 4','LS 4','LF 4')
 
 Data = read.csv(file.path(shrpoint_path, 'data/raw', "IOTC-2024-WPTT26(AS) - YFT - Raised catches.csv"))
 
@@ -37,19 +35,6 @@ Data = plyr::ddply(Data,"Grid",.fun = function(d) {
   d$long = long
   return(d)}
 )					
-
-# Get area information:
-Data$Area = get_4Aarea_from_lonlat(Data$long, Data$lat)
-table(Data$Area)
-
-# -------------------------------------------------------------------------
-
-# Create area columns:
-Data = create_4Aarea_cols(Data)
-
-Data = Data %>% 
-  dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName)) %>% 
-  dplyr::mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries)))
 
 # Save this object for analyses:
 write.csv(Data, file = file.path(shrpoint_path, 'data/processed', 'catch_grid.csv'), row.names = FALSE)

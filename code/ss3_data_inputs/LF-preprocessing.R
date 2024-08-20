@@ -1,4 +1,5 @@
 # This script will do the preprocessing of the LF data regardless the number of areas in the SS model
+rm(list = ls())
 
 # Sharepoint path:
 source('sharepoint_path.R')
@@ -42,38 +43,28 @@ Data = plyr::ddply(Data, "Grid", .fun = function(d) {
 )		
 Data = Data %>% dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,FisheryCode,TnoFish,FirstClassLow,SizeInterval,REPORTING_QUALITY,C001:C150)
 
-# Get area information:
-Data$Area = get_4Aarea_from_lonlat(Data$Long, Data$Lat)
-table(Data$Area)
-
-# -------------------------------------------------------------------------
-
-# Create area columns:
-Data = create_4Aarea_cols(Data)
-
-# Create ModelFleet column:
-Data = Data %>% 
-  dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName)) %>% 
-  dplyr::mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries)))
-
-# Select important variables:
-Data = Data %>% dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,Area,AssessmentArea,AssessmentAreaName, ModelArea,FisheryCode,ModelFishery,ModelFleet,FirstClassLow,SizeInterval,REPORTING_QUALITY,C001:C150)
-
-# Continue..
+# Aggregate (not sure why we should do this, it does not change anything)
+# Do it in two parts:
 C_labels = c(Paste("C00",1:9),Paste("C0",10:99), Paste("C",100:150))
-data = Data %>% 
-  dplyr::group_by(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,Area,AssessmentArea,AssessmentAreaName,ModelArea,FisheryCode,ModelFishery,ModelFleet,FirstClassLow,SizeInterval,REPORTING_QUALITY) %>% 
+data1 = Data %>% 
+  dplyr::group_by(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,FisheryCode,SizeInterval,FirstClassLow) %>% 
   dplyr::summarise_at(C_labels,list(Sum)) %>%
   as.data.frame() 
+data2 = Data %>% 
+  dplyr::group_by(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,FisheryCode) %>% 
+  dplyr::summarise_at('REPORTING_QUALITY',list(mean)) %>% # mean reporting quality
+  as.data.frame() 
+Data = inner_join(data1, data2)
 
-data = data %>%
-  dplyr::mutate(sno=rowSums(dplyr::select(data,C001:C150))) %>%
-  dplyr::mutate(C095=rowSums(dplyr::select(data,C095:C150))) %>%
-  dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,Area,AssessmentArea, AssessmentAreaName, ModelArea,FisheryCode, ModelFishery,ModelFleet,FirstClassLow,SizeInterval,REPORTING_QUALITY,sno,C001:C095) %>% 
+# Now create sno columns and aggregate largest length bins, then create real length bin columns
+out_data = Data %>%
+  dplyr::mutate(sno=rowSums(across(C001:C150))) %>%
+  dplyr::mutate(C095=rowSums(across(C095:C150))) %>%
+  dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,FisheryCode,SizeInterval,FirstClassLow,REPORTING_QUALITY,sno,C001:C095) %>% 
   tidyr::gather(length,total,C001:C095) %>%
   dplyr::mutate(length = FirstClassLow+(as.numeric(substr(length,2,4))-1)*SizeInterval) %>% 
   dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>% 
   tidyr::spread(length,total,fill=0)
 
 # Save this object for analyses:
-write.csv(data, file = file.path(shrpoint_path, 'data/processed', 'size_grid.csv'), row.names = FALSE)
+write.csv(out_data, file = file.path(shrpoint_path, 'data/processed', 'size_grid.csv'), row.names = FALSE)

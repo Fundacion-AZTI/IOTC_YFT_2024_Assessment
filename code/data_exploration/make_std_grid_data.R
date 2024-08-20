@@ -89,7 +89,7 @@ st_geometry(catchStd) = NULL
 # Do not remove grids on land since we are assuming those are correct and we dont want to remove catch information
 # Aggregate information by std grid:
 # These variables are aggregated without any kind of weighting: month, schooltype
-catchStd = catchStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode, modelarea, modelfleet, modelfishery) %>%
+catchStd = catchStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode) %>%
   summarise_at(c('ncnofish', 'ncmtfish'), sum)
 # Get lon lat information:
 catchStd = left_join(catchStd, stdGridPoint, by = 'grid_ID')
@@ -121,9 +121,9 @@ sizeStd = rbind(df_1, df_2)
 
 # Aggregate information by std grid (important for 1x1 grids in size data):
 # These variables are aggregated without any kind of weighting: month, schooltype
-tmp_1 = sizeStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode, modelarea, modelfleet, modelfishery) %>%
+tmp_1 = sizeStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode) %>%
           summarise_at(c('reporting_quality'), mean) # IMPORTANT: mean reporting quality
-tmp_2 = sizeStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode, modelarea, modelfleet, modelfishery) %>%
+tmp_2 = sizeStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode) %>%
   summarise_at(c('sno', C_labels), sum)
 # Merge both datasets:
 sizeStd = inner_join(tmp_1, tmp_2)
@@ -141,14 +141,14 @@ sum(is.na(mergedStd$ncnofish))/nrow(mergedStd)
 
 # Obtain imputation data frame (to fill in missing catch information for some grids):
 
-# First level of aggregation (remove grid resolution, but keeps modelarea)
-catchStdAgg1 = catchStd %>% group_by(year, quarter, fleet, gear, fisherycode, modelarea, modelfleet) %>%
+# First level of aggregation (remove grid resolution)
+catchStdAgg1 = catchStd %>% group_by(year, quarter, fleet, gear, fisherycode) %>%
   summarise_at(c('ncnofish', 'ncmtfish'), mean) # Important to get mean to not overweights missing information
 # Second level of aggregation (remove grid and quarter resolution, but keeps modelarea)
-catchStdAgg2 = catchStd %>% group_by(year, fleet, gear, fisherycode, modelarea, modelfleet) %>%
+catchStdAgg2 = catchStd %>% group_by(year, fleet, gear, fisherycode) %>%
   summarise_at(c('ncnofish', 'ncmtfish'), mean) # Important to get mean to not overweights missing information
 # Third level of aggregation (remove grid, quarter, and modelarea resolution)
-catchStdAgg3 = catchStd %>% group_by(year, fleet, gear, fisherycode) %>%
+catchStdAgg3 = catchStd %>% group_by(year, gear, fisherycode) %>%
   summarise_at(c('ncnofish', 'ncmtfish'), mean) # Important to get mean to not overweights missing information
 # Last level of aggregation (remove grid, quarter, modelarea, fleet, and gear resolution)
 catchStdAgg4 = catchStd %>% group_by(year, fisherycode) %>%
@@ -156,13 +156,13 @@ catchStdAgg4 = catchStd %>% group_by(year, fisherycode) %>%
 
 # Merge all aggregated data.frames:
 mergedStd = left_join(mergedStd, catchStdAgg1, 
-                      by = c('year', 'quarter', 'fleet', 'gear', 'fisherycode', 'modelarea', 'modelfleet'),
+                      by = c('year', 'quarter', 'fleet', 'gear', 'fisherycode'),
                       suffix = c('', '_1'))
 mergedStd = left_join(mergedStd, catchStdAgg2, 
-                      by = c('year', 'fleet', 'gear', 'fisherycode', 'modelarea', 'modelfleet'),
+                      by = c('year', 'fleet', 'gear', 'fisherycode'),
                       suffix = c('', '_2'))
 mergedStd = left_join(mergedStd, catchStdAgg3, 
-                      by = c('year', 'fleet', 'gear', 'fisherycode'),
+                      by = c('year', 'gear', 'fisherycode'),
                       suffix = c('', '_3'))
 mergedStd = left_join(mergedStd, catchStdAgg4, 
                       by = c('year', 'fisherycode'),
