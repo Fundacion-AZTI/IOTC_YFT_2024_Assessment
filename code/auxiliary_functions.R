@@ -99,6 +99,19 @@ get_2Aarea_from_lonlat = function(Long, Lat) {
   
 }
 
+# -------------------------------------------------------------------------
+# Get 1A 'Area' column based on longitude and latitude:
+get_1Aarea_from_lonlat = function(Long, Lat) {
+  # Areas: 1 (1a), 2 (1b)
+  out_area =  ifelse(Lat > 10 & Long <= 75, 1, # originally, it was Long < 75, but produced unassigned areas for GI after GridCell correction (Type 1 30x30)
+                     ifelse((Lat > -10 & Lat < 10 & Long  < 60) | (Lat > -15 & Lat < 10 & Long  > 60 & Long <= 75), 2, # originally, it was Long < 75, but produced unassigned areas for GI after GridCell correction (Type 1 30x30)
+                            ifelse((Lat > -60 & Lat < -10 & Long > 20 & Long < 40) | (Lat > -30 & Lat < -10 & Long > 40 & Long  < 60), 2,
+                                   ifelse((Lat > -60 & Lat < -30 & Long > 40 & Long < 60) | (Lat > -60 & Lat <= -15 & Long  > 60 & Long <= 160), 2, # originally, the max long was 150, but new data std had data until long 160. 
+                                          ifelse(Lat > -15 & Long > 75 & Long < 150, 2, 0)))))		
+  return(out_area)
+  
+}
+
 
 # -------------------------------------------------------------------------
 # Create 4A AssessmentArea and ModelArea columns from 'Area' column:
@@ -141,7 +154,7 @@ create_4Aarea_cols = function(Data) {
 }
 
 # -------------------------------------------------------------------------
-# Create 4A AssessmentArea and ModelArea columns from 'Area' column:
+# Create 2A AssessmentArea and ModelArea columns from 'Area' column:
 create_2Aarea_cols = function(Data) {
   
   Data = plyr::ddply(Data,c("Area","FisheryCode"),.fun = function(d) {
@@ -176,6 +189,32 @@ create_2Aarea_cols = function(Data) {
   
 }
 
+# -------------------------------------------------------------------------
+# Create 1A AssessmentArea and ModelArea columns from 'Area' column:
+create_1Aarea_cols = function(Data) {
+  
+  Data = plyr::ddply(Data,c("Area","FisheryCode"),.fun = function(d) {
+    d$AssessmentArea = d$Area
+    d = mutate_cond(d,FisheryCode=='FS', AssessmentArea = 2)
+    d = mutate_cond(d,FisheryCode=='LS', AssessmentArea = 2)
+    d = mutate_cond(d,FisheryCode=='LF', AssessmentArea = 2)
+    d = mutate_cond(d,FisheryCode=='BB', AssessmentArea = 2)
+    d = mutate_cond(d,FisheryCode=='HD', AssessmentArea = 1)
+    d = mutate_cond(d,FisheryCode=='TR', AssessmentArea = 2)
+    return(d)})	
+  
+  Data = plyr::ddply(Data,c("Area","FisheryCode"),.fun = function(d) {
+    d$AssessmentAreaName = d$AssessmentArea
+    d$ModelArea = d$AssessmentArea
+    d = mutate_cond(d,AssessmentArea=='1',AssessmentAreaName = '1a')
+    d = mutate_cond(d,AssessmentArea=='2',AssessmentAreaName = '1b')
+    d = mutate_cond(d,AssessmentArea=='1',ModelArea = '1')
+    d = mutate_cond(d,AssessmentArea=='2',ModelArea = '1')
+    return(d)})
+  
+  return(Data)
+  
+}
 
 # -------------------------------------------------------------------------
 # Several functions relevant for data preparation
@@ -233,6 +272,28 @@ filter_LF_2A = function(data) {
     # dplyr::filter(!(ModelFishery == "TR 4" & Year %in% c(2016:2019))) %>%  # please check if 2020-2022 data needs to be excluded
     # dplyr::filter(!(ModelFishery == "TR 1b")) %>%
     # dplyr::filter(!(ModelFishery == "TR 2")) 
+  
+  return(work)
+  
+}
+
+# -------------------------------------------------------------------------
+# Filter 1A LF data for SS input:
+# Check this function later
+filter_LF_1A = function(data) {
+  
+  work = data %>% 
+    dplyr::filter(!(Fleet %in% c('TWN','SYC') & Gear == 'LL')) %>%
+    dplyr::filter(!(ModelFishery == "LL 1a" & Year %in% c(1970:1995, 2010:2020))) %>% # please check if 2020-2022 data needs to be excluded
+    dplyr::filter(!(ModelFishery == "LL 1b" & Year %in% c(1950:1959))) %>%
+    # dplyr::filter(!(ModelFishery == "LL 2" & Year %in% c(1950:1959))) %>%
+    # dplyr::filter(!(ModelFishery == "LL 4" & Year %in% c(1950:1959,2001:2005,2015,2019))) %>%  # please check if 2020-2022 data needs to be excluded
+    # dplyr::filter(!(ModelFishery == "GI 4" & Year %in% c(1975:1987))) %>%
+    dplyr::filter(!(ModelFishery == "HD 1a" & Year %in% c(1950:2007)))
+  # dplyr::filter(!(ModelFishery == "OT 4" & Year %in% c(1983,2016))) %>%
+  # dplyr::filter(!(ModelFishery == "TR 4" & Year %in% c(2016:2019))) %>%  # please check if 2020-2022 data needs to be excluded
+  # dplyr::filter(!(ModelFishery == "TR 1b")) %>%
+  # dplyr::filter(!(ModelFishery == "TR 2")) 
   
   return(work)
   
