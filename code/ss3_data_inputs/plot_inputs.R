@@ -1,15 +1,18 @@
+rm(list = ls())
+
 # Read path and parameters for plots:
 source('sharepoint_path.R')
 source(here('code', 'parameters_for_plots.R'))
 source(here('code', 'auxiliary_functions.R'))
 
+# Spatial configuration:
+spat_config = '4A_io'
+
 # -------------------------------------------------------------------------
 # Plot 2024 SS inputs -----------------------------------------------------
 
-
 # Catch per fleet and year as barplot -------------------------------------
 
-spat_config = '4A_io'
 catch_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'catch.csv'))
 catch_dat = catch_dat %>% mutate(FisheryCode = str_sub(ModelFishery, start = 1, end = 2))
 
@@ -38,7 +41,6 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_catch_frac', img_type)), pl
 
 # Catch per fleet, year, and area as barplot ------------------------------
 
-spat_config = '4A_io'
 catch_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'catch.csv'))
 catch_dat = catch_dat %>% mutate(FisheryCode = str_sub(ModelFishery, start = 1, end = 2),
                                  Area = str_sub(ModelFishery, start = 4))
@@ -71,7 +73,6 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_catch_area_frac', img_type)
 
 # Scale LL CPUE per time step with CV -------------------------------------
 
-spat_config = '4A_io'
 cpue_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'scaled_cpue_Meancv_02.csv'))
 cpue_dat = cpue_dat %>% mutate(area = if_else(fleet == 22, '1b', 
                                               if_else(fleet == 23, '2', 
@@ -99,7 +100,6 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_cpue_area', img_type)), plo
 # Compare 2021 and 2024 SS inputs -----------------------------------------
 
 # Read 2021 SS data inputs
-spat_config = '4A_io'
 base_dat = SS_readdat(file = file.path(shrpoint_path, 'models/base', spat_config, 'data.ss'))
 
 
@@ -173,7 +173,7 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_cpue', img_type)), plo
        width = img_width, height = 170, units = 'mm', dpi = img_res)
 
 
-# Compare (traditional) size information ------------------------------------------------
+# Compare (traditional) size information: aggregated size comps ----------------
 # This will use the size matrix with bug
 
 # 2024 size:
@@ -219,6 +219,55 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_size', img_type)), plo
        width = img_width, height = 200, units = 'mm', dpi = img_res)
 
 
+# -------------------------------------------------------------------------
+# Compare (traditional) size information: mean length over the years --------------
+# This will use the size matrix with bug
+
+# 2024 size:
+size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-bug.csv'))
+size_dat = size_dat %>% select(Yr, ModelFleet, L010:L198)
+size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
+colnames(size_dat) = tolower(colnames(size_dat))
+size_dat = size_dat %>% dplyr::filter(time %in% 13:296) # same period for both assessments
+# Find mean length per fleet and year:
+tmp_dat = gather(size_dat, 'len_bin', 'freq', 3:ncol(size_dat))
+tmp_dat = tmp_dat %>% mutate(len_bin = as.numeric(gsub(pattern = 'l', replacement = '', x = len_bin)))
+tmp_dat = tmp_dat %>% group_by(time, fleet_number) %>% summarise(mean_len = weighted.mean(x = len_bin, w = freq))
+# Add extra columns:
+size_dat = tmp_dat
+size_dat = size_dat %>% mutate(type = '2024 assessment', .after = 'fleet_number')
+
+# 2021 size:
+old_size_dat = base_dat$lencomp
+old_size_dat = old_size_dat %>% select(Yr, FltSvy, l10:l198)
+old_size_dat = dplyr::rename(old_size_dat, c(time = 'Yr', fleet_number = 'FltSvy'))
+old_size_dat = old_size_dat %>% dplyr::filter(time %in% 13:296)
+# Find mean length per fleet and year:
+tmp_dat = gather(old_size_dat, 'len_bin', 'freq', 3:ncol(old_size_dat))
+tmp_dat = tmp_dat %>% mutate(len_bin = as.numeric(gsub(pattern = 'l', replacement = '', x = len_bin)))
+tmp_dat = tmp_dat %>% group_by(time, fleet_number) %>% summarise(mean_len = weighted.mean(x = len_bin, w = freq))
+# Add extra columns:
+old_size_dat = tmp_dat
+old_size_dat = old_size_dat %>% mutate(type = '2021 assessment', .after = 'fleet_number')
+
+# Merge datasets:
+merged_size = rbind(size_dat, old_size_dat)
+merged_size$time = ssts2yq(merged_size$time)
+merged_size = left_join(merged_size, fleet_name_df)
+
+# Make plot:
+p2 = ggplot(data = merged_size, aes(x = time, y = mean_len)) +
+  geom_line(aes(color = type)) +
+  ylab("Mean length (cm)") + xlab(NULL) +
+  theme(axis.text.y = element_text(angle = 90, vjust = 0.5, hjust=0.5),
+        legend.position = c(0.875, 0.05)) +
+  scale_y_continuous(breaks = breaks_extended(3)) +
+  guides(color = guide_legend(title = NULL)) +
+  facet_wrap( ~ fleet_name, scales = 'free_y', ncol = 4)
+ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_size', img_type)), plot = p2,
+       width = img_width, height = 200, units = 'mm', dpi = img_res)
+
+# -------------------------------------------------------------------------
 # Compare 2024 (traditional) size with and without bug ----------------------------------
 
 # 2024 size with bug:
