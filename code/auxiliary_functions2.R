@@ -239,7 +239,7 @@ mutate_cond <- function(.data, condition, ..., envir = parent.frame()) {
   .data[condition, ] <- .data[condition, ] %>% mutate(...)
   .data
 }
-mutate_cond <- function(.data, condition, ..., envir = parent.frame()) {
+
 
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 Paste <- function (..., sep = "")  paste(..., sep = sep)
@@ -515,7 +515,7 @@ summary.check <- function(sc.nm, ss3,desc){
 
 # -------------------------------------------------------------------------
 # AGGREGATE.SSMOD
-
+# 
 aggregate.ssMod <- function(scs, path_scs){
   mod_sum <- NULL
   for (i in 1:length(scs)){
@@ -523,7 +523,7 @@ aggregate.ssMod <- function(scs, path_scs){
     ss3 <- SSgetoutput(dirvec=sc_dir ,  getcovar=FALSE,forecast=FALSE)
     mod_sum <- c(mod_sum,ss3)
     rm(ss3)
-    
+
   }
   return(SSsummarize(mod_sum))
 }

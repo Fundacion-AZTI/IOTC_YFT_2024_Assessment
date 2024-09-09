@@ -7,6 +7,7 @@ library(tidyverse)
 library(reshape)
 library(readxl)
 library(here)
+library(dplyr)
 # 
 # ── Conflicts ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
 # ✖ scales::col_factor() masks readr::col_factor()
@@ -22,7 +23,7 @@ library(here)
 # 2: package ‘tibble’ was built under R version 4.2.3 
 # 3: package ‘forcats’ was built under R version 4.2.3 
 # 4: package ‘lubridate’ was built under R version 4.2.3 		
-
+source('code/auxiliary_functions2.R')
 source('sharepoint_path.R')
 setwd(shrpoint_path)
 attach('data/ss3_inputs/tag/tag.Rdata')
@@ -40,7 +41,7 @@ Data =  transmute(Data,TAG_TagSeries, TAG_Tag1, TAG_Tag2,TAG_Project,TAG_Vessel,
 				  REC_TagSeries,REC_ID, REC_Length,REC_Sp,REC_Country,REC_DateFound, REC_DateCatch,REC_DateReturn,REC_Timestamp,REC_LatDegree,REC_LatMinute,REC_LonDegree,REC_LonMinute,REC_Gear, CAL_SET_ShoolType, REC_WhereFound, 
 				  CAL_REC_FL,CAL_REC_DATE_AVG,CAL_SIG_LAT,CAL_SIG_LON,CAL_REC_LON,CAL_REC_LAT,AvgOfCAL_REC_LON,AvgOfCAL_REC_LAT, AvgOfCAL_RECSET_LON, AvgOfCAL_RECSET_LAT,REC_EditStatus) %>% 
 		#filter(TAG_Sp == 'Y' & (is.na(REC_Sp) | REC_Sp=='Y')) %>%
-		filter (!is.na(TAG_Length)) %>%
+		dplyr::filter (!is.na(TAG_Length)) %>%
 		mutate(rel_date = as.Date(as.character(SIG_Date),format="%Y-%m-%d")) %>%		
 		mutate(rel_year = as.numeric(format(rel_date,'%Y')),rel_month = as.numeric(format(rel_date,'%m')), rel_quarter=month2qrt(rel_month),rel_yrqtr=yearqtr2numeric(rel_year,rel_quarter)) %>% 
 		mutate(rel_long = CAL_SIG_LON,rel_lat = CAL_SIG_LAT) %>% 
@@ -105,7 +106,7 @@ data = plyr::ddply(data,'tag_length',.fun=function(d,L) {
 
 			
 # recapture data
-dataC <- data %>% filter(!is.na(rec_id) & !is.na(rec_yrqtr))
+dataC <- data %>% dplyr::filter(!is.na(rec_id) & !is.na(rec_yrqtr))
 dataC = dataC %>% 
 	 mutate(rec_assessment_area = 0) %>% 
 	 mutate(rec_assessment_area = replace(rec_assessment_area, which(rec_lat >= 10 & rec_long < 75),1))  %>% 
@@ -180,7 +181,7 @@ dataC = dataC %>% ## LL
 		mutate(rec_model_fleet = replace(rec_model_fleet, which(rec_model_fleet == 0 & rec_gear =='Troll line' & rec_assessment_area==3),'18'))  %>% 
 		mutate(rec_model_fleet = replace(rec_model_fleet, which(rec_model_fleet == 0 & rec_gear =='Handline' & rec_assessment_area==3),'18'))  	
 #tapply(dataC$rec_fleet,list(dataC$rec_fleet, dataC$rec_region), length)	
-dataC = dataC %>%filter(rec_model_fleet !=0)
+dataC = dataC %>% dplyr::filter(rec_model_fleet !=0)
 
 
 
@@ -196,7 +197,7 @@ dataC = dataC %>%filter(rec_model_fleet !=0)
 # updated prossing: reporting rate adjument for outside seychlles recovery using esimated proportion of EU PS landings in Seychelles
 		
 work = data %>% 
-	filter(project=='RTTP')  %>%
+	dplyr::filter(project=='RTTP')  %>%
 	mutate(rel_age = replace(rel_age,which(rel_age>15),15)) %>%
 	group_by(rel_assessment_area, rel_yrqtr,rel_year,rel_quarter,rel_age)  %>%
 	summarise(number=n())  %>% 
@@ -204,7 +205,7 @@ work = data %>%
 	mutate(rel_yr=yearqtr2qtr(rel_year,rel_quarter,1950,13),season=1,tfill=999,gender=0,tag = 1:n())
 work = work %>% mutate(number_prime = round(number * 0.725,1))
 workC = dataC %>% 
-	filter(project=='RTTP')  %>%
+	dplyr::filter(project=='RTTP')  %>%
 	mutate(rel_age = replace(rel_age,which(rel_age>15),15)) %>%
 	group_by(rel_assessment_area, rel_year,rel_quarter,rel_age, rec_year,rec_quarter,rec_model_fleet,rec_location)  %>%
 	summarise(number=n(),number_prime=n())  %>% 
@@ -230,7 +231,7 @@ workC = dataC %>%
 	mutate_cond(rec_location=='SEZ' & rec_model_fleet %in% c(6,8,16,17) & rec_year==2009 & rec_quarter==3,number_prime = round(1/0.956*number/0.94,1))  %>% 
 	mutate_cond(rec_location=='SEZ' & rec_model_fleet %in% c(6,8,16,17) & rec_year==2009 & rec_quarter==4,number_prime = round(1/0.966*number/0.94,1))  %>% 	
 	mutate_cond(rec_location=='SEZ' & rec_model_fleet %in% c(6,8,16,17) & rec_year > 2009,number_prime = round(1.1*number/0.94,1))  %>% 
-	filter(!((rec_location =='' | rec_location =='OTH') & rec_model_fleet %in% c(6,8,16,17)))  %>%
+	dplyr::filter(!((rec_location =='' | rec_location =='OTH') & rec_model_fleet %in% c(6,8,16,17)))  %>%
 	group_by(rel_assessment_area, rel_year,rel_quarter,rel_age, rec_year,rec_quarter,rec_model_fleet)  %>%
 	summarise(number=sum(number),number_prime=sum(number_prime))  %>%
 	as.data.frame() %>%
@@ -240,4 +241,5 @@ workC = dataC %>%
 tmp = work %>% select(tag,rel_assessment_area,rel_yr,season, tfill,gender,rel_age,number_prime) 
 temp = workC %>% select(tag,rec_yr,season,rec_model_fleet,number_prime)
 	
+save(tmp,temp, file="data/ss3_inputs/tag/tag_ss3_input_30_08.RData")
 	
