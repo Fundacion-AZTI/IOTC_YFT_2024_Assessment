@@ -29,7 +29,8 @@ get_grid_lat_dim = function(grid_type) {
                      ifelse(grid_type==2, 10, # Type 2
                             ifelse(grid_type==3, 10, # Type 3
                                    ifelse(grid_type==4, 20, # Type 4
-                                          ifelse(grid_type==5, 1, 5))))) # Type 5 (dim = 1) and 6 (dim = 5)
+                                          ifelse(grid_type==5, 1, 
+                                                 ifelse(grid_type==6, 5, 0)))))) # Type 5 (dim = 1) and 6 (dim = 5)
   return(out_val)
   
 }
@@ -40,7 +41,8 @@ get_grid_lon_dim = function(grid_type) {
                    ifelse(grid_type==2, 20, # Type 2
                           ifelse(grid_type==3, 10, # Type 3
                                  ifelse(grid_type==4, 20, # Type 4
-                                        ifelse(grid_type==5, 1, 5))))) # Type 5 (dim = 1) and 6 (dim = 5)
+                                        ifelse(grid_type==5, 1, 
+                                               ifelse(grid_type==6, 5, 0)))))) # Type 5 (dim = 1) and 6 (dim = 5)
   return(out_val)
   
 }
@@ -54,6 +56,8 @@ get.lat.from.id = function(id) {
   size_grid_ = substr(id,1,1)
   
   size_lat_ = get_grid_lat_dim(size_grid_)
+  if(size_lat_ == 0) stop("Unrecognized grid type. Check your grid codes.")
+  
   quadrant =substr(id,2,2)
   lat_label  = substr(id,3,4)
   lat = as.numeric(lat_label)+size_lat_/2
@@ -65,6 +69,7 @@ get.long.from.id = function(id) {
   size_grid_ = substr(id,1,1)
   
   size_long_ = get_grid_lon_dim(size_grid_)
+  if(size_long_ == 0) stop("Unrecognized grid type. Check your grid codes.")
   
   quadrant = substr(id,2,2)
   long_label  = substr(id,5,7)
