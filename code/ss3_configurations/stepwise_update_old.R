@@ -138,7 +138,7 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
 #.......................................................................
 ### Update length data until 2022 --------------------------------------------
   #.......................................................................
-  remotes::install_github("r4ss/r4ss@signif") 
+  
   config_name = '03_update_length'
   tmp_dir = file.path(shrpoint_path, SS_config, config_name)
   dir.create(tmp_dir)
@@ -165,13 +165,14 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   
   #update length
   length_df = read.csv(file.path(shrpoint_path, SS_data, 'size.csv'))
-  dat_1$lencomp <- length_df %>% subset(!is.na(ModelFleet )) %>% subset(!(Yr<230 & ModelFleet==21))
-
+  dat_1$lencomp <- length_df %>% subset(!is.na(ModelFleet ))
+  dat_1_v2 <- dat_1
+  dat_1_v2$lencomp[,-c(1:6)] <- dat_1_v2$lencomp[,-c(1:6)]/100
   # Read base SS inputs (from 2021 assessment)
 
   # Write SS files:
 
-  SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+  SS_writedat(dat_1_v2, outfile = file.path(tmp_dir, 'data_v2.ss'), overwrite = T)
      SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
   SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
   SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
@@ -201,7 +202,7 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   
   #ONLY update length
   length_df = read.csv(file.path(shrpoint_path, SS_data, 'size.csv'))
-  dat_1$lencomp <- length_df %>% subset(!is.na(ModelFleet )) %>% subset(!(Yr<230 & ModelFleet==21))
+  dat_1$lencomp <- length_df %>% subset(!is.na(ModelFleet )) %>% filter(Yr<=296)
   
   # Write SS files:
   SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
@@ -713,7 +714,7 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   ctl_1$natM <- NULL
   ctl_1$MG_parms <- ctl_1$MG_parms %>% add_row(  ctl_1$MG_parms[1,],.before=1)
    
-  #row.names(ctl_1$MG_parms )[1] <- "NatM_p_1_Fem_GP_1"
+  row.names(ctl_1$MG_parms )[1] <- "NatM_p_1_Fem_GP_1"
   ctl_1$MG_parms[1,1:7] <- c(0.1,0.6,0.462,0.462,0,0,-2)
   
   
@@ -816,19 +817,101 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
  
   
   
-
-  
   #.......................................................................
-  ### Update PS selectivity --------------------------------------------
+  ### Update length data until 2022 --------------------------------------------
   #.......................................................................
-  #remotes::install_github("r4ss/r4ss@signif") 
-  config_name = '08_selectivity_PS'
+  remotes::install_github("r4ss/r4ss@signif") 
+  config_name = '08_correctionLengthData'
   tmp_dir = file.path(shrpoint_path, SS_config, config_name)
   dir.create(tmp_dir)
   
   # Temporary files:
   # SS base files path (in Sharepoint):
   SS_base = 'models/update/07_update_Maturity'
+  # Temporary files:
+  
+  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+  base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+  base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+  base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+  
+  dat_1 = base_dat
+  ctl_1 = base_ctl
+  fore_1 = base_fore
+  start_1 = base_start
+  
+  
+  
+  #update length
+  length_df = read.csv(file.path(shrpoint_path, SS_data, 'size.csv'))
+  dat_1$lencomp <- length_df %>% subset(!is.na(ModelFleet ))
+    # Read base SS inputs (from 2021 assessment)
+  
+  # Write SS files:
+  
+  SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+  SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+  SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+  SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+  
+  # Run model:
+  r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
+  
+  #### end ####
+  
+  #.......................................................................
+  ### Update length data until 2022 --------------------------------------------
+  #.......................................................................
+  
+  config_name = '09_remove_LF_length_earlyPeriod'
+  tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+  dir.create(tmp_dir)
+  
+  # Temporary files:
+  # SS base files path (in Sharepoint):
+  SS_base = 'models/update/08_correctionLengthData'
+  # Temporary files:
+  
+  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+  base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+  base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+  base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+  
+  dat_1 = base_dat
+  ctl_1 = base_ctl
+  fore_1 = base_fore
+  start_1 = base_start
+  
+  
+  
+  #update length
+  length_df = read.csv(file.path(shrpoint_path, SS_data, 'size.csv'))
+  dat_1$lencomp <- length_df %>% subset(!is.na(ModelFleet )) %>% subset(!(Yr<230 & ModelFleet==21))
+  # Read base SS inputs (from 2021 assessment)
+  
+  # Write SS files:
+  
+  SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+  SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+  SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+  SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+  
+  # Run model:
+  r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
+  
+  #### end ####
+  
+  #.......................................................................
+  ### Update PS selectivity --------------------------------------------
+  #.......................................................................
+  remotes::install_github("r4ss/r4ss@signif") 
+  config_name = '10_selectivity_PS'
+  tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+  dir.create(tmp_dir)
+  
+  # Temporary files:
+  # SS base files path (in Sharepoint):
+  SS_base = 'models/update/009_remove_LF_length_earlyPeriod'
   # Temporary files:
   
   base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
@@ -860,7 +943,7 @@ ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY8(8)",1:3] <- c(0,2,2)
   r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-maxfn 0 -phase 50 -nohess')
   
  #after running read control file change the parameters in the control file
-  SS_base = 'models/update/08_selectivity_PS'
+  SS_base = 'models/update/09_selectivity_PS'
   
    new_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
   
@@ -913,3 +996,39 @@ ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY8(8)",1:3] <- c(0,2,2)
  #.......................................................................
  
  
+ 
+ #.......................................................................
+ ### Update LF selectivity --------------------------------------------
+ #.......................................................................
+
+ config_name = '09_selectivity_LF'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/09_selectivity_PS'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+dat_1$lencomp <- base_dat$lencomp  %>% dplyr::filter(!(fleet==21 & year<=260))
+ 
+# Write SS files:
+
+SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+x<- base_dat$lencomp$year[base_dat$lencomp$fleet==1 & base_dat$lencomp$year<=296]
+y <- dat_1$lencomp$year[dat_1$lencomp$fleet==1 & dat_1$lencomp$year<=296]  
+setdiff(y, c(x, y))

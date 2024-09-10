@@ -181,14 +181,17 @@ dir_table <- "output/tables/"
   #...................................................
   
   
-  scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings","05_update_M","06_update_Growth","07_update_Maturity",
-           "08_correctionLengthData")  
+  scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings","05_update_M","06_update_Growth","07_update_Maturity")
+           #"08_correctionLengthData","09_remove_LF_length_earlyPeriod")  
 
   desc <- c("BaseCase", "update catch","update cpue","update warnings",
             "update all-increase boundary OT region 4 (FL14) param1 and tother warnings","Natural mortality age 4.07 years M=0.467",
-            "Farley 2023 growth","Maturity Zudaire et al. 2022","r4ss write_ssdat function updated")
+            "Farley 2023 growth","Maturity Zudaire et al. 2022")
+            #"r4ss write_ssdat function updated and length data corrected",
+            #"length data LF<230 ignored")
   
-  scs <- c("09_selectivity_PS")
+  scs <- c("08_selectivity_PS") 
+  #desc <- c("length data LF<230 ignored")
   desc <- "update PS selectivity"
   scs_wd <-paste0("models/update/",scs)
   
@@ -207,18 +210,32 @@ dir_table <- "output/tables/"
   
   #### end ####
   
+  
+  
   #...................................................
   #
   #### STEPWISE - COMPARISON F AND SSB ####
   #
   #...................................................
   
-  ### Comparison f
+  
+  
+  scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings","05_update_M","06_update_Growth","07_update_Maturity",
+           "08_selectivity_PS")#,"09_remove_LF_length_earlyPeriod")  
+  
+  desc <- c("BaseCase", "update catch","update cpue","update warnings",
+            "update all-increase boundary OT region 4 (FL14) param1 and tother warnings","Natural mortality age 4.07 years M=0.467",
+            "Farley 2023 growth","Maturity Zudaire et al. 2022",
+            "PS selectivity update")
+          #  "r4ss write_ssdat function updated and length data corrected",
+           # "length data LF<230 ignored")
+  
   
   sub_scs <- scs
   sub_scs_wd <-paste0("models/update/",sub_scs)
   mod_sum <- aggregate.ssMod(sub_scs, sub_scs_wd)
   
+  ### Comparison f
   df <- mod_sum$Fvalue
   df <- df %>% rename_at(1:length(sub_scs),~sub_scs)
   df_long <- df %>% pivot_longer(cols =sub_scs, names_to = "scenario", values_to = "value")

@@ -49,6 +49,6 @@ LC_diff_AS2024_AS2021$total <- total
 LC_diff_AS2024_AS2021 <- as.data.frame(LC_diff_AS2024_AS2021)
 LC_diff_AS2024_AS2021 <- LC_diff_AS2024_AS2021 %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))
 
-write.csv(LC_diff_AS2024_AS2021, file=file.path("data","ss3_inputs","DifferencesLencomp_AS2021_AS2024_v2.csv"))
+write.csv(LC_diff_AS2024_AS2021, file=file.path("data","ss3_inputs","DifferencesLencomp_AS2021_AS2024.csv"))
 
           
