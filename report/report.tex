@@ -200,13 +200,114 @@ Ocean}
 
 \section{Executive Summary}\label{executive-summary}
 
-Make a short summary of the main results and conclusions of this report.
-This is an example of a reference
-(\citeproc{ref-fuPreliminaryIndianYellowfin2021}{Fu et al. 2021}).
+This report presents a preliminary stock assessment for Indian Ocean
+yellowfin tuna (\emph{Thunnus albacares}) using Stock Synthesis 3 (SS3).
+The assessment uses an age-structured and spatially-explicit population
+model and is fitted to catch rate indices, length-composition data, and
+tagging data. The assessment covers 1950 -- 2023 and represents an
+update of the previous assessment model, taking into account progress
+and improvements made since the previous assessment. The assessment
+assumes that the Indian Ocean yellowfin tuna constitute a single
+spawning stock, modelled as spatially disaggregated four regions, with
+21 fisheries. Standardized CPUE series from the main longline fleets
+1975 -- 2020 were included in the models as the relative abundance index
+of exploitable biomass in each region. The CPUE indices from EU Purse
+seine sets on free schools were included in a subset of models with the
+spatial and fleet structure revised to better accommodate the
+distribution and size structure of the purse seine fisheries. Indices
+based on associative and non-associative dynamics of yellowfin tuna with
+floating objects were also available, and the utility of these indices
+was examined in the assessment. Tag release and recovery data from the
+RTTP-IO program were included in the model to inform abundance,
+movement, and mortality rates.
 
 \section{Introduction}\label{introduction}
 
-Introduction to the report. Some background of previous assessments.
+This paper presents a preliminary stock assessment of yellowfin tuna
+(\emph{Thunnus albacares}) in the Indian Ocean (IO) including fishery
+data up to the end of 2023. The assessment implements an age- and
+spatially-structured population model using the Stock Synthesis software
+(\citeproc{ref-methotStockSynthesisBiological2013}{Methot and Wetzel
+2013}).
+
+Prior to 2008, IO yellowfin tuna was assessed using methods such as VPA
+and production models
+(\citeproc{ref-nishidaStockAssessmentYellowfin2007}{Nishida and Shono
+2007}, \citeproc{ref-nishidaStockAssessmentYellowfin2005}{2005}). In
+2008, a preliminary stock assessment of IO yellowfin tuna was conducted
+using MULTIFAN-CL
+(\citeproc{ref-langleyPreliminaryStockAssessment2008}{Langley et al.
+2008}) enabling the integration of the tag release/recovery data
+collected from the large-scale tagging programme conducted in the IO in
+the preceding years. The MULTIFAN-CL assessment was revised and updated
+in the following years
+(\citeproc{ref-langleyStockAssessmentYellowfin2009}{Langley et al.
+2009}; \citeproc{ref-langleyStockAssessmentYellowfin2010}{Langley,
+Herrera, and Million 2010},
+\citeproc{ref-langleyStockAssessmentYellowfin2011}{2011},
+\citeproc{ref-langleyStockAssessmentYellowfin2012}{2012}).
+
+In 2015, the assessment of IO yellowfin tuna was implemented using SS3
+(\citeproc{ref-langleyStockAssessmentYellowfin2015}{Langley 2015}). The
+SS3 modelling framework is very similar to MFCL conceptually and the two
+platforms have yielded similar results. On basis of that assessment, the
+yellowfin tuna stock was determined to be overfished and subject to
+overfishing. At its 20th meeting, the Indian Ocean Tuna Commission
+(IOTC) adopted an Interim Plan for Rebuilding the Indian Ocean Yellowfin
+Tuna Stock (Res. 16/01).
+
+The SS3 assessment was updated in 2016
+(\citeproc{ref-langleyUpdate2015Indian2016}{Langley 2016}) and was
+revised and updated in 2018
+(\citeproc{ref-fuPreliminaryIndianOcean2018}{Fu et al. 2018b}). Recent
+assessments have utilised new composite longline CPUE indices derived
+from the main distant water longline fleets, replacing the Japanese
+longline CPUE indices used previously. The 2018 assessment also included
+a comprehensive analysis of the main assumptions of the stock
+assessment. A model ensemble covering major components of structural
+uncertainty was used to characterise the stock status. The assessment
+estimated that the spawning stock biomass in 2017 was below SBMSY, and
+that fishing mortality was above FMSY. Therefore, the stock status was
+determined to remain overfished and experiencing overfishing.
+
+However, the model forecasts to evaluate fishery risk indicated a
+problem with the model structure or software since a substantial number
+of model projections yielded non-sensical results, with the stock
+crashing within a few years into the projection period even under low
+catch scenarios (\citeproc{ref-fuIndianOceanYellowfin2018}{Fu et al.
+2018a}). It was later discovered that the problem was mostly related to
+an assumption about regional recruitment distribution in the forecast
+(IOTC 2020). Further, it was considered that model uncertainty had not
+been adequately captured in the projections. Consequently, the SC
+considered that the assessment forecast was too uncertain to provide
+management advice to underpin the yellowfin tuna rebuilding plan (IOTC
+2018b).
+
+The Scientific Committee then initiated a work plan to address the
+problems identified in the 2018 assessment and carried out various work
+in following years to reduce the uncertainty of the assessment and to
+coordinate modelling decisions
+(\citeproc{ref-merinoStateDevelopmentWorkplan2019}{Merino et al. 2019};
+\citeproc{ref-merinoIndianOceanYellowfin2020}{Merino 2020}). An external
+review of the assessment provided recommendations to improve model
+parametrisations
+(\citeproc{ref-methotRecommendationsConfigurationIndian2019}{Methot
+2019}). An attempt was made to update the assessment in 2019, with
+extensive investigations of alternative spatial structures, data
+weighting and biological parameters
+(\citeproc{ref-urtizbereaPRELIMINARYASSESSMENTINDIAN2019}{Urtizberea et
+al. 2019}). Further analysis was conducted in 2020 to refine the process
+of model selection through an objective scoring system based on
+diagnostic metrics (Ijurco et al.~2020).
+
+The IOTC Commission has thus tasked the Scientific Committee via its
+Working Party on Tropical Tunas, to conduct a new assessment of the
+status of the Yellowfin stock in 2021 using all available data. This
+report documents the next iteration of the stock assessment of the IO
+yellowfin tuna stock for consideration at 23rd WPTT meeting. This stock
+assessment is based on 2018 modelling framework of IO yellowfin tuna but
+has incorporated some revisions made through additional analysis carried
+out in 2019 and 2020.
 
 \section{Background}\label{background}
 
@@ -216,35 +317,432 @@ Genetic, parasite, and other relevant studies for stock structure.
 
 \subsection{Biology}\label{biology}
 
-Growth, natural mortality, maturity, etc.
+Yellowfin tuna (\emph{Thunnus albacares}) is a cosmopolitan species
+distributed mainly in the tropical and subtropical oceanic waters of the
+three major oceans, where it forms large schools. The sizes caught in
+the Indian Ocean (IO) range from 30 cm to 180 cm fork length. Smaller
+fish (juveniles) form mixed schools with skipjack and juvenile bigeye
+tuna and are mainly limited to surface tropical waters, while larger
+fish are found in surface and sub-surface waters. Intermediate age
+yellowfin are seldom taken in the industrial fisheries, but are abundant
+in some artisanal fisheries, mainly in the Arabian Sea.
+
+Spawning occurs mainly from December to March in the equatorial area
+(0--10\(^\circ\)S), with the main spawning grounds west of
+75\(^\circ\)E. Secondary spawning grounds exist off Sri Lanka and the
+Mozambique Channel and in the eastern Indian Ocean off Australia
+(\citeproc{ref-froeseFishBase2024}{Froese and Pauly 2024}). Yellowfin
+size at 50\% maturity has been estimated at around 75 cm based on
+cortical alveolar stage
+(\citeproc{ref-zudaireReproductivePotentialYellowfin2013}{Zudaire et al.
+2013}) and recruitment to the purse seine fishery occurs predominantly
+in July (as evident in the high catch rates of the purse seine
+associated sets in region 1b in the third quarter). Newly recruited fish
+are primarily caught by the purse seine fishery on floating objects and
+the pole-and-line fishery in the Maldives. Males are predominant in the
+catches of larger fish at sizes larger than 150 cm (this is also the
+case in other oceans). Medium sized yellowfin concentrate for feeding in
+the Arabian Sea. Feeding behaviour is largely opportunistic, with a
+variety of prey species being consumed, including large concentrations
+of crustacean that have occurred recently in the tropical areas and
+small mesopelagic fishes which are abundant in the Arabian Sea.
+
+Longline catch data indicates that yellowfin are distributed
+continuously throughout the entire tropical Indian Ocean, but some more
+detailed analysis of fisheries data suggests that the stock structure
+may be more complex. The tag recoveries of the RTTP-IO provide evidence
+of large movements of yellowfin tuna within the western equatorial
+region, although there are very few observations of large scale
+transverse movements of tagged yellowfin. This may indicate that the
+western and eastern regions of the IO support relatively discrete
+sub-populations of yellowfin tuna. Studies of stock structure using DNA
+techniques have indicated that there may be genetically discrete
+subpopulations of yellowfin tuna in the northwestern IO
+(\citeproc{ref-dammannagodaEvidenceFineGeographical2008}{Dammannagoda,
+Hurwood, and Mather 2008}) and within Indian waters
+(\citeproc{ref-kunalMitochondrialDNAAnalysis2013}{Kunal et al. 2013}). A
+recent study of stock structure using the gene sequencing technology
+along with a basin-scale sampling design indicated genetic
+differentiation between north and south of the equator within the IO for
+yellowfin, and possibly additional genetic structure within the
+locations north of the equator
+(\citeproc{ref-greweGeneticPopulationConnectivity2020}{Grewe et al.
+2020}). These studies generally support the potential presence of
+population units of yellowfin tuna within the IO, despite that there
+remains considerable uncertainty on sub-regional population structure in
+the IO. The assessment assumes that the IO yellowfin tuna stock consists
+of several interconnected regional populations that have the same
+biological characteristics (see Figure 1). Isotope studies have
+suggested relatively limited movement, with resident behaviour at the
+temporal scale of their muscle turnover, which is 3 months
+(\citeproc{ref-menardIsotopicEvidenceDistinct2007}{Ménard et al. 2007}).
 
 \subsection{Fisheries}\label{fisheries}
 
-Describe main fisheries and their contribution to the total catch, etc.
+Yellowfin tuna, an important component of tuna fisheries throughout the
+IO, are harvested with a diverse variety of gear types, from small-scale
+artisanal fisheries (in the Arabian Sea, Mozambique Channel and waters
+around Indonesia, Sri Lanka and the Maldives and Lakshadweep Islands) to
+large gillnetters (from Oman, Iran and Pakistan operating mostly but not
+exclusively in the Arabian Sea) and distant-water longliners and purse
+seiners that operate widely in equatorial and tropical waters (Figure
+1). Purse seiners and gillnetters catch a wide size range of yellowfin
+tuna, whereas the longline fishery takes mostly adult fish.
+
+Prior to 1980, annual catches of yellowfin tuna remained below about
+80,000 mt and were dominated by longline catches
+(Figure~\ref{fig-catch-bar}). Annual catches increased markedly during
+the 1980s and early 1990s, mainly due to the development of the
+purse-seine fishery as well as an expansion of the other established
+fisheries (fresh-tuna longline, gillnet, baitboat, handline and, to a
+lesser extent, troll). A peak in catches was recorded in 1993, with
+catches over 400,000 mt, the increase in catch almost fully attributable
+to longline fleets, particularly longliners flagged in Taiwan, which
+reported exceptional catches of yellowfin tuna in the Arabian Sea. The
+Taiwanese longline fishery in the IO has been equipped with super-cold
+storage. Since around 1986, the fleet has fished more frequently with
+deep sets.
+
+Catches declined in 1994, to about 350,000 mt, remaining at that level
+for the next decade then increasing sharply to reach a peak of about
+520,000 mt in 2004/2005 driven by a large increase in catch by all
+fisheries, especially the purse-seine (free school) fishery. Total
+annual catches declined sharply from 2004 to 2007 and remained at about
+300,000 mt during 2007--2011. In 2012, total catches increased to about
+400,000 mt and were maintained at about that level through 2013 to 2015.
+Total catches increased to an average of 430,000 mt between 2016 and
+2019, and a maximum of close to 450,000 mt in 2019
+(Figure~\ref{fig-catch-bar}), despite IOTC Resolution 17/01 which
+requested major fleets to substantially reduce their yellowfin catches
+below the 2014 or 2015 catch level. Furthermore, catch levels of about
+440,000 t reported for 2018 might be under-estimated (to some extent)
+because of changes in data processing methodology by European
+Union-Spain for its purse seine fleet for that year
+(\citeproc{ref-iotcReviewYellowfinTuna2021}{IOTC 2021}).
+
+In recent years (2015--2023), purse seine has been the dominant fishing
+method harvesting 36\% of the total IO yellowfin tuna catch (by weight),
+with the gillnet and handline fisheries, comprising 20\% and 18\% of the
+catch, respectively. There was a substantial increase in the catch by
+handline in 2020 (Figure~\ref{fig-catch-bar}). A smaller component of
+the catch was taken by industrial longline (5\%), and the regionally
+important baitboat (4\%) and troll (4\%) fisheries. The recent increase
+in the total catch has been mostly attributable to an increase in catch
+from the gillnet and handline fisheries.
+
+The purse-seine catch is generally distributed equally between
+free-school and associated (log and FAD sets) schools, although the
+large catches in 2003--2005 were dominated by fishing on free-schools.
+Conversely, during 2015--2023 the purse-seine catch was dominated (70\%)
+by the associated fishery.
+
+Historically, most of the yellowfin catch has been taken from the
+western equatorial region of the IO (44\%; region 1b, see Figure 1) and,
+to a lesser extent, the Arabian Sea (26\%), the eastern equatorial
+region (24\%, region 4) and the Mozambique Channel (5\%; region 2). The
+purse-seine and baitboat fisheries operate almost exclusively within the
+western equatorial region, while catches from the Arabian Sea are
+principally by handline, gillnet, and longline (see Figure 1). Catches
+from the eastern equatorial region (region 4) were dominated by longline
+and gillnet (around Sri Lanka and Indonesia). The southern IO (region 3)
+accounts for a small proportion of the total yellowfin catch (1\%) taken
+exclusively by longline (see Figure 1).
+
+In recent years (2008--2012), due to the threat of piracy, the bulk of
+the industrial purse seine and longline fleets moved out of the western
+waters of Region 1b to avoid the coastal and off-shore waters off
+Somalia, Kenya and Tanzania. The threat of piracy particularly affected
+the freezer longline fleet and levels of effort and catch decreased
+markedly from 2007. The total catch by freezing longliners declined to
+about 2,000 mt in 2010, a 10-fold decrease in catch from the years
+before the onset of piracy. Purse seine catches also dropped in
+2007--2009 and then started to recover. Piracy off the Somali coast was
+almost eliminated by 2013 but longline catches have not recovered.
 
 \section{Data}\label{data}
 
+Catch and length information was provided by the IOTC Secretariat in a
+comma-separated values (CSV) format. These datasets and the metadata can
+be found online at the IOTC website:
+\url{https://iotc.org/documents/WPTT/26AS/Data/01}. The catch and length
+(LF) datasets were mainly composed of information about time (year and
+month), CPCs, gear type, school type, and grid code. In addition, the
+catch dataset had information on aggregated catch in weight (metric
+tons) and numbers, while the LF dataset had information on the number of
+fish sampled per fork length bin (cm) and the score of reporting quality
+(RQ) estimated by the Secretariat. The fork length bin width was 2 cm
+and the length bins spanned from 10 to 308 cm (i.e., a total of 150
+length bins).
+
+We processed the LF data following the next steps:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  The number of sampled fish from 198 to 308 cm was summed and then
+  assigned it to the length bin 198 cm.
+\item
+  We converted the length bin width from 2 to 4 cm for the stock
+  assessment model. To do so, we summed the number of sampled fish from
+  pairs of length bins (e.g., 10 and 12 cm were summed and assigned to
+  10 cm, 14 and 16 cm were summed and assigned to 14 cm, and so on).
+  After this conversion, we had a total of 48 length bins.
+\end{enumerate}
+
 \subsection{Spatial stratification}\label{spatial-stratification}
 
-Describe spatial stratification of the data. Note it do not necessarily
-need to follow the same stratification in the assessment model.
+The grid code was available for every observation in the catch and LF
+datasets, which contained information on the grid size, quadrant, and
+longitude and latitude of the corner of the grid. The grid size
+categories are shown in Table~\ref{tbl-grid-size}. The catch dataset
+always reported information using a grid size of
+\(5^\circ\times 5^\circ\) (category 6) while the LF dataset had diverse
+grid size categories. Using the grid code, we calculated the longitude
+and latitude of the center of the grid (called centroid hereafter).
+
+In order to spatially aggregate the raw data per model area, we followed
+two different approaches. The first approach, used in the 2021
+assessment, aggregated the catch and LF data by using the grid centroids
+to assign model areas as shown in Figure~\ref{fig-map-grid-agg1}.
+
+The second approach homogenized the grids in the LF dataset in
+standardized grids with \(5^\circ\times 5^\circ\) resolution. This
+standardization procedure was not needed for the catch dataset since
+that information was always reported at a \(5^\circ\times 5^\circ\)
+resolution. For grids with larger spatial resolution than
+\(5^\circ\times 5^\circ\) (i.e., categories 1, 2, 3, and 4), the number
+of sampled fish per length bin was divided equally into standardized
+grids while the RQ was repeated. For grids with smaller spatial
+resolution (i.e., category 5), the number of sampled fish per length bin
+was summed and the RQ was averaged. After this standardization
+procedure, we calculated the centroid of standardized grid, which were
+then used to assign model areas as shown in
+Figure~\ref{fig-map-grid-agg2}.
 
 \subsection{Temporal stratification}\label{temporal-stratification}
 
-Time period, seasonal, etc.
+The time period covered by the assessment spanned from 1950 to 2023,
+representing the period for which catch data are available from the
+commercial fishing fleets. The catch and LF data was temporally
+aggregated by quarter. In the assessment, we considered a quarterly time
+step (\emph{quarters-as-years} approach), so having in total 296 model
+time steps. Therefore, recruitment was estimated every model time step
+(i.e., quarter), which allowed us to represent the continuous
+recruitment of yellowfin in equatorial regions.
 
 \subsection{Definition of fisheries}\label{definition-of-fisheries}
 
-Fisheries that are included in the assessment model.
+The assessment adopted the equivalent fisheries definitions used in the
+previous stock assessments (Table~\ref{tbl-fishery-codes}). These
+\emph{fisheries} represent relatively homogeneous fishing units, with
+similar selectivity and catchability characteristics that do not vary
+greatly over time. Twenty-one fisheries were defined based on location
+(region), time period, fishing gear, purse seine set type, and type of
+vessel in the case of longline fleet (Table~\ref{tbl-fleet-4Aconfig}).
+
+The longline fishery was partitioned into two main components:
+
+\begin{itemize}
+\item
+  Freezing longline fisheries, or all those using drifting longlines for
+  which one or more of the following three conditions apply: (i) the
+  vessel hull is made up of steel; (ii) vessel length overall of 30 m or
+  greater; (iii) the majority of the catches of target species are
+  preserved frozen or deep-frozen. A composite longline fishery was
+  defined in each region (LL 1--4) aggregating the longline catch from
+  all freezing longline fleets (principally Japan and Taiwan).
+\item
+  Fresh-tuna longline fisheries, or all those using drifting longlines
+  and made of vessels (i) having fibreglass, FRP, or wooden hull; (ii)
+  having length overall less than 30 m; (iii) preserving the catches of
+  target species fresh or in refrigerated seawater. A composite longline
+  fishery was defined aggregating the longline catch from all fresh-tuna
+  longline fleets (principally Indonesia and Taiwan) in region 4 (LF 4),
+  which is where the majority of the fresh-tuna longliners have
+  traditionally operated. The catches of yellowfin tuna recorded in
+  regions 1 to 3 for fresh-tuna longliners, representing only 3\% of the
+  total catches over the time series, were assigned to area 4.
+\end{itemize}
+
+The purse-seine catch and effort data were apportioned into two separate
+method fisheries: catches from sets on associated schools of tuna (log
+and drifting FAD sets; \emph{PS LS}) and from sets on unassociated
+schools (free schools; \emph{PS FS}). Purse-seine fisheries operate
+within regions 1a, 1b, 2 and 4 and separate purse-seine fisheries were
+defined in regions 1b, 2 and 4, with the limited catch, effort and
+length frequency data from region 1a reassigned to region 1b.
+
+In the previous assessment, the region 1b purse-seine fisheries (log and
+free-school) were divided into three time periods: pre-2003, 2003--2006
+and post-2006. This was mainly to maintain historical consistency (the
+temporal stratification was initially implemented to account for change
+in the length composition during the 2000s, but no selectivity changes
+were identified in the assessment and consequently the same selectivity
+was shared among the three time periods. For the current assessment, the
+temporal stratification was removed, reducing the 6 purse-seine
+fisheries in region 1b to 2 fisheries (log and free-school).
+
+A single baitboat fishery was defined within region 1b (essentially the
+Maldives fishery). As with the purse-seine fishery, a small proportion
+of the total baitboat catch and effort occurs on the periphery of region
+1b, within regions 1a and 4. The additional catch was assigned to the
+region 1b fishery.
+
+Gillnet fisheries were defined in the Arabian Sea (region 1a), including
+catches by Iran, Pakistan, and Oman, and in region 4 (Sri Lanka and
+Indonesia). A very small proportion of the total gillnet catch and
+effort occurs in region 1b, with catches and effort reassigned to area
+1a.
+
+Three troll fisheries were defined, representing separate fisheries in
+regions 1b (Maldives), 2 (Comoros and Madagascar) and 4 (Sri Lanka and
+Indonesia). Moderate troll catches are also taken in regions 1a and 3,
+the catch and effort from this component of the fishery reassigned to
+the fisheries within region 1b and 4, respectively.
+
+A handline fishery was defined within region 1a, principally
+representing catches by the Yemenis fleet. Moderate handline catches are
+also taken in regions 1b, 2 and 4, the catch and effort from these
+components of the fishery were reassigned to the fishery within region
+1a.
+
+For regions 1a and 4, a miscellaneous (``Other'') fishery was defined
+comprising catches from artisanal fisheries other than those specified
+above (e.g.~trawlers, small purse seines or seine nets, sport fishing
+and a range of small gears).
 
 \subsection{Catch}\label{catch}
 
 Describe catch per fishery, time series, etc. This is
-Figure~\ref{fig-catch-ts-compare}.
+Figure~\ref{fig-map-grid}.
 
 \subsection{Indices}\label{indices}
 
-Describe available indices, methodology for standardization, etc.
+\subsubsection{Longline CPUE}\label{longline-cpue}
+
+Standardised CPUE indices were derived using generalized linear models
+(GLM) from longline catch and effort data (aggregated by month and
+1\(^\circ\) grid resolution) provided by Japan, Korea, Taiwan, and China
+(\citeproc{ref-matsumotoJointLonglineCPUE2024}{Matsumoto et al. 2024}).
+Cluster analyses of species composition data for each fleet were used to
+separate datasets into fisheries understood to target different species.
+Selected clusters were then combined and standardized using generalized
+linear models. Yellowfin catch (numbers of fish) was the dependent
+variable of the positive catch model (lognormal error structure), while
+the presence/absence of yellowfin tuna in the catch was the dependent
+variable in the binomial model. In addition to the year-quarter, models
+included covariates for 5\(^\circ\) square location, number of hooks,
+and vessels (that accounted for 50\% of the total effort). The CPUE for
+the temperate regions 2 and 3 incorporated the cluster variable to
+indicate the targeting effect, whereas the tropical regions 1 and 4 used
+hooks between floats (HBF). The CPUE indices represented the time series
+of abundance (1975--2020) for each of the four model regions (1, 2, 3,
+and 4). The data from region 1a is not included in the standardization
+and the index for region 1b is assumed to index the abundance for the
+whole of region 1.
+
+The standardized quarterly CPUE indices included in the assessment are
+shown in Figure~\ref{fig-comp-cpue}. In general, the overall trends in
+the updated CPUE indices are similar to those included in the previous
+assessment, but the updated indices in regons 1, 3, and 4 have larger
+declines, especially in the early years. For region 3, the updated
+analysis is based on an aggregated dataset in which there were fewer
+vessels targeting yellowfin tuna and much less catch and effort, so the
+information is more scarce
+(\citeproc{ref-matsumotoJointLonglineCPUE2024}{Matsumoto et al. 2024}).
+
+For the regional longline fisheries, a common catchability coefficient
+(and selectivity) was estimated in the assessment model, thereby,
+linking the respective CPUE indices among regions. This significantly
+increases the power of the model to estimate the relative (and absolute)
+level of biomass among regions. However, as CPUE indices are essentially
+density estimates it is necessary to scale the CPUE indices to account
+for the relative abundance of the stock among regions. For example, a
+relatively small region with a very high average catch rate may have a
+lower level of total biomass than a large region with a moderate level
+of CPUE.
+
+The approach used was to determine regional scaling factors that
+incorporated both the size of the region and the relative catch rate to
+estimate the relative level of exploitable longline biomass among
+regions. This approach is similar to that used in the Western and
+Central Pacific Fisheries Commission (WCPFC) regionally disaggregated
+tuna assessments. Hoyle
+(\citeproc{ref-hoyleIndianOceanTropical2018}{2018}) proposed a set of
+regional weighing factors for IO yellowfin based on aggregated longline
+catch effort data. The authors recommended the estimates by method `8'
+for the period 1979--1994 (referred to as `7994m8', see Table 2 of Hoyle
+(\citeproc{ref-hoyleIndianOceanTropical2018}{2018})) to be included in
+the current assessment. The relative scaling factors calculated for
+regions 1--4 are 1.674, 0.623, 0.455 and 1.000 respectively.
+
+For each of the principal longline fisheries, the GLM standardized CPUE
+index was normalized to the mean of the period for which the region
+scaling factors were derived (i.e., the GLM index from 1979--1994). The
+normalized GLM index was then scaled by the respective regional scaling
+factor to account for the regional differences in the relative level of
+exploitable longline biomass among regions
+
+A number of important trends are evident in the CPUE indices:
+
+\begin{itemize}
+\item
+  1980-1989 the western tropical (region 1b) CPUE increased during the
+  1980s, then declined until 1995, increased again until 2005, and then
+  decreased again. The low CPUE indices followed the period of
+  exceptionally high catches from the purse seine fishery in region 1b
+  during 2003--2005. The drop in CPUE occurred before the peak in the
+  number of piracy incidents in the western Indian Ocean (2008--2011).
+  After that time, it remained close to the lowest level observed but
+  showed very large seasonal variations.
+\item
+  The eastern tropical region 4 followed a similar pattern until 1990
+  but then declined steadily, and by 2016 was also close to the lowest
+  level in the time series. The recent decline in CPUE in this region is
+  consistent with a decline in the proportion of yellowfin in the
+  combined tuna catch from the Japanese longline fleet in the eastern
+  Indian Ocean (see Figure 44 from Hoyle et al 2015). It is unclear
+  whether the change in species proportion is related to a decline in
+  the abundance of yellowfin in the region (relative to the other
+  species) or a regional change in the targeting of the fishing fleet.
+  However, there is an indication that there has been a differential
+  shift towards deeper longline gear (greater HBF) in the eastern Indian
+  Ocean since 2000 and this may indicate a shift in targeting toward
+  bigeye tuna in this region (Hoyle pers. comm. additional JP LL
+  analyses). Such factors may not be adequately accounted for in the
+  standardisation of the yellowfin CPUE data.
+\item
+  The CPUE indices in western temperate region 2 followed a similar
+  pattern to the western tropical indices, with a decline until the
+  late-1970s followed by an increase until the late 1980s, and
+  subsequently a slow decline with significant variability. However, the
+  two sets of CPUE indices diverge somewhat from about 2007 with the
+  CPUE indices from R2 being maintained at a higher level relative to
+  R1.
+\item
+  The CPUE indices from region 3 are low compared to the other three
+  regions reflecting the low regional scaling factor. However, the
+  overall trend in the CPUE indices is broadly comparable to the other
+  regions. The eastern temperate region 3 the pattern was similar to the
+  western temperate area before 1979. After 1979 catch rates increased
+  until the mid-2000's, but then declined rapidly and reached their
+  lowest observed levels by 2016.
+\item
+  There is an exceptionally high peak in CPUE indices 1976--78. Hoyle et
+  al.~(2017) showed that this discontinuity exists in Japanese,
+  Taiwanese and Korean data, and in multiple regions in multiple oceans,
+  and for both bigeye and yellowfin tuna. Hoyle et al (2017) suggested
+  this is unlikely to be explained by changes to the population or
+  catchability but may be associated with catch reporting and data
+  management.
+\item
+  The spike in the CPUE indices around 2012 in the west equatorial
+  region (region 1) was evident for most fishing fleets. Several
+  hypotheses have been proposed on what could have caused CPUE to have
+  increased, including a return to fishing in areas that were most
+  affected by piracy. However, further investigation is required.
+\end{itemize}
 
 \subsection{Size data}\label{size-data}
 
@@ -327,7 +825,90 @@ Write your acknowledgements.
 
 \section{Tables}\label{tables}
 
-Here insert your tables.
+\begin{longtable}[]{@{}ll@{}}
+\caption{Grid size categories in the raw catch and LF
+datasets.}\label{tbl-grid-size}\tabularnewline
+\toprule\noalign{}
+Grid type & Resolution (latitude \(\times\) longitude) \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Grid type & Resolution (latitude \(\times\) longitude) \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & \(30^\circ\times 30^\circ\) \\
+2 & \(10^\circ\times 20^\circ\) \\
+3 & \(10^\circ\times 10^\circ\) \\
+4 & \(20^\circ\times 20^\circ\) \\
+5 & \(1^\circ\times 1^\circ\) \\
+6 & \(5^\circ\times 5^\circ\) \\
+\end{longtable}
+
+\newpage{}
+
+\begin{longtable}[]{@{}ll@{}}
+\caption{Fishery classification used in the
+assessment.}\label{tbl-fishery-codes}\tabularnewline
+\toprule\noalign{}
+Fishery code & Gear \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Fishery code & Gear \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+GI & Gillnet \\
+HD & Handline \\
+LL & Longline \\
+OT & Others \\
+BB & Baitboat \\
+PS FS & Purse seine, free school \\
+PS LS & Purse seine, log school \\
+TR & Troll \\
+LF & Longline (fresh tuna) \\
+\end{longtable}
+
+\newpage{}
+
+\begin{longtable}[]{@{}ll@{}}
+\caption{Fishery definition in the assessment configuration with 4
+areas.}\label{tbl-fleet-4Aconfig}\tabularnewline
+\toprule\noalign{}
+Fishery number & Fishery code and region \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Fishery number & Fishery code and region \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & GI 1a \\
+2 & HD 1a \\
+3 & LL 1a \\
+4 & OT 1a \\
+5 & BB 1b \\
+6 & PS FS 1b \\
+7 & LL 1b \\
+8 & PS LS 1b \\
+9 & TR 1b \\
+10 & LL 2 \\
+11 & LL 3 \\
+12 & GI 4 \\
+13 & LL 4 \\
+14 & OT 4 \\
+15 & TR 4 \\
+16 & PS FS 2 \\
+17 & PS LS 2 \\
+18 & TR 2 \\
+19 & PS FS 4 \\
+20 & PS LS 4 \\
+21 & LF 4 \\
+\end{longtable}
 
 \newpage{}
 
@@ -337,11 +918,95 @@ Here insert your tables.
 
 \centering{
 
-\includegraphics[width=6.69in,height=\textheight]{C:/Use/OneDrive - AZTI/General - IOTC_YFT_2024/output/figures/catch_ts_compare.png}
+\includegraphics[width=6.69in,height=\textheight]{C:/Use/OneDrive - AZTI/General - IOTC_YFT_2024/output/figures/map_IO_4ARegions.png}
 
 }
 
-\caption{\label{fig-catch-ts-compare}Add your caption here.}
+\caption{\label{fig-4A-config}Add your caption here.}
+
+\end{figure}%
+
+\newpage{}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=6.69in,height=\textheight]{C:/Use/OneDrive - AZTI/General - IOTC_YFT_2024/output/figures/ts_catch.png}
+
+}
+
+\caption{\label{fig-catch-bar}Add your caption here.}
+
+\end{figure}%
+
+\newpage{}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=6.69in,height=\textheight]{C:/Use/OneDrive - AZTI/General - IOTC_YFT_2024/output/figures/map_size_grid.png}
+
+}
+
+\caption{\label{fig-map-grid}Add your caption here.}
+
+\end{figure}%
+
+\newpage{}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=6.69in,height=\textheight]{C:/Use/OneDrive - AZTI/General - IOTC_YFT_2024/output/figures/map_size_grid_4A.png}
+
+}
+
+\caption{\label{fig-map-grid-agg1}Add your caption here.}
+
+\end{figure}%
+
+\newpage{}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=6.69in,height=\textheight]{C:/Use/OneDrive - AZTI/General - IOTC_YFT_2024/output/figures/map_size_grid_std_4A.png}
+
+}
+
+\caption{\label{fig-map-grid-agg2}Add your caption here.}
+
+\end{figure}%
+
+\newpage{}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=6.69in,height=\textheight]{C:/Use/OneDrive - AZTI/General - IOTC_YFT_2024/output/figures/compare_catch.png}
+
+}
+
+\caption{\label{fig-comp-catch}Add your caption here.}
+
+\end{figure}%
+
+\newpage{}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=6.69in,height=\textheight]{C:/Use/OneDrive - AZTI/General - IOTC_YFT_2024/output/figures/compare_cpue.png}
+
+}
+
+\caption{\label{fig-comp-cpue}Add your caption here.}
 
 \end{figure}%
 
@@ -358,16 +1023,151 @@ Include a table with acronyms (e.g., GLMM, SS, etc.)
 
 \subsection{Retrospective analyses}\label{retrospective-analyses}
 
+\newpage{}
+
 \section*{References}\label{references}
 \addcontentsline{toc}{section}{References}
 
 \phantomsection\label{refs}
 \begin{CSLReferences}{1}{0}
-\bibitem[\citeproctext]{ref-fuPreliminaryIndianYellowfin2021}
-Fu, Dan, Agurtzane Urtizberea Ijurco, Massimiliano Cardinale, Richard D
-Methot, Simon D. Hoyle, and Gorka Merino. 2021. {``Preliminary {Indian
-Yellowfin} Tuna Stock Assessment 1950-2020 ({Stock Synthesis}).''}
-IOTC-2021-WPTT23-12. Indian Ocean Tuna Comission.
+\bibitem[\citeproctext]{ref-dammannagodaEvidenceFineGeographical2008}
+Dammannagoda, Sudath T., David A. Hurwood, and Peter B. Mather. 2008.
+{``Evidence for Fine Geographical Scale Heterogeneity in Gene
+Frequencies in Yellowfin Tuna ({Thunnus} Albacares) from the North
+{Indian Ocean} Around {Sri Lanka}.''} \emph{Fisheries Research} 90
+(1-3): 147--57. \url{https://doi.org/10.1016/j.fishres.2007.10.006}.
+
+\bibitem[\citeproctext]{ref-froeseFishBase2024}
+Froese, Rainer, and Daniel Pauly. 2024. {``{FishBase}.''} World \{\{Wide
+Web\}\} Electronic Publication. \emph{FishBase}. www.fishbase.org.
+
+\bibitem[\citeproctext]{ref-fuIndianOceanYellowfin2018}
+Fu, Dan, Adam D. Langley, Gorka Merino, and Agurtzane Urtizberea. 2018a.
+{``Indian {Ocean Yellowfin Tuna SS3 Model Projections}.''}
+IOTC--2018--SC21--16. Indian Ocean Tuna Comission.
+
+\bibitem[\citeproctext]{ref-fuPreliminaryIndianOcean2018}
+---------. 2018b. {``Preliminary {Indian Ocean Yellowfin Tuna Stock
+Assessment} 1950-2017 ({Stock Synthesis}).''} IOTC--2018--WPTT20--33.
+Indian Ocean Tuna Comission.
+
+\bibitem[\citeproctext]{ref-greweGeneticPopulationConnectivity2020}
+Grewe, Peter, Pierre Feutry, Scott Foster, Aulich, Matt Lansdell, Scott
+Cooper, Naomi Clear, et al. 2020. {``Genetic Population Connectivity of
+Yellowfin Tuna in the {Indian Ocean} from the {PSTBS-IO Project}.''}
+IOTC-2020-WPTT22(AS)12\_REV1. Seychelles: Indian Ocean Tuna Comission.
+
+\bibitem[\citeproctext]{ref-hoyleIndianOceanTropical2018}
+Hoyle, Simon D. 2018. {``Indian {Ocean} Tropical Tuna Regional Scaling
+Factors That Allow for Seasonality and Cell Areas.''}
+IOTC-2018-WPM09-13. Indian Ocean Tuna Comission.
+
+\bibitem[\citeproctext]{ref-iotcReviewYellowfinTuna2021}
+IOTC, Secretariat. 2021. {``Review of {Yellowfin Tuna Statistical
+Data}.''} IOTC-2021-WPTT23(DP)-07\_Rev1. Indian Ocean Tuna Comission.
+
+\bibitem[\citeproctext]{ref-kunalMitochondrialDNAAnalysis2013}
+Kunal, Swaraj Priyaranjan, Girish Kumar, Maria Rosalia Menezes, and Ram
+Murti Meena. 2013. {``Mitochondrial {DNA} Analysis Reveals Three Stocks
+of Yellowfin Tuna {Thunnus} Albacares ({Bonnaterre}, 1788) in {Indian}
+Waters.''} \emph{Conservation Genetics} 14 (1): 205--13.
+\url{https://doi.org/10.1007/s10592-013-0445-3}.
+
+\bibitem[\citeproctext]{ref-langleyStockAssessmentYellowfin2015}
+Langley, Adam D. 2015. {``Stock Assessment of Yellowfin Tuna in the
+{Indian Ocean} Using {Stock Synthesis}.''} IOTC--2015--WPTT17--30.
+Indian Ocean Tuna Comission.
+
+\bibitem[\citeproctext]{ref-langleyUpdate2015Indian2016}
+---------. 2016. {``An Update of the 2015 {Indian Ocean Yellowfin Tuna}
+Stock Assessment for 2016.''} IOTC-2016-WPTT18-27. Indian Ocean Tuna
+Comission.
+
+\bibitem[\citeproctext]{ref-langleyPreliminaryStockAssessment2008}
+Langley, Adam D., John Hampton, Miguel Herrera, and Julien Million.
+2008. {``Preliminary Stock Assessment of Yellowfin Tuna in the {Indian
+Ocean} Using {MULTIFAN-CL}.''} IOTC-2008-WPTT-10. Indian Ocean Tuna
+Comission.
+
+\bibitem[\citeproctext]{ref-langleyStockAssessmentYellowfin2009}
+Langley, Adam D., Miguel Herrera, Jean-Pierre Hallier, and Julien
+Million. 2009. {``Stock Assessment of Yellowfin Tuna in the {Indian
+Ocean} Using {MULTIFAN-CL}.''} IOTC-2009-WPTT-10. Indian Ocean Tuna
+Comission.
+
+\bibitem[\citeproctext]{ref-langleyStockAssessmentYellowfin2010}
+Langley, Adam D., Miguel Herrera, and Julien Million. 2010. {``Stock
+Assessment of Yellowfin Tuna in the {Indian Ocean} Using
+{MULTIFAN-CL}.''} IOTC-2010-WPTT-23. Indian Ocean Tuna Comission.
+
+\bibitem[\citeproctext]{ref-langleyStockAssessmentYellowfin2011}
+---------. 2011. {``Stock Assessment of Yellowfin Tuna in the {Indian
+Ocean} Using {MULTIFAN-CL}.''} IOTC-2011-WPTT-13. Indian Ocean Tuna
+Comission.
+
+\bibitem[\citeproctext]{ref-langleyStockAssessmentYellowfin2012}
+---------. 2012. {``Stock Assessment of Yellowfin Tuna in the {Indian
+Ocean} Using {MULTIFAN-CL}.''} IOTC-2012-WPTT-14-38 Rev\_1. Indian Ocean
+Tuna Comission.
+
+\bibitem[\citeproctext]{ref-matsumotoJointLonglineCPUE2024}
+Matsumoto, Takayuki, Keisuke Satoh, Wen-Pei Tsai, Sheng-Ping Wang,
+Jung-Hyun Lim, Heewon Park, and Sung Il Lee. 2024. {``Joint Longline
+{CPUE} for Yellowfin Tuna in the {Indian Ocean} by the {Japanese},
+{Korean} and {Taiwanese} Longline Fishery.''} IOTC-2024-WPTT26(DP)-14.
+Indian Ocean Tuna Comission.
+
+\bibitem[\citeproctext]{ref-menardIsotopicEvidenceDistinct2007}
+Ménard, Frédéric, Anne Lorrain, Michel Potier, and Francis Marsac. 2007.
+{``Isotopic Evidence of Distinct Feeding Ecologies and Movement Patterns
+in Two Migratory Predators (Yellowfin Tuna and Swordfish) of the Western
+{Indian Ocean}.''} \emph{Marine Biology} 153 (2): 141--52.
+\url{https://doi.org/10.1007/s00227-007-0789-7}.
+
+\bibitem[\citeproctext]{ref-merinoIndianOceanYellowfin2020}
+Merino, Gorka. 2020. {``Indian {Ocean} Yellowfin Workplan
+(2019-2020).''} IOTC-2020-WPTT22(AS)-INF01. Indian Ocean Tuna Comission.
+
+\bibitem[\citeproctext]{ref-merinoStateDevelopmentWorkplan2019}
+Merino, Gorka, Shiham Adam, Hilario Murua, Dan Fu, and Paul De Bruyn.
+2019. {``State of the Development of the Workplan to Improve the Current
+Assessment of Yellowfin Tuna.''} IOTC-2019-SC22-INF01. Indian Ocean Tuna
+Comission.
+
+\bibitem[\citeproctext]{ref-methotRecommendationsConfigurationIndian2019}
+Methot, Richard D. 2019. {``Recommendations on the Configuration of the
+{Indian Ocean} Yellowfin Tuna Stock Assessment Model.''}
+
+\bibitem[\citeproctext]{ref-methotStockSynthesisBiological2013}
+Methot, Richard D., and Chantell R. Wetzel. 2013. {``Stock Synthesis:
+{A} Biological and Statistical Framework for Fish Stock Assessment and
+Fishery Management.''} \emph{Fisheries Research} 142 (May): 86--99.
+\url{https://doi.org/10.1016/j.fishres.2012.10.012}.
+
+\bibitem[\citeproctext]{ref-nishidaStockAssessmentYellowfin2005}
+Nishida, Tom, and Hiroshi Shono. 2005. {``Stock Assessment of Yellowfin
+Tuna ({Thunnus} Albacares) Resources in the {Indian Ocean} by the Age
+Structured Production Model ({ASPM}) Analyses.''} IOTC-2005-WPTT-09.
+Indian Ocean Tuna Comission.
+
+\bibitem[\citeproctext]{ref-nishidaStockAssessmentYellowfin2007}
+---------. 2007. {``Stock Assessment of Yellowfin Tuna ({Thunnus}
+Albacares) in the {Indian Ocean} by the Age Structured Production
+Model({ASPM}) Analyses.''} IOTC-2007-WPTT-12. Indian Ocean Tuna
+Comission.
+
+\bibitem[\citeproctext]{ref-urtizbereaPRELIMINARYASSESSMENTINDIAN2019}
+Urtizberea, Agurtzane, Dan Fu, Gorka Merino, Richard D Methot,
+Massimiliano Cardinale, Henning Winker, John Walter, and Hilario Murua.
+2019. {``{PRELIMINARY ASSESSMENT OF INDIAN OCEAN YELLOWFIN TUNA}
+1950-2018 ({STOCK SYNTHESIS}, {V3}.30).''} IOTC-2019-WPTT21-50. Indian
+Ocean Tuna Comission.
+
+\bibitem[\citeproctext]{ref-zudaireReproductivePotentialYellowfin2013}
+Zudaire, Iker, Hilario Murua, Maitane Grande, and Nathalie Bodin. 2013.
+{``Reproductive Potential of {Yellowfin Tuna} ({Thunnus} Albacares) in
+the Western {Indian Ocean}.''} \emph{Fishery Bulletin} 111 (3): 252--64.
+\url{https://doi.org/10.7755/FB.111.3.4}.
 
 \end{CSLReferences}
 
