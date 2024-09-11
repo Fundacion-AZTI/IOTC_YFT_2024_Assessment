@@ -25,7 +25,7 @@ library(here)
 
 proj_dir = here::here()
 setwd(proj_dir)
-source(here('code', 'auxiliary_functions.R'))
+source(here('code', 'auxiliary_functions2.R'))
 # Sharepoint path:
 source('sharepoint_path.R')
 setwd(shrpoint_path)
@@ -181,18 +181,18 @@ dir_table <- "output/tables/"
   #...................................................
   
   
-  scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings","05_update_M","06_update_Growth","07_update_Maturity")
+  scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings","05_update_M","06_update_Growth","07_update_Maturity",
+           "08_selectivity_PS","09_recdev")
            #"08_correctionLengthData","09_remove_LF_length_earlyPeriod")  
 
   desc <- c("BaseCase", "update catch","update cpue","update warnings",
             "update all-increase boundary OT region 4 (FL14) param1 and tother warnings","Natural mortality age 4.07 years M=0.467",
-            "Farley 2023 growth","Maturity Zudaire et al. 2022")
+            "Farley 2023 growth","Maturity Zudaire et al. 2022","update PS selectivity","update recdev")
             #"r4ss write_ssdat function updated and length data corrected",
             #"length data LF<230 ignored")
   
-  scs <- c("08_selectivity_PS") 
-  #desc <- c("length data LF<230 ignored")
-  desc <- "update PS selectivity"
+  scs <- c("08_selectivity_PS_selLL")
+  desc <- "update recdev"
   scs_wd <-paste0("models/update/",scs)
   
   plot_ss3 <- TRUE
@@ -230,8 +230,8 @@ dir_table <- "output/tables/"
           #  "r4ss write_ssdat function updated and length data corrected",
            # "length data LF<230 ignored")
   
-  
-  sub_scs <- scs
+  i <- 1:7
+  sub_scs <- scs[i]
   sub_scs_wd <-paste0("models/update/",sub_scs)
   mod_sum <- aggregate.ssMod(sub_scs, sub_scs_wd)
   
@@ -250,7 +250,7 @@ dir_table <- "output/tables/"
     scale_color_discrete(labels=levels(sub_df_long$scenario))+
     xlab("Year")+ ylab("F/Fmsy")+theme_fun()
   
-  SavePlot('Stepwise_update_F',15,10)
+  SavePlot(paste0('Stepwise_update_F_',max(i)),15,10)
   
   ### end ###
   
@@ -272,7 +272,7 @@ dir_table <- "output/tables/"
     scale_color_discrete(labels=levels(sub_df_long$scenario))+xlab("Year")+ ylab("SSB")+
     theme_fun()
   
-  SavePlot('Stepwise_update_SSB',15,10)
+  SavePlot(paste0('Stepwise_update_SSB',max(i)),15,10)
   
   
   #### end ####

@@ -652,7 +652,7 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
   
   
-  dat_1 = dat_0
+  dat_1 = base_dat
   ctl_1 = base_ctl
   fore_1 = base_fore
   start_1 = base_start
@@ -835,6 +835,8 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
   base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
   base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+  
+  base_dat$lencomp <- base_dat$lencomp %>% subset(!(fleet==21 & year<240))
   
   dat_1 = base_dat
   ctl_1 = base_ctl
