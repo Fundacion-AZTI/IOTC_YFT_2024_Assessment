@@ -26,3 +26,6 @@ fleet_col = c('FS' = fleet_pal[1], 'LS' = fleet_pal[2], 'LL' = fleet_pal[3], 'LF
 
 # Folder in sharepoint where to save plots:
 plot_dir = 'output/figures'
+
+# Folder in sharepoint where to save tables:
+tab_dir = 'output/tables'

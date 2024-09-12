@@ -8,6 +8,7 @@ source('sharepoint_path.R')
 
 # Read auxiliary functions:
 source(here('code', 'auxiliary_functions.R'))
+source(here('code', 'parameters_for_plots.R'))
 
 # DEFINITION OF REGIONS 2010
 # Note that the boundaries of Area R3 and R4 were changed for the assessment in 2010, 
@@ -103,6 +104,12 @@ table(work$ModelFleet)
 
 # Save SS catch input
 write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'catch.csv'), row.names = FALSE)
+
+# Save table fleet labels:
+fleet_name_df = work %>% group_by(ModelFleet) %>% summarise(fleet_name = unique(ModelFishery))
+colnames(fleet_name_df) = c('fleet_number', 'fleet_name')
+write.csv(fleet_name_df, file = file.path(shrpoint_path, tab_dir, paste0('fleet_label_', spat_config, '.csv')), row.names = FALSE)
+
 
 # -------------------------------------------------------------------------
 

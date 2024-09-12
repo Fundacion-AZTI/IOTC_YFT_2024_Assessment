@@ -152,7 +152,7 @@ The time period covered by the assessment spanned from 1950 to 2023, representin
 
 ## Definition of fisheries
 
-The assessment adopted the equivalent fisheries definitions used in the previous stock assessments (@tbl-fishery-codes). These *fisheries* represent relatively homogeneous fishing units, with similar selectivity and catchability characteristics that do not vary greatly over time. Twenty-one fisheries were defined based on location (region), time period, fishing gear, purse seine set type, and type of vessel in the case of longline fleet (@tbl-fleet-4Aconfig).
+The assessment adopted the equivalent fisheries definitions used in the previous stock assessments (@tbl-fishery-codes). These *fisheries* represent relatively homogeneous fishing units, with similar selectivity and catchability characteristics that do not vary greatly over time. Twenty-one fisheries were defined based on location (region), time period, fishing gear, purse seine set type, and type of vessel in the case of longline fleet (@tbl-fleet-4A).
 
 The longline fishery was partitioned into two main components:
 
@@ -304,8 +304,8 @@ Write your acknowledgements.
 | LL           | Longline                 |
 | OT           | Others                   |
 | BB           | Baitboat                 |
-| PS FS        | Purse seine, free school |
-| PS LS        | Purse seine, log school  |
+| FS           | Purse seine, free school |
+| LS           | Purse seine, log school  |
 | TR           | Troll                    |
 | LF           | Longline (fresh tuna)    |
 
@@ -313,31 +313,14 @@ Write your acknowledgements.
 
 {{< pagebreak >}}
 
-| Fishery number | Fishery code and region |
-|----------------|-------------------------|
-| 1              | GI 1a                   |
-| 2              | HD 1a                   |
-| 3              | LL 1a                   |
-| 4              | OT 1a                   |
-| 5              | BB 1b                   |
-| 6              | PS FS 1b                |
-| 7              | LL 1b                   |
-| 8              | PS LS 1b                |
-| 9              | TR 1b                   |
-| 10             | LL 2                    |
-| 11             | LL 3                    |
-| 12             | GI 4                    |
-| 13             | LL 4                    |
-| 14             | OT 4                    |
-| 15             | TR 4                    |
-| 16             | PS FS 2                 |
-| 17             | PS LS 2                 |
-| 18             | TR 2                    |
-| 19             | PS FS 4                 |
-| 20             | PS LS 4                 |
-| 21             | LF 4                    |
+```{r}
+#| label: tbl-fleet-4A
+#| tab-cap: "Fishery definition in the assessment configuration with 4 areas."
+my_tab = read.csv(file.path(shrpoint_path, 'output/tables', "fleet_label_4A_io.csv"))
+colnames(my_tab) = c('Fishery number', 'Fishery code and region')
+knitr::kable(my_tab, align=rep('l', 2))
+```
 
-: Fishery definition in the assessment configuration with 4 areas. {#tbl-fleet-4Aconfig}
 
 {{< pagebreak >}}
 
