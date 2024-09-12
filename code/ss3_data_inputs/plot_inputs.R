@@ -228,7 +228,6 @@ size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'si
 size_dat = size_dat %>% select(Yr, ModelFleet, L010:L198)
 size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
 colnames(size_dat) = tolower(colnames(size_dat))
-size_dat = size_dat %>% dplyr::filter(time %in% 13:296) # same period for both assessments
 # Find mean length per fleet and year:
 tmp_dat = gather(size_dat, 'len_bin', 'freq', 3:ncol(size_dat))
 tmp_dat = tmp_dat %>% mutate(len_bin = as.numeric(gsub(pattern = 'l', replacement = '', x = len_bin)))
@@ -241,7 +240,6 @@ size_dat = size_dat %>% mutate(type = '2024 assessment', .after = 'fleet_number'
 old_size_dat = base_dat$lencomp
 old_size_dat = old_size_dat %>% select(Yr, FltSvy, l10:l198)
 old_size_dat = dplyr::rename(old_size_dat, c(time = 'Yr', fleet_number = 'FltSvy'))
-old_size_dat = old_size_dat %>% dplyr::filter(time %in% 13:296)
 # Find mean length per fleet and year:
 tmp_dat = gather(old_size_dat, 'len_bin', 'freq', 3:ncol(old_size_dat))
 tmp_dat = tmp_dat %>% mutate(len_bin = as.numeric(gsub(pattern = 'l', replacement = '', x = len_bin)))
@@ -253,10 +251,14 @@ old_size_dat = old_size_dat %>% mutate(type = '2021 assessment', .after = 'fleet
 # Merge datasets:
 merged_size = rbind(size_dat, old_size_dat)
 merged_size$time = ssts2yq(merged_size$time)
-merged_size = left_join(merged_size, fleet_name_df)
+all_times_df = expand.grid(time = seq(from = min(merged_size$time), to = max(merged_size$time), by = 0.25),
+                           fleet_number = unique(merged_size$fleet_number), type = unique(merged_size$type))
+plot_data_df = left_join(all_times_df, merged_size)
+plot_data_df = left_join(plot_data_df, fleet_name_df)
 
 # Make plot:
-p2 = ggplot(data = merged_size, aes(x = time, y = mean_len)) +
+p2 = ggplot(data = plot_data_df, aes(x = time, y = mean_len)) +
+  geom_point(aes(color = type), size = 0.25) +
   geom_line(aes(color = type)) +
   ylab("Mean length (cm)") + xlab(NULL) +
   theme(axis.text.y = element_text(angle = 90, vjust = 0.5, hjust=0.5),
@@ -264,7 +266,7 @@ p2 = ggplot(data = merged_size, aes(x = time, y = mean_len)) +
   scale_y_continuous(breaks = breaks_extended(3)) +
   guides(color = guide_legend(title = NULL)) +
   facet_wrap( ~ fleet_name, scales = 'free_y', ncol = 4)
-ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_size', img_type)), plot = p2,
+ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_mlen', img_type)), plot = p2,
        width = img_width, height = 200, units = 'mm', dpi = img_res)
 
 # -------------------------------------------------------------------------
