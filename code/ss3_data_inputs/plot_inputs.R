@@ -73,6 +73,49 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_catch_area_frac', img_type)
        width = img_width, height = 130, units = 'mm', dpi = img_res)
 
 
+
+# Pie plot: catch by grid/fleet -------------------------------------------
+
+catch_grid = read.csv(file.path(shrpoint_path, 'data/processed', 'catch_grid.csv'))
+
+# Same processing as in CE-4A_io:
+catch_grid$Area = get_4Aarea_from_lonlat(catch_grid$long, catch_grid$lat)
+catch_grid = create_4Aarea_cols(catch_grid)
+filter_data = catch_grid %>% dplyr::filter(Year >= 1980) # relevant period
+plot_data = filter_data %>% group_by(Grid, lat, long, FisheryCode) %>% summarise(catch = sum(NCmtFish)) %>% 
+  inner_join(filter_data %>%
+               group_by(Grid, lat, long) %>%
+               summarise(catch_tot = sum(NCmtFish)))
+max_grid_catch = max(plot_data$catch_tot)
+plot_data = plot_data %>% dplyr::filter(lat >= min(yLim), lat <= max(yLim), 
+                                        long >= min(xLim), long <= max(xLim))
+plot_data = plot_data %>% mutate(radius = (catch_tot/max_grid_catch),
+                                 lat = factor(lat, levels = sort(unique(plot_data$lat), decreasing = TRUE)),
+                                 long = factor(long, levels = sort(unique(plot_data$long))))
+
+# Make plot:
+p_pie = ggplot(plot_data, aes(x = radius/2, y = catch, fill = FisheryCode, width = radius)) +
+  geom_bar(stat="identity", position = 'fill') +
+  facet_grid(lat ~ long) + 
+  coord_polar("y") +
+  theme_void() + 
+  scale_fill_manual(values = fleet_col) +
+  theme(legend.position="none",
+        panel.spacing = unit(-0.2, "cm"),
+        strip.background = element_blank(),
+        strip.text.x = element_blank(), strip.text.y = element_blank())
+
+p_map = ggplot() + 
+  geom_segment(data = reg_lines_4A, aes(x = lon1, y = lat1, xend = lon2, yend = lat2), color = 'gray40') +
+  geom_segment(data = reg_lines_1ab, aes(x = lon1, y = lat1, xend = lon2, yend = lat2), color = 'gray40', linetype = 2) +
+  theme_classic()
+p_map = add_sf_map(p_map)
+
+all_plot = p_map + inset_element(p_pie, 0.065, 0.05, 0.99, 0.99, align_to = 'full')
+ggsave(file.path(shrpoint_path, plot_dir, paste0('catch_grid', img_type)), plot = all_plot,
+       width = img_width, height = 130, units = 'mm', dpi = img_res)
+
+
 # Scale LL CPUE per time step with CV -------------------------------------
 
 cpue_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'scaled_cpue_Meancv_02.csv'))
