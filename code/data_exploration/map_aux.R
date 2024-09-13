@@ -3,17 +3,18 @@ source('sharepoint_path.R')
 source(here('code', 'parameters_for_plots.R'))
 source(here('code', 'auxiliary_functions.R'))
 theme_set(theme_classic())
+data_folder = 'data/processed'
 
 
 # Define data.frames with lines for spatial config ------------------------
-reg_lines_4A = rbind(data.frame(lon1 = 75, lat1 = 20, lon2 = 75, lat2 = -15), # vertical 
+reg_lines_4A = rbind(data.frame(lon1 = 75, lat1 = 12.5, lon2 = 75, lat2 = -15), # vertical 
                       data.frame(lon1 = 60, lat1 = -10, lon2 = 60, lat2 = -30), # vertical 
                       data.frame(lon1 = 40, lat1 = -30, lon2 = 40, lat2 = -40), # vertical 
-                      data.frame(lon1 = 30, lat1 = -10, lon2 = 60, lat2 = -10), # horizontal 
+                      data.frame(lon1 = 40, lat1 = -10, lon2 = 60, lat2 = -10), # horizontal 
                       data.frame(lon1 = 60, lat1 = -15, lon2 = 120, lat2 = -15), # horizontal 
                       data.frame(lon1 = 40, lat1 = -30, lon2 = 60, lat2 = -30) # horizontal 
 )
-reg_lines_1ab = data.frame(lon1 = 40, lat1 = 10, lon2 = 75, lat2 = 10) # 1a and 1b
+reg_lines_1ab = data.frame(lon1 = 52, lat1 = 10, lon2 = 75, lat2 = 10) # 1a and 1b
 reg_lines_2A = rbind(data.frame(lon1 = 75, lat1 = 20, lon2 = 75, lat2 = -15), # vertical 
                       data.frame(lon1 = 60, lat1 = -15, lon2 = 60, lat2 = -30), # vertical 
                       data.frame(lon1 = 40, lat1 = -30, lon2 = 40, lat2 = -40), # vertical 
@@ -134,7 +135,7 @@ load(file.path(shrpoint_path, data_folder, 'stdGrid_5.RData'))
 grid_centers_tmp = grid_centers %>% mutate(grid_type = as.character(grid_type), grid_ID = 1:n())
 st_geometry(grid_centers_tmp) = NULL
 grid_centers_tmp = grid_centers_tmp %>% group_split(grid_ID) %>% 
-  purrr::map(~ transform_to_stdgrid(.x, len_df = FALSE)) %>% 
+  purrr::map(~ transform_to_stdgrid(.x)) %>% 
   list_rbind() %>% st_as_sf(coords = c("long", "lat"), crs = 4326, remove = FALSE)
   
 # Filter intersect grids:
@@ -157,11 +158,11 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('map_size_grid_std', img_type))
 # Add 4A lines to raw size grid -----------------------------------------------
 
 p3 = ggplot() +
-  geom_segment(data = reg_lines_4A, aes(x = lon1, y = lat1, xend = lon2, yend = lat2)) +
-  geom_segment(data = reg_lines_1ab, aes(x = lon1, y = lat1, xend = lon2, yend = lat2), linetype = 2) +
   geom_sf(data = worldmap, fill = "gray60", color = "gray60") +
   geom_sf(data = grid_borders, fill = 'blue', color = 'white', alpha = 0.3) +
   geom_sf(data = grid_centers, color = 'red', shape = 4, size = 2) +
+  geom_segment(data = reg_lines_4A, aes(x = lon1, y = lat1, xend = lon2, yend = lat2)) +
+  geom_segment(data = reg_lines_1ab, aes(x = lon1, y = lat1, xend = lon2, yend = lat2), linetype = 2) +
   coord_sf(expand = FALSE, xlim = xLim, ylim = yLim) +
   xlab(NULL) + ylab(NULL) +
   scale_y_continuous(breaks = yBreaks) + scale_x_continuous(breaks = xBreaks)
@@ -172,11 +173,11 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('map_size_grid_4A', img_type)),
 # Add 4A lines to STD size grid -----------------------------------------------
 
 p4 = ggplot() +
-  geom_segment(data = reg_lines_4A, aes(x = lon1, y = lat1, xend = lon2, yend = lat2)) +
-  geom_segment(data = reg_lines_1ab, aes(x = lon1, y = lat1, xend = lon2, yend = lat2), linetype = 2) +
   geom_sf(data = worldmap, fill = "gray60", color = "gray60") +
   geom_sf(data = grid_borders_std, fill = 'blue', col = 'white', alpha = 0.3) +
   geom_sf(data = grid_centers_std, color = 'red', shape = 4, size = 2) +
+  geom_segment(data = reg_lines_4A, aes(x = lon1, y = lat1, xend = lon2, yend = lat2)) +
+  geom_segment(data = reg_lines_1ab, aes(x = lon1, y = lat1, xend = lon2, yend = lat2), linetype = 2) +
   coord_sf(expand = FALSE, xlim = xLim, ylim = yLim) +
   xlab(NULL) + ylab(NULL) +
   scale_y_continuous(breaks = yBreaks) + scale_x_continuous(breaks = xBreaks)
