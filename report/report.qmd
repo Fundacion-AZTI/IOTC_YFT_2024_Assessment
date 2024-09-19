@@ -95,21 +95,21 @@ Fisheries information indicates that adult yellowfin are distributed continuousl
 
 ## Fisheries
 
-Yellowfin tuna are harvested with a diverse variety of gear types, from small-scale artisanal fisheries (in the Arabian Sea, Mozambique Channel and waters around Indonesia, Sri Lanka, the Maldives, and Lakshadweep Islands) to large gillnetters (from Oman, Iran and Pakistan operating mostly but not exclusively in the Arabian Sea) and distant-water longliners and purse seiners that operate widely in equatorial and tropical waters (ADD FIGURE CATCH). Purse seiners and gillnetters catch a wide size range of yellowfin tuna, whereas the longline fishery takes mostly adult fish (ADD FIGURE CATCH).
+Yellowfin tuna are harvested with a diverse variety of gear types, from small-scale artisanal fisheries (in the Arabian Sea, Mozambique Channel and waters around Indonesia, Sri Lanka, the Maldives, and Lakshadweep Islands) to large gillnetters (from Oman, Iran and Pakistan operating mostly but not exclusively in the Arabian Sea) and distant-water longliners and purse seiners that operate widely in equatorial and tropical waters (@fig-catch-grid). Purse seiners and gillnetters catch a wide size range of yellowfin tuna, whereas the longline fishery takes mostly adult fish (@fig-agg-size).
 
 Prior to 1980, annual catches of yellowfin tuna remained below about 80,000 mt and were dominated by longline catches (@fig-catch-bar). Annual catches increased markedly during the 1980s and early 1990s, mainly due to the development of the purse-seine fishery as well as an expansion of the other established fisheries (fresh-tuna longline, gillnet, baitboat, handline and, to a lesser extent, troll). A peak in catches was recorded in 1993, with catches over 400,000 mt, the increase in catch almost fully attributable to longline fleets, particularly longliners flagged in Taiwan, which reported exceptional catches of yellowfin tuna in the Arabian Sea. The Taiwanese longline fishery in the IO has been equipped with super-cold storage. Since around 1986, the fleet has fished more frequently with deep sets.
 
-Catches declined in 1994, to about 350,000 mt, remaining at that level for the next decade then increasing sharply to reach a peak of about 520,000 mt in 2004/2005 driven by a large increase in catch by all fisheries, especially the purse-seine (free school) fishery. Total annual catches declined sharply from 2004 to 2007 and remained at about 300,000 mt during 2007–2011. In 2012, total catches increased to about 400,000 mt and were maintained at about that level through 2013 to 2015. Total catches increased to an average of 430,000 mt between 2016 and 2019, and a maximum of close to 450,000 mt in 2019 (@fig-catch-bar), despite IOTC Resolution 17/01 which requested major fleets to substantially reduce their yellowfin catches below the 2014 or 2015 catch level. Furthermore, catch levels of about 440,000 mt reported for 2018 might be under-estimated (to some extent) because of changes in data processing methodology by European Union-Spain for its purse seine fleet for that year [@iotcReviewYellowfinTuna2021].
+Catches declined in 1994, to about 350,000 mt, remaining at that level for the next decade then increasing sharply to reach a peak of about 520,000 mt in 2004-2005 driven by a large increase in catch by all fisheries, especially the purse-seine (free school) fishery. Total annual catches declined sharply from 2004 to 2007 and remained at about 300,000 mt during 2007–2011. In 2012, total catches increased to about 400,000 mt and were maintained at about that level through 2013 to 2015. Total catches increased to an average of 430,000 mt between 2016 and 2019, and a maximum of close to 450,000 mt in 2019 (@fig-catch-bar), despite IOTC Resolution 17/01 which requested major fleets to substantially reduce their yellowfin catches below the 2014 or 2015 catch level. Furthermore, catch levels of about 440,000 mt reported for 2018 might be under-estimated (to some extent) because of changes in data processing methodology by European Union-Spain for its purse seine fleet for that year [@iotcReviewYellowfinTuna2021].
 
 In recent years (2015–2023), purse seine has been the dominant fishing method harvesting 36% of the total IO yellowfin tuna catch (by weight), with the gillnet and handline fisheries, comprising 20% and 18% of the catch, respectively. There was a substantial increase in the catch by handline in 2020 (@fig-catch-bar). A smaller component of the catch was taken by industrial longline (5%), and the regionally important baitboat (4%) and troll (4%) fisheries. The recent increase in the total catch has been mostly attributable to an increase in catch from the gillnet and handline fisheries.
 
 The purse-seine catch is generally distributed equally between free-school and associated (log and FAD sets) schools, although the large catches in 2003–2005 were dominated by fishing on free-schools. Conversely, during 2015–2023 the purse-seine catch was dominated (70%) by the associated fishery.
 
-Historically, most of the yellowfin catch has been taken from the western equatorial region of the IO (44%; region 1b, ADD IMAGE SPATIAL CATCH) and, to a lesser extent, the Arabian Sea (26%), the eastern equatorial region (24%, region 4) and the Mozambique Channel (5%; region 2). The purse-seine and baitboat fisheries operate almost exclusively within the western equatorial region, while catches from the Arabian Sea are principally by handline, gillnet, and longline (see Figure 1). Catches from the eastern equatorial region (region 4) were dominated by longline and gillnet (around Sri Lanka and Indonesia). The southern IO (region 3) accounts for a small proportion of the total yellowfin catch (1%) taken exclusively by longline (see Figure 1).
+Historically, most of the yellowfin catch has been taken from the western equatorial region of the IO (44%; region 1b, @fig-catch-grid) and, to a lesser extent, the Arabian Sea (26%), the eastern equatorial region (24%, region 4) and the Mozambique Channel (5%; region 2). The purse-seine and baitboat fisheries operate almost exclusively within the western equatorial region, while catches from the Arabian Sea are principally by handline, gillnet, and longline (see @fig-catch-grid). Catches from the eastern equatorial region (region 4) were dominated by longline and gillnet (around Sri Lanka and Indonesia). The southern IO (region 3) accounts for a small proportion of the total yellowfin catch (1%) taken exclusively by longline.
 
 In recent years (2008–2012), due to the threat of piracy, the bulk of the industrial purse seine and longline fleets moved out of the western waters of Region 1b to avoid the coastal and off-shore waters off Somalia, Kenya and Tanzania. The threat of piracy particularly affected the freezer longline fleet and levels of effort and catch decreased markedly from 2007. The total catch by freezing longliners declined to about 2,000 mt in 2010, a 10-fold decrease in catch from the years before the onset of piracy. Purse seine catches also dropped in 2007–2009 and then started to recover. Piracy off the Somali coast was almost eliminated by 2013 but longline catches have not recovered.
 
-The sizes caught in the IO range from 30 cm to 180 cm fork length. Intermediate age yellowfin are seldom taken in the industrial fisheries, but are abundant in some artisanal fisheries, mainly in the Arabian Sea. Newly recruited fish are primarily caught by the purse seine fishery on floating objects and the pole-and-line fishery in the Maldives. Males are predominant in the catches of larger fish at sizes larger than 150 cm (this is also the case in other oceans). Medium sized yellowfin concentrate for feeding in the Arabian Sea. 
+The sizes caught in the IO range from 30 cm to 180 cm fork length [@fig-agg-size]. Intermediate age yellowfin are seldom taken in the industrial fisheries, but are abundant in some artisanal fisheries, mainly in the Arabian Sea. Newly recruited fish are primarily caught by the purse seine fishery on floating objects and the pole-and-line fishery in the Maldives. Males are predominant in the catches of larger fish at sizes larger than 150 cm (this is also the case in other oceans). Medium sized yellowfin concentrate for feeding in the Arabian Sea.
 
 # Data
 
@@ -340,6 +340,33 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_IO_4AReg
 #| fig-cap: "Add your caption here."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_catch.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-catch-bar-area
+#| fig-cap: "Add your caption here."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_catch_area.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-agg-size
+#| fig-cap: "Add your caption here."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "agg_size.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-catch-grid
+#| fig-cap: "Add your caption here."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "catch_grid.png"), rel_path = FALSE)
 ```
 
 {{< pagebreak >}}
