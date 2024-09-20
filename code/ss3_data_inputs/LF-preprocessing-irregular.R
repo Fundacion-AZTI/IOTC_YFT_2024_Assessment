@@ -14,6 +14,7 @@ source(here('code', 'auxiliary_functions.R'))
 # Follow the 4A configuration:
 ModelFisheries <- c('GI 1a','HD 1a','LL 1a','OT 1a','BB 1b','FS 1b','LL 1b','LS 1b','TR 1b','LL 2','LL 3','GI 4','LL 4','OT 4','TR 4','FS 2','LS 2','TR 2','FS 4','LS 4','LF 4')
 
+# Read data:
 Data = read.csv(file.path(shrpoint_path, 'data/raw',  "IOTC-2024-WPTT26(AS) - YFT - Size frequencies.csv"))
 
 Data = Data %>% 
@@ -34,6 +35,9 @@ Data = Data %>%
   mutate(CellType = substring(Grid,1,1)) %>%
   dplyr::filter(CellType %in% as.character(1:6)) # Remove unclassified cell types
 
+# Check fishery mapping:
+which(is.na(Data$FisheryCode))
+
 Data = plyr::ddply(Data, "Grid", .fun = function(d) {
   lat = get.lat.from.id(d$Grid[1]);
   long = get.long.from.id(d$Grid[1]);
@@ -41,7 +45,7 @@ Data = plyr::ddply(Data, "Grid", .fun = function(d) {
   d$Long = long
   return(d)}
 )		
-Data = Data %>% dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,FisheryCode,TnoFish,FirstClassLow,SizeInterval,REPORTING_QUALITY,C001:C150)
+Data = Data %>% dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,FisheryCode,TnoFish,FirstClassLow,SizeInterval,Quality,C001:C150)
 
 # Aggregate (not sure why we should do this, it does not change anything)
 # Do it in two parts:
@@ -52,19 +56,22 @@ data1 = Data %>%
   as.data.frame() 
 data2 = Data %>% 
   dplyr::group_by(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,FisheryCode) %>% 
-  dplyr::summarise_at('REPORTING_QUALITY',list(mean)) %>% # mean reporting quality
+  dplyr::summarise_at('Quality',list(mean)) %>% # mean reporting quality
   as.data.frame() 
 Data = inner_join(data1, data2)
 
-# Now create sno columns and aggregate largest length bins, then create real length bin columns
+# Now create Nfish_samp columns and aggregate largest length bins, then create real length bin columns
 out_data = Data %>%
-  dplyr::mutate(sno=rowSums(across(C001:C150))) %>%
+  dplyr::mutate(Nfish_samp=rowSums(across(C001:C150))) %>%
   dplyr::mutate(C095=rowSums(across(C095:C150))) %>%
-  dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,FisheryCode,SizeInterval,FirstClassLow,REPORTING_QUALITY,sno,C001:C095) %>% 
+  dplyr::select(Year,Quarter,Month,Grid,Lat,Long,Fleet,Gear,SchoolType,FisheryCode,SizeInterval,FirstClassLow,Quality,Nfish_samp,C001:C095) %>% 
   tidyr::gather(length,total,C001:C095) %>%
   dplyr::mutate(length = FirstClassLow+(as.numeric(substr(length,2,4))-1)*SizeInterval) %>% 
   dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>% 
   tidyr::spread(length,total,fill=0)
 
+# Remove some columns:
+out_data = out_data %>% dplyr::select(-c(SizeInterval,FirstClassLow))
+
 # Save this object for analyses:
-write.csv(out_data, file = file.path(shrpoint_path, 'data/processed', 'size_grid.csv'), row.names = FALSE)
+write.csv(out_data, file = file.path(shrpoint_path, 'data/processed', 'size_grid-irregular.csv'), row.names = FALSE)

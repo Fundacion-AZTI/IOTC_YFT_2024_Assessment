@@ -8,6 +8,9 @@ source(here('code', 'auxiliary_functions.R'))
 # Spatial configuration:
 spat_config = '4A_io'
 
+data_folder = 'data/processed'
+L_labels  =  c(Paste("L0",seq(10,98,2)), Paste("L",seq(100,198,2))) 
+
 # Read fleet labels
 fleet_name_df = read.csv(file.path(shrpoint_path, tab_dir, paste0('fleet_label_', spat_config,'.csv')))
 
@@ -40,7 +43,8 @@ p2 = ggplot(data = plot_data, aes(x = year, y = catch, fill = fisherycode)) +
 ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_catch_frac', img_type)), plot = p2,
        width = img_width, height = 130, units = 'mm', dpi = img_res)
 
-
+# Save legend for next plot:
+fish_legend <- get_legend(p2)    
 
 # Catch per fleet, year, and area as barplot ------------------------------
 
@@ -72,8 +76,6 @@ p2 = ggplot(data = plot_data, aes(x = year, y = catch, fill = fisherycode)) +
 ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_catch_area_frac', img_type)), plot = p2,
        width = img_width, height = 130, units = 'mm', dpi = img_res)
 
-
-
 # Pie plot: catch by grid/fleet -------------------------------------------
 
 catch_grid = read.csv(file.path(shrpoint_path, 'data/processed', 'catch_grid.csv'))
@@ -82,17 +84,17 @@ catch_grid = read.csv(file.path(shrpoint_path, 'data/processed', 'catch_grid.csv
 catch_grid$Area = get_4Aarea_from_lonlat(catch_grid$long, catch_grid$lat)
 catch_grid = create_4Aarea_cols(catch_grid)
 filter_data = catch_grid %>% dplyr::filter(Year >= 1980) # relevant period
-plot_data = filter_data %>% group_by(Grid, lat, long, FisheryCode) %>% summarise(catch = sum(NCmtFish)) %>% 
+plot_data = filter_data %>% group_by(Grid, lat, long, FisheryCode) %>% summarise(catch = sum(NCmtFish)) %>%
   inner_join(filter_data %>%
                group_by(Grid, lat, long) %>%
                summarise(catch_tot = sum(NCmtFish)))
 max_grid_catch = max(plot_data$catch_tot)
-plot_data = plot_data %>% dplyr::filter(lat >= min(yLim), lat <= max(yLim), 
+plot_data = plot_data %>% dplyr::filter(lat >= min(yLim), lat <= max(yLim),
                                         long >= min(xLim), long <= max(xLim))
 plot_data = plot_data %>% mutate(radius = (catch_tot/max_grid_catch),
                                  lat = factor(lat, levels = sort(unique(plot_data$lat), decreasing = TRUE)),
                                  long = factor(long, levels = sort(unique(plot_data$long))))
-
+  
 # Make plot:
 p_pie = ggplot(plot_data, aes(x = radius/2, y = catch, fill = FisheryCode, width = radius)) +
   geom_bar(stat="identity", position = 'fill') +
@@ -111,7 +113,8 @@ p_map = ggplot() +
   theme_classic()
 p_map = add_sf_map(p_map)
 
-all_plot = p_map + inset_element(p_pie, 0.065, 0.05, 0.99, 0.99, align_to = 'full')
+all_plot = p_map + inset_element(fish_legend, 0.15, 0.6, 0.1, 0.5, align_to = 'full') + 
+  inset_element(p_pie, 0.065, 0.05, 0.99, 0.99, align_to = 'full')
 ggsave(file.path(shrpoint_path, plot_dir, paste0('catch_grid', img_type)), plot = all_plot,
        width = img_width, height = 130, units = 'mm', dpi = img_res)
 
@@ -133,9 +136,9 @@ plot_data$area = factor(plot_data$area, levels = c('1b', '4', '2', '3'))
 p1 = ggplot(data = plot_data, aes(x = time, y = obs)) +
   geom_ribbon(aes(ymin = obs - sd, ymax = obs + sd), fill = 'grey70') +
   geom_line(aes(y = obs)) +
-  coord_cartesian(ylim = c(0, NA)) + 
-  xlab(NULL) + ylab("Scaled CPUE") +
-  facet_wrap( ~ area, scales = 'free_y')
+  coord_cartesian(ylim = c(0, 5), expand = FALSE) + 
+  xlab(NULL) + ylab("Scaled LL CPUE") +
+  facet_wrap( ~ area)
 ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_cpue_area', img_type)), plot = p1,
        width = img_width, height = 130, units = 'mm', dpi = img_res)
 
@@ -167,3 +170,53 @@ p2 = ggplot(size_dat, aes(x = len_bin, y = prop, fill = fisherycode, color = fis
   facet_wrap( ~ fleet_name, scales = 'free_y', ncol = 4)
 ggsave(file.path(shrpoint_path, plot_dir, paste0('agg_size', img_type)), plot = p2,
        width = img_width, height = 200, units = 'mm', dpi = img_res)
+
+# Aggregated length by grid and fleet -------------------------------------
+
+load(file.path(shrpoint_path, data_folder, 'mergedStd_5.RData'))
+size_grid = mergedStd
+
+colnames(size_grid) = str_to_title(colnames(size_grid))
+colnames(size_grid)[c(6)] = c('FisheryCode')
+# Same processing as in CE-4A_io:
+size_grid$Area = get_4Aarea_from_lonlat(size_grid$Lon, size_grid$Lat)
+size_grid = create_4Aarea_cols(size_grid)
+
+filter_data = size_grid %>% dplyr::filter(Year >= 1980) # relevant period
+plot_data = filter_data %>% group_by(Grid_id, Lat, Lon, FisheryCode) %>% dplyr::summarise_at(L_labels,list(Sum))
+plot_data = plot_data %>% dplyr::filter(Lat >= min(yLim), Lat <= max(yLim), 
+                                        Lon >= min(xLim), Lon <= max(xLim))
+plot_data = plot_data %>% mutate(Lat = round(Lat, digits = 2), Lon = round(Lon, digits = 2)) # round centroids
+# Sum by row to get freq:
+plot_data = plot_data %>% ungroup() %>% mutate(across(-c(1:4))/rowSums(across(-c(1:4))))
+plot_data = gather(plot_data, 'len_bin', 'prop', 5:ncol(plot_data))
+plot_data$len_bin = as.numeric(gsub(pattern = 'L', replacement = '', x = plot_data$len_bin))
+# Make lon lat as factors:
+plot_data = plot_data %>% mutate(lat = factor(Lat, levels = sort(unique(plot_data$Lat), decreasing = TRUE)),
+                                 lon = factor(Lon, levels = sort(unique(plot_data$Lon))))
+
+
+# Make plot:
+p_hist = ggplot(plot_data, aes(x = len_bin, y = prop, fill = FisheryCode)) +
+  geom_area(alpha = 0.75) +
+  facet_grid(lat ~ lon) + 
+  theme_void() + 
+  coord_cartesian(ylim = c(0, 0.3)) +
+  scale_fill_manual(values = fleet_col) +
+  # scale_color_manual(values = fleet_col) +
+  theme(legend.position="none",
+        panel.spacing = unit(-0.02, "cm"),
+        strip.background = element_blank(),
+        strip.text.x = element_blank(), strip.text.y = element_blank())
+
+p_map = ggplot() + 
+  geom_segment(data = reg_lines_4A, aes(x = lon1, y = lat1, xend = lon2, yend = lat2), color = 'gray40') +
+  geom_segment(data = reg_lines_1ab, aes(x = lon1, y = lat1, xend = lon2, yend = lat2), color = 'gray40', linetype = 2) +
+  theme_classic()
+p_map = add_sf_map(p_map)
+
+all_plot = p_map + inset_element(fish_legend, 0.15, 0.6, 0.1, 0.5, align_to = 'full') +
+  inset_element(p_hist, 0.065, 0.055, 0.99, 0.99, align_to = 'full')
+ggsave(file.path(shrpoint_path, plot_dir, paste0('size_grid', img_type)), plot = all_plot,
+       width = img_width, height = 130, units = 'mm', dpi = img_res)
+

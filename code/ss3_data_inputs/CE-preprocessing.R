@@ -34,7 +34,10 @@ Data = plyr::ddply(Data,"Grid",.fun = function(d) {
   d$lat =lat
   d$long = long
   return(d)}
-)					
+)
+
+# Check fishery mapping:
+which(is.na(Data$FisheryCode))
 
 # Save this object for analyses:
 write.csv(Data, file = file.path(shrpoint_path, 'data/processed', 'catch_grid.csv'), row.names = FALSE)
