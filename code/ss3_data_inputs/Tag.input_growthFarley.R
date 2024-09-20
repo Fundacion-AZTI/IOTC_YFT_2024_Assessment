@@ -1,41 +1,75 @@
+
+# tagging input data assuming ALK from Fairley et al 2023
 #
-#   READ TAGGING DATA AND TRANSFORM INTO 
-#   SS3 FORMAT FROM LENGTH TO AGE
-#.....................................
+#......................................................
+
 
 library(tidyverse)
 library(reshape)
 library(readxl)
 library(here)
-library(dplyr)
-# 
-# ── Conflicts ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
-# ✖ scales::col_factor() masks readr::col_factor()
-# ✖ scales::discard()    masks purrr::discard()
-# ✖ tidyr::expand()      masks reshape::expand()
-# ✖ stats::filter()      masks dplyr::filter()
-# ✖ stats::lag()         masks dplyr::lag()
-# ✖ reshape::rename()    masks dplyr::rename()
-# ✖ lubridate::stamp()   masks reshape::stamp()
-# ℹ Use the conflicted package to force all conflicts to become errors
-# Warning messages:
-#   1: package ‘tidyverse’ was built under R version 4.2.3 
-# 2: package ‘tibble’ was built under R version 4.2.3 
-# 3: package ‘forcats’ was built under R version 4.2.3 
-# 4: package ‘lubridate’ was built under R version 4.2.3 		
-source('code/auxiliary_functions2.R')
+
+# Set working directiry using here():
+proj_dir = here()
+setwd(proj_dir)
+
+source("code/auxiliary_functions2.R")
+
 source('sharepoint_path.R')
 setwd(shrpoint_path)
-attach('data/ss3_inputs/tag/tag.Rdata')
-
 
 
 
 ###########
-# Data input
+# ALK TAGGING DATA
 ###########
 
- 
+
+# source("code/auxiliary_functions.R")
+# # Sharepoint path:
+# source('sharepoint_path.R')
+# setwd(shrpoint_path)
+# 
+# #CALCULATE AND PLOT LENGTH AT AGE
+# 
+# #initial values
+# age <- seq(0.25,15,0.25)
+# FL <- c(10:167)
+# param <- c(167.47, 3.11, 0.39, 0.82, 0.34, -0.01)
+# 
+# #calculate length at age and age at length
+# FLatAge <-  growth2stage.f(age, param)
+Len_Font <- c(23.821,34.9831,43.1626,46.936,49.9479,52.8725,58.2097,68.1843,77.6614,87.5578,98.6306,106.399,
+              114.182,121.998,125.114,127.895,130.377,132.592,134.569,136.334,137.908,139.314,140.568,141.688,142.687,143.578,144.374,146.017)
+Len_Fair <- c( 29.94634,  44.53486,  51.23907,  59.87039,  69.86614,  78.93331,  87.15816,  94.61894, 101.38664,
+               107.52563, 113.09432, 118.14569, 122.72780, 126.88425, 130.65457, 134.07464, 137.17699, 139.99114,
+               142.54386, 144.85944, 146.95991, 148.86525, 150.59359, 152.16137, 153.58350, 154.87352, 156.04371,
+               157.10518)
+
+df <- NULL
+df$Age <- seq(0.25,15,0.25)[1:28]
+df$Len_Fontaneau <- Len_Font
+df$Len_Fairly <- Len_Fair[1:28]
+df <- as.data.frame(df)
+p <- ggplot()+
+  geom_line(data=df,aes(x=Age,y=Len_Fairly,colour="Fairly"),size=1)+
+  geom_line(data=df,aes(x=Age,y=Len_Fontaneau,colour="Fontaneau"),size=1)+theme_fun()+
+  xlab("Age")+ylab("Length (cm)")+
+  scale_color_manual(name = "Tag-Growth", values = c("Fontaneau" = "black", "Fairly" = "red"))
+p
+
+dir_plot <- "output/figures/"
+SavePlot('Tag_ALK_Fonteneau_Fairly',15,10)
+
+Len <- df$Len_Fairly
+
+###########
+# Tagging Data input
+###########
+
+Data <- read.csv("data/ss3_inputs/tag/tag.csv")
+print(nrow(Data))
+
 
 Data =  transmute(Data,TAG_TagSeries, TAG_Tag1, TAG_Tag2,TAG_Project,TAG_Vessel,TAG_Sp,TAG_Length, TAG_Gear,SIG_Date,SIG_LatDegree,SIG_LatMinute,SIG_LonDegree,SIG_LonMinute,
 				  REC_TagSeries,REC_ID, REC_Length,REC_Sp,REC_Country,REC_DateFound, REC_DateCatch,REC_DateReturn,REC_Timestamp,REC_LatDegree,REC_LatMinute,REC_LonDegree,REC_LonMinute,REC_Gear, CAL_SET_ShoolType, REC_WhereFound, 
@@ -91,7 +125,6 @@ data = data %>%
 	 mutate(rel_model_area = replace(rel_model_area,which(rel_model_area==5),4)) 
 
 # Assign release age  - simple slicing	
-Len <- c(23.821,34.9831,43.1626,46.936,49.9479,52.8725,58.2097,68.1843,77.6614,87.5578,98.6306,106.399,114.182,121.998,125.114,127.895,130.377,132.592,134.569,136.334,137.908,139.314,140.568,141.688,142.687,143.578,144.374,146.017)  # Fon
 
 
 LenMid <- c(10, (Len[-28] + (Len[-1] - Len[-28])/2))
@@ -181,7 +214,7 @@ dataC = dataC %>% ## LL
 		mutate(rec_model_fleet = replace(rec_model_fleet, which(rec_model_fleet == 0 & rec_gear =='Troll line' & rec_assessment_area==3),'18'))  %>% 
 		mutate(rec_model_fleet = replace(rec_model_fleet, which(rec_model_fleet == 0 & rec_gear =='Handline' & rec_assessment_area==3),'18'))  	
 #tapply(dataC$rec_fleet,list(dataC$rec_fleet, dataC$rec_region), length)	
-dataC = dataC %>% dplyr::filter(rec_model_fleet !=0)
+dataC = dataC %>%dplyr::filter(rec_model_fleet !=0)
 
 
 
@@ -195,15 +228,21 @@ dataC = dataC %>% dplyr::filter(rec_model_fleet !=0)
 # updated prossing: initial tag mortality 10%
 # updated prossing: seperate reporting rate adjustment for at sea and seychelles recovery
 # updated prossing: reporting rate adjument for outside seychlles recovery using esimated proportion of EU PS landings in Seychelles
-		
-work = data %>% 
-	dplyr::filter(project=='RTTP')  %>%
-	mutate(rel_age = replace(rel_age,which(rel_age>15),15)) %>%
+
+work = data %>% dplyr::filter(project=='RTTP')  
+
+
+work =	work %>% mutate(rel_age = replace(rel_age,which(rel_age>15),15)) %>%
 	group_by(rel_assessment_area, rel_yrqtr,rel_year,rel_quarter,rel_age)  %>%
 	summarise(number=n())  %>% 
 	as.data.frame() %>%
 	mutate(rel_yr=yearqtr2qtr(rel_year,rel_quarter,1950,13),season=1,tfill=999,gender=0,tag = 1:n())
+
+print(nrow(work))
+
 work = work %>% mutate(number_prime = round(number * 0.725,1))
+
+
 workC = dataC %>% 
 	dplyr::filter(project=='RTTP')  %>%
 	mutate(rel_age = replace(rel_age,which(rel_age>15),15)) %>%
@@ -241,5 +280,8 @@ workC = dataC %>%
 tmp = work %>% select(tag,rel_assessment_area,rel_yr,season, tfill,gender,rel_age,number_prime) 
 temp = workC %>% select(tag,rec_yr,season,rec_model_fleet,number_prime)
 	
-save(tmp,temp, file="data/ss3_inputs/tag/tag_ss3_input_30_08.RData")
-	
+tmp$rel_assessment_area[tmp$rel_assessment_area==2] <- 1
+tmp$rel_assessment_area[tmp$rel_assessment_area==3] <- 2
+
+write.csv(tmp,"data/ss3_inputs/tag/Realease_tag_GrowthFairly.csv",row.names=FALSE) 
+write.csv(temp,"data/ss3_inputs/tag/Recovered_tag_GrowthFairly.csv" ,row.names=FALSE)
