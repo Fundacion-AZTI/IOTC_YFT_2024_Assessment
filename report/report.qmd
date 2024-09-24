@@ -155,7 +155,7 @@ We assigned a model area for each observation based on the grid centroid. Note t
 
 ### Catch-raised aggregation
 
-This spatial aggregation method was performed only for the size dataset with a regular grid. Like the previous approach, we assigned a model area for each observation based on the grid centroid (@fig-map-grid-agg2). To aggregate by model area, catch information was summed and size information was weighted by catch. In order to do this weighting, we first identified the catch (in numbers) that corresponded to a given size observation (i.e., year, quarter, standard grid, CPCs, and gear type). We found a perfect match for about $\sim$ 78% of cases but there were some size observations without catch. In order to fill in these catch gaps, we followed an imputation procedure with four levels:
+This spatial aggregation method was performed only for the size dataset with a regular grid. Like the previous approach, we assigned a model area for each observation based on the grid centroid (@fig-map-grid-agg2). To aggregate by model area, catch information was summed and size information was weighted by catch. In order to do this weighting, we first identified the catch (in numbers) that corresponded to a given size observation (i.e., year, quarter, grid, CPCs, and gear type). We found a perfect match for $\sim$ 78% of cases but there were some size observations without catch. In order to fill in these catch gaps, we followed an imputation procedure with four levels:
 
 -   *Level 1*: Fill in catch gaps with the average catch per grid for a given year, quarter, CPCs, and gear type.
 -   *Level 2*: Fill in catch gaps with the average catch per grid for a given year, CPCs, and gear type.
@@ -217,6 +217,22 @@ A number of important trends are evident in the CPUE indices:
 - The spike in the CPUE indices around 2012 in the west equatorial region (region 1) was evident for most fishing fleets. Several hypotheses have been proposed on what could have caused CPUE to have increased, including a return to fishing in areas that were most affected by piracy. However, further investigation is required.
 
 The values and trend of LL CPUE used in the 2021 assessment and in this assessment were quite similar for all model areas before 1990 (@fig-comp-cpue). After 1990, we noted large differences for model area 1b, where the current CPUE showed consistently larger values ($\sim$40%) than the 2021 CPUE, especially after 2005. For region 4, we also observed slightly larger 2024 CPUE values compared to the 2021 CPUE after 2005. However, this discrepancy was minimal for regions 2 and 3. 
+
+### Purse seine CPUE indices
+
+The European and associated flags purse seine fishing activities in the Indian Ocean during 1981–2020 have been monitored through the collection of logbooks and observer sampling. Standardised indices of the biomass of yellowfin caught by European purse seiners (Spain and France) from sets on free swimming schools (1991 – 2022) and sets on associated tuna schools (FOB, 2010 – 2022) were developed (@fig-ts-ps-cpue). The free school index was based on the application of a general additive mixed effect model with three components to model [@kaplanStandardizedCPUEAbundance2024]: i) the detection rate of free swimming schools per unit search time, ii) the probability that adult yellowfin are present in a set, and iii) the adult biomass per set given presence assuming a lognormal distribution. The FOB index was based on the application of two models: a generalized linear mixed model and a spatiotemporal model, both using a hurdle approach [@correaStandardizedCatchUnit2024]. These standardizations considered a comprehensive list of candidate covariates, including the effect of the technological improvement related to the use of echosounder buoys and environmental variables. The predicted CPUE over time was obtained using the *predict-then-aggregate* approach, which is considered best practice [@hoyleCatchUnitEffort2024]. 
+
+The FOB mainly informs the biomass of juvenile yellowfin, while the free-school index informs the biomass of the adult portion of the population in region 1b. The FOB index displays juvenile biomass fluctuations over the years, with larger values during 2013 and 2014, and a remarkable increase after 2020. On the other hand, the free school CPUE index showed a increase from the late 1990s until 2004, and then a dramatic decrease until 2009. From 2015, the free school index showed another dramatic decrease until 2018, and a slight recovery after that. 
+
+We evaluated the impact of incorporating the free school and FOB CPUE series as auxiliary indices (i.e., always in conjunction with the LL CPUE index) in the assessment model. In order to incorporate the free school index, we revised the region/fishery structure in which purse seine fisheries are separated into the small and large fish components (EXPAND THIS).
+
+### Effort creep
+
+It is well recognised that the relationship between PS CPUE and abundance is unlikely be proportional, as the improvement of catch efficiency due to technology development is difficult to quantify, and the changes in catchability are not fully accounted for in the standardisation process. Effort creep can be defined as an unquantified increase in the average fishing power over time that disturbs the relationship of proportionality between the index and the stock trajectory [@hoyleEffortCreepLongline2024]. These changes in catchability over time can affect CPUE indices, and therefore the outcomes of stock assessments. This is especially important for assessments that lack abundance indices from fishery-independent surveys, which includes the majority of the fisheries managed by tuna regional fishery management organizations (RFMOs). 
+
+For the case of longline fleets, technological advances include electronic devices to help navigate, communicate, and find target species. Synthetic materials allowed fishers to improve hooks and lines which increased probabilities of both hooking and landing. Satellite imagery improved search efficiency. Freezers increased the proportion of time spent on fishing grounds, while equipment for faster longline retrieval increased hooks set without affecting soak time [@hoyleEffortCreepLongline2024]. In the 2021 yellowfin assessment in the IO, a sensitivity analysis was run during the WPTT meeting that included 1% effort creep per year for the entire period of the index, which resulted in changes in the stock depletion level. Based on the recommendations of @hoyleEffortCreepLongline2024, we evaluated two different levels of effort creep for the LL CPUE index in the current assessment: 0.5 and 1.5% per annum, which is associated with vessel turnover. 
+
+The WCPO assessments have often estimated substantial changes in PS FAD-associated fisheries (e.g., @mckechnieStockAssessmentBigeye2017). Using a similar approach, @kolodyEstimationIndianOcean2018 estimated a catchability increase of approximately 1.25% per year for the standardised purse seine effort for yellowfin from sets on associated schools. Likewise, studies on the French fleet indicate a 10% increase in catch per set associated with echosounder use, equivalent to about 1% per annum, and a 1.7 – 4.0 % increase in efficiency (stable across time) arising from fishing their own floating objects [@wainQuantifyingIncreaseFishing2021]. Based on the recommendations of @hoyleEffortCreepLongline2024, we evaluated two different levels of effort creep for both purse seine indices in the current assessment: 1.5 and 4.35% per annum.
 
 ## Size data
 
@@ -384,6 +400,16 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "catch_grid.p
 {{< pagebreak >}}
 
 ```{r}
+#| label: fig-size-grid
+#| fig-cap: "Add your caption here."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "size_grid.png"), rel_path = FALSE)
+```
+
+
+{{< pagebreak >}}
+
+```{r}
 #| label: fig-map-grid
 #| fig-cap: "Add your caption here."
 #| fig-align: center
@@ -433,6 +459,15 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_catc
 #| fig-cap: "Add your caption here."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_cpue_area.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-ts-ps-cpue
+#| fig-cap: "Add your caption here."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_ps_cpue.png"), rel_path = FALSE)
 ```
 
 

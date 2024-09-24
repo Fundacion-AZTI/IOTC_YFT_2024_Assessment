@@ -11,9 +11,6 @@ source(here('code', 'auxiliary_functions.R'))
 # read data from standard SF table
 ##############
 
-# Follow the 4A configuration:
-ModelFisheries <- c('GI 1a','HD 1a','LL 1a','OT 1a','BB 1b','FS 1b','LL 1b','LS 1b','TR 1b','LL 2','LL 3','GI 4','LL 4','OT 4','TR 4','FS 2','LS 2','TR 2','FS 4','LS 4','LF 4')
-
 # Read size datasets:
 Data_1 = read.csv(file.path(shrpoint_path, 'data/raw',  "YFT_STD_SF_WPTT26_REGULAR_TO_CWP55_GRIDS.csv"))
 Data_2 = read.csv(file.path(shrpoint_path, 'data/raw',  "YFT_STD_SF_WPTT26_NON_REGULAR_TO_CWP55_GRIDS.csv"))

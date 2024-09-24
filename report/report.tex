@@ -276,7 +276,7 @@ improve model parametrisations
 2019}). An attempt was made to update the assessment in 2019, with
 extensive investigations of alternative spatial structures, data
 weighting and biological parameters
-(\citeproc{ref-urtizbereaPRELIMINARYASSESSMENTINDIAN2019}{Urtizberea et
+(\citeproc{ref-urtizbereaPreliminaryAssessmentIndian2019}{Urtizberea et
 al. 2019}). Further analysis was conducted in 2020 to refine the process
 of model selection through an objective scoring system based on
 diagnostic metrics
@@ -655,10 +655,10 @@ area for each observation based on the grid centroid
 information was summed and size information was weighted by catch. In
 order to do this weighting, we first identified the catch (in numbers)
 that corresponded to a given size observation (i.e., year, quarter,
-standard grid, CPCs, and gear type). We found a perfect match for about
-\(\sim\) 78\% of cases but there were some size observations without
-catch. In order to fill in these catch gaps, we followed an imputation
-procedure with four levels:
+grid, CPCs, and gear type). We found a perfect match for \(\sim\) 78\%
+of cases but there were some size observations without catch. In order
+to fill in these catch gaps, we followed an imputation procedure with
+four levels:
 
 \begin{itemize}
 \tightlist
@@ -895,6 +895,98 @@ model area 1b, where the current CPUE showed consistently larger values
 we also observed slightly larger 2024 CPUE values compared to the 2021
 CPUE after 2005. However, this discrepancy was minimal for regions 2 and
 3.
+
+\subsubsection{Purse seine CPUE indices}\label{purse-seine-cpue-indices}
+
+The European and associated flags purse seine fishing activities in the
+Indian Ocean during 1981--2020 have been monitored through the
+collection of logbooks and observer sampling. Standardised indices of
+the biomass of yellowfin caught by European purse seiners (Spain and
+France) from sets on free swimming schools (1991 -- 2022) and sets on
+associated tuna schools (FOB, 2010 -- 2022) were developed
+(Figure~\ref{fig-ts-ps-cpue}). The free school index was based on the
+application of a general additive mixed effect model with three
+components to model
+(\citeproc{ref-kaplanStandardizedCPUEAbundance2024}{Kaplan et al.
+2024}): i) the detection rate of free swimming schools per unit search
+time, ii) the probability that adult yellowfin are present in a set, and
+iii) the adult biomass per set given presence assuming a lognormal
+distribution. The FOB index was based on the application of two models:
+a generalized linear mixed model and a spatiotemporal model, both using
+a hurdle approach (\citeproc{ref-correaStandardizedCatchUnit2024}{Correa
+et al. 2024}). These standardizations considered a comprehensive list of
+candidate covariates, including the effect of the technological
+improvement related to the use of echosounder buoys and environmental
+variables. The predicted CPUE over time was obtained using the
+\emph{predict-then-aggregate} approach, which is considered best
+practice (\citeproc{ref-hoyleCatchUnitEffort2024}{Hoyle et al. 2024}).
+
+The FOB mainly informs the biomass of juvenile yellowfin, while the
+free-school index informs the biomass of the adult portion of the
+population in region 1b. The FOB index displays juvenile biomass
+fluctuations over the years, with larger values during 2013 and 2014,
+and a remarkable increase after 2020. On the other hand, the free school
+CPUE index showed a increase from the late 1990s until 2004, and then a
+dramatic decrease until 2009. From 2015, the free school index showed
+another dramatic decrease until 2018, and a slight recovery after that.
+
+We evaluated the impact of incorporating the free school and FOB CPUE
+series as auxiliary indices (i.e., always in conjunction with the LL
+CPUE index) in the assessment model. In order to incorporate the free
+school index, we revised the region/fishery structure in which purse
+seine fisheries are separated into the small and large fish components
+(EXPAND THIS).
+
+\subsubsection{Effort creep}\label{effort-creep}
+
+It is well recognised that the relationship between PS CPUE and
+abundance is unlikely be proportional, as the improvement of catch
+efficiency due to technology development is difficult to quantify, and
+the changes in catchability are not fully accounted for in the
+standardisation process. Effort creep can be defined as an unquantified
+increase in the average fishing power over time that disturbs the
+relationship of proportionality between the index and the stock
+trajectory (\citeproc{ref-hoyleEffortCreepLongline2024}{Hoyle 2024}).
+These changes in catchability over time can affect CPUE indices, and
+therefore the outcomes of stock assessments. This is especially
+important for assessments that lack abundance indices from
+fishery-independent surveys, which includes the majority of the
+fisheries managed by tuna regional fishery management organizations
+(RFMOs).
+
+For the case of longline fleets, technological advances include
+electronic devices to help navigate, communicate, and find target
+species. Synthetic materials allowed fishers to improve hooks and lines
+which increased probabilities of both hooking and landing. Satellite
+imagery improved search efficiency. Freezers increased the proportion of
+time spent on fishing grounds, while equipment for faster longline
+retrieval increased hooks set without affecting soak time
+(\citeproc{ref-hoyleEffortCreepLongline2024}{Hoyle 2024}). In the 2021
+yellowfin assessment in the IO, a sensitivity analysis was run during
+the WPTT meeting that included 1\% effort creep per year for the entire
+period of the index, which resulted in changes in the stock depletion
+level. Based on the recommendations of Hoyle
+(\citeproc{ref-hoyleEffortCreepLongline2024}{2024}), we evaluated two
+different levels of effort creep for the LL CPUE index in the current
+assessment: 0.5 and 1.5\% per annum, which is associated with vessel
+turnover.
+
+The WCPO assessments have often estimated substantial changes in PS
+FAD-associated fisheries (e.g., McKechnie, Pilling, and Hampton
+(\citeproc{ref-mckechnieStockAssessmentBigeye2017}{2017})). Using a
+similar approach, Kolody
+(\citeproc{ref-kolodyEstimationIndianOcean2018}{2018}) estimated a
+catchability increase of approximately 1.25\% per year for the
+standardised purse seine effort for yellowfin from sets on associated
+schools. Likewise, studies on the French fleet indicate a 10\% increase
+in catch per set associated with echosounder use, equivalent to about
+1\% per annum, and a 1.7 -- 4.0 \% increase in efficiency (stable across
+time) arising from fishing their own floating objects
+(\citeproc{ref-wainQuantifyingIncreaseFishing2021}{Wain et al. 2021}).
+Based on the recommendations of Hoyle
+(\citeproc{ref-hoyleEffortCreepLongline2024}{2024}), we evaluated two
+different levels of effort creep for both purse seine indices in the
+current assessment: 1.5 and 4.35\% per annum.
 
 \subsection{Size data}\label{size-data}
 
@@ -1141,6 +1233,20 @@ Fishery number & Fishery code and region \\
 
 \centering{
 
+\includegraphics[width=6.69in,height=\textheight]{C:/Use/OneDrive - AZTI/General - IOTC_YFT_2024/output/figures/size_grid.png}
+
+}
+
+\caption{\label{fig-size-grid}Add your caption here.}
+
+\end{figure}%
+
+\newpage{}
+
+\begin{figure}
+
+\centering{
+
 \includegraphics[width=6.69in,height=\textheight]{C:/Use/OneDrive - AZTI/General - IOTC_YFT_2024/output/figures/map_size_grid.png}
 
 }
@@ -1225,6 +1331,20 @@ Fishery number & Fishery code and region \\
 
 \centering{
 
+\includegraphics[width=3.34in,height=\textheight]{C:/Use/OneDrive - AZTI/General - IOTC_YFT_2024/output/figures/ts_ps_cpue.png}
+
+}
+
+\caption{\label{fig-ts-ps-cpue}Add your caption here.}
+
+\end{figure}%
+
+\newpage{}
+
+\begin{figure}
+
+\centering{
+
 \includegraphics[width=6.69in,height=\textheight]{C:/Use/OneDrive - AZTI/General - IOTC_YFT_2024/output/figures/compare_cpue.png}
 
 }
@@ -1270,6 +1390,13 @@ Pelamis, Yellowfin {Thunnus} Albacares and Bigeye {Thunnus} Obesus) in
 the {Indian Ocean}.''} In \emph{Advances in {Marine Biology}},
 88:39--89. Elsevier. \url{https://doi.org/10.1016/bs.amb.2020.09.002}.
 
+\bibitem[\citeproctext]{ref-correaStandardizedCatchUnit2024}
+Correa, Giancarlo M., Jon Uranga, David Kaplan, Gorka Merino, and
+Lourdes Ramos. 2024. {``Standardized Catch Per Unit Effort of Yellowfin
+Tuna in the {Indian Ocean} for the {European} Purse Seine Fleet
+Operating on Floating Objects.''} IOTC-2024-WPTT26(DP)-11rev1. Indian
+Ocean Tuna Comission.
+
 \bibitem[\citeproctext]{ref-dammannagodaEvidenceFineGeographical2008}
 Dammannagoda, Sudath T., David A. Hurwood, and Peter B. Mather. 2008.
 {``Evidence for Fine Geographical Scale Heterogeneity in Gene
@@ -1295,7 +1422,7 @@ IOTC-2023-WPTT25-20. Indian Ocean Tuna Comission.
 
 \bibitem[\citeproctext]{ref-froeseFishBase2024}
 Froese, Rainer, and Daniel Pauly. 2024. {``{FishBase}.''} World \{\{Wide
-Web\}\} Electronic Publication. \emph{FishBase}. www.fishbase.org.
+Web\}\} Electronic Publication. www.fishbase.org.
 
 \bibitem[\citeproctext]{ref-fuPreliminaryIndianOcean2018}
 Fu, Dan, Adam D. Langley, Gorka Merino, and Agurtzane Urtizberea. 2018.
@@ -1332,6 +1459,19 @@ Hoyle, Simon D. 2018. {``Indian {Ocean} Tropical Tuna Regional Scaling
 Factors That Allow for Seasonality and Cell Areas.''}
 IOTC-2018-WPM09-13. Indian Ocean Tuna Comission.
 
+\bibitem[\citeproctext]{ref-hoyleEffortCreepLongline2024}
+---------. 2024. {``Effort Creep in Longline and Purse Seine {CPUE} and
+Its Application in Tropical Tuna Assessments.''}
+IOTC-2024-WPTT26(DP)-16. Indian Ocean Tuna Comission.
+
+\bibitem[\citeproctext]{ref-hoyleCatchUnitEffort2024}
+Hoyle, Simon D., Robert A. Campbell, Nicholas D. Ducharme-Barth, Arnaud
+Grüss, Bradley R. Moore, James T. Thorson, Laura Tremblay-Boyer, Henning
+Winker, Shijie Zhou, and Mark N. Maunder. 2024. {``Catch Per Unit Effort
+Modelling for Stock Assessment: {A} Summary of Good Practices.''}
+\emph{Fisheries Research} 269 (January): 106860.
+\url{https://doi.org/10.1016/j.fishres.2023.106860}.
+
 \bibitem[\citeproctext]{ref-hoyleExploringPossibleCauses2017}
 Hoyle, Simon D., Keisuke Satoh, and Takayuki Matsumoto. 2017.
 {``Exploring Possible Causes of Historical Discontinuities in {Japanese}
@@ -1340,6 +1480,18 @@ Longline {CPUE}.''} IOTC-2017-WPTT19-33. Indian Ocean Tuna Comission.
 \bibitem[\citeproctext]{ref-iotcReviewYellowfinTuna2021}
 IOTC, Secretariat. 2021. {``Review of {Yellowfin Tuna Statistical
 Data}.''} IOTC-2021-WPTT23(DP)-07\_Rev1. Indian Ocean Tuna Comission.
+
+\bibitem[\citeproctext]{ref-kaplanStandardizedCPUEAbundance2024}
+Kaplan, David, Giancarlo M Correa, Lourdes Ramos, Antoine Duparc, Jon
+Uranga, Josu Santiago, Laurent Floch, et al. 2024. {``Standardized
+{CPUE} Abundance Indices for Adult Yellowfin Tuna Caught in
+Free-Swimming School Sets by the {European} Purse-Seine Fleet in the
+{Indian Ocean}, 1991-2022.''} IOTC-2024-WPTT26(DP)-13rev2.
+
+\bibitem[\citeproctext]{ref-kolodyEstimationIndianOcean2018}
+Kolody, D. 2018. {``Estimation of {Indian Ocean Skipjack Purse Seine
+Catchability Trends} from {Bigeye} and {Yellowfin Assessments}.''}
+IOTC--2018--WPTT20--32. Indian Ocean Tuna Comission.
 
 \bibitem[\citeproctext]{ref-krishnanDietCompositionFeeding2024}
 Krishnan, Silambarasan, Tiburtius Antony Pillai, John Chembian Antony
@@ -1426,6 +1578,12 @@ Maunder, Mark, Carolina V. Minte-Vera, Adam D. Langley, and Daniel
 Howell. 2023. {``Independent Review of Recent {IOTC} Yellowfin Tuna
 Assessment.''} IOTC-2023-WPTT25-13\_Rev1. Indian Ocean Tuna Comission.
 
+\bibitem[\citeproctext]{ref-mckechnieStockAssessmentBigeye2017}
+McKechnie, S., G. Pilling, and John Hampton. 2017. {``Stock Assessment
+of Bigeye Tuna in the Western and Central {Pacific Ocean}.''}
+WCPFC-SC13-2017/SA-WP-05. {Western and Central Pacific Fisheries
+Commission}.
+
 \bibitem[\citeproctext]{ref-menardIsotopicEvidenceDistinct2007}
 Ménard, Frédéric, Anne Lorrain, Michel Potier, and Francis Marsac. 2007.
 {``Isotopic Evidence of Distinct Feeding Ecologies and Movement Patterns
@@ -1507,12 +1665,20 @@ Merino. 2020. {``Towards Providing Scientific Advice for {Indian Ocean}
 Yellowfin in 2020.''} IOTC-2020-WPTT22(AS)-21. Indian Ocean Tuna
 Comission.
 
-\bibitem[\citeproctext]{ref-urtizbereaPRELIMINARYASSESSMENTINDIAN2019}
+\bibitem[\citeproctext]{ref-urtizbereaPreliminaryAssessmentIndian2019}
 Urtizberea, Agurtzane, Dan Fu, Gorka Merino, Richard D Methot,
 Massimiliano Cardinale, Henning Winker, John Walter, and Hilario Murua.
-2019. {``{PRELIMINARY ASSESSMENT OF INDIAN OCEAN YELLOWFIN TUNA}
-1950-2018 ({STOCK SYNTHESIS}, {V3}.30).''} IOTC-2019-WPTT21-50. Indian
+2019. {``Preliminary Assessment of {Indian Ocean} Yellowfin Tuna
+1950-2018 ({Stock Synthesis}, V3.30).''} IOTC-2019-WPTT21-50. Indian
 Ocean Tuna Comission.
+
+\bibitem[\citeproctext]{ref-wainQuantifyingIncreaseFishing2021}
+Wain, Gwenaëlle, Loreleï Guéry, David Michael Kaplan, and Daniel
+Gaertner. 2021. {``Quantifying the Increase in Fishing Efficiency Due to
+the Use of Drifting {FADs} Equipped with Echosounders in Tropical Tuna
+Purse Seine Fisheries.''} Edited by Richard O'Driscoll. \emph{ICES
+Journal of Marine Science} 78 (1): 235--45.
+\url{https://doi.org/10.1093/icesjms/fsaa216}.
 
 \bibitem[\citeproctext]{ref-zudairePreliminaryEstimatesSex2022}
 Zudaire, Iker, Iraide Artetxe-Arrate, Jessica H. Farley, Hilario Murua,

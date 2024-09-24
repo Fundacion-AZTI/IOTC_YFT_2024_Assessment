@@ -101,6 +101,7 @@ work = data	%>%
   mutate(qtr = yearqtr2qtr(Year,Quarter,1950,13)) %>%
   mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries)))
 table(work$ModelFleet)
+which(is.na(work$ModelFleet))
 
 # Save SS catch input
 write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'catch.csv'), row.names = FALSE)

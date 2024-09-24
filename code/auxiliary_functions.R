@@ -240,21 +240,45 @@ Sum <- function (..., na.rm = T)  sum(..., na.rm = na.rm)
 
 # -------------------------------------------------------------------------
 # Filter 4A LF data for SS input:
-filter_LF_4A = function(data) {
-  
-  work = data %>% 
+filter_LF_4A_type1 = function(data) { # used in 2021 assessment
+
+  work = data %>%
     dplyr::filter(!(Fleet %in% c('TWN','SYC') & Gear == 'LL')) %>%
     dplyr::filter(!(ModelFishery == "LL 1a" & Year %in% c(1970:1995, 2010:2020))) %>% # please check if 2020-2022 data needs to be excluded
     dplyr::filter(!(ModelFishery == "LL 1b" & Year %in% c(1950:1959))) %>%
     dplyr::filter(!(ModelFishery == "LL 2" & Year %in% c(1950:1959))) %>%
     dplyr::filter(!(ModelFishery == "LL 3" & Year %in% c(1950:1959))) %>%
     dplyr::filter(!(ModelFishery == "LL 4" & Year %in% c(1950:1959,2001:2005,2015,2019))) %>%  # please check if 2020-2022 data needs to be excluded
+    dplyr::filter(!(ModelFishery == "LF 4" & Year < 2005)) %>% # confirmed by Agurtzane
     dplyr::filter(!(ModelFishery == "GI 4" & Year %in% c(1975:1987))) %>%
     dplyr::filter(!(ModelFishery == "HD 1a" & Year %in% c(1950:2007))) %>%
     dplyr::filter(!(ModelFishery == "OT 4" & Year %in% c(1983,2016))) %>%
     dplyr::filter(!(ModelFishery == "TR 4" & Year %in% c(2016:2019))) %>%  # please check if 2020-2022 data needs to be excluded
     dplyr::filter(!(ModelFishery == "TR 1b")) %>%
-    dplyr::filter(!(ModelFishery == "TR 2")) 
+    dplyr::filter(!(ModelFishery == "TR 2"))
+
+  return(work)
+
+}
+
+filter_LF_4A_type2 = function(data) { # new filtering
+  
+  work = data %>% 
+    # Filters reviewed by Simon and agreed by the team:
+    dplyr::filter(!(Fleet %in% c('TWN','SYC') & Gear == 'LL')) %>%
+    dplyr::filter(!(ModelFishery == "LL 1a" & Year %in% c(1970:1995, 2010:2020))) %>% 
+    dplyr::filter(!(ModelFishery == "LL 1b" & Year %in% c(1950:1959))) %>%
+    dplyr::filter(!(ModelFishery == "LL 2" & Year %in% c(1950:1959))) %>%
+    dplyr::filter(!(ModelFishery == "LL 3" & Year %in% c(1950:1959))) %>%
+    dplyr::filter(!(ModelFishery == "LL 4" & Year %in% c(1950:1959,2001:2005,2015,2019))) %>%
+    dplyr::filter(!(ModelFishery == "LF 4" & Year < 2005)) %>% # confirmed by Agurtzane
+    # Remove rows with less than 100 Nfish sampled:
+    dplyr::filter(!(Nfish_samp < 100 & Quality > 0)) %>% # remove low sample size but only those rows not considered best quality
+    # Remove weird patterns:
+    dplyr::filter(!(ModelFishery == "GI 1a" & Fleet == 'LKA' & Year %in% c(2021))) %>%
+    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet == 'MDV' & Year %in% c(2003))) %>%
+    dplyr::filter(!(ModelFishery == "OT 1a" & Year %in% c(2021:2022))) %>%
+    dplyr::filter(!(ModelFishery == "OT 4" & Year %in% c(2016)))
   
   return(work)
   
