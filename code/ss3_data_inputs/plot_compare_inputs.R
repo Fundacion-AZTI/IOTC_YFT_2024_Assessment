@@ -39,7 +39,7 @@ merged_catch$time = ssts2yq(merged_catch$time) # transform to yr-qt
 
 # Make plot:
 p1 = ggplot(data = merged_catch, aes(x = time, y = catch*1e-03)) +
-  geom_line(aes(color = type)) +
+  geom_line(aes(color = type), linewidth = 0.2) +
   ylab("Catch (thousands of tons)") + xlab(NULL) +
   theme(axis.text.y = element_text(angle = 90, vjust = 0.5, hjust=0.5),
         legend.position = c(0.6, 0.05)) +

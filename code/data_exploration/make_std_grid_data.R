@@ -4,7 +4,7 @@ source('code/auxiliary_functions.R')
 
 data_folder = 'data/processed'
 # Length bin column names (lowercase):
-C_labels = c(paste0("l0", seq(from = 10, to = 98, by = 2)), paste0("l", seq(from = 100, to = 198, by = 2)))
+len_bins = c(paste0("l0", seq(from = 10, to = 98, by = 2)), paste0("l", seq(from = 100, to = 198, by = 2)))
 
 # Define grid dim to use (degrees):
 grid_size = 5
@@ -15,7 +15,7 @@ grid_size = 5
 
 # Read datasets:
 catch_spt = read_csv(file.path(shrpoint_path, data_folder, 'catch_grid.csv'))
-size_spt = read_csv(file.path(shrpoint_path, data_folder, 'size_grid.csv'))
+size_spt = read_csv(file.path(shrpoint_path, data_folder, 'size_grid-regular.csv')) # always with regular
 # Some processing:
 colnames(catch_spt) = tolower(colnames(catch_spt))
 colnames(size_spt) = tolower(colnames(size_spt))
@@ -25,24 +25,31 @@ size_spt = size_spt %>% mutate(grid = as.character(grid))
 # Remember that Long Lat columns are the centroid of the IOTC grid, calculated in LF or CE scripts.
 
 # -------------------------------------------------------------------------
-# Spatially standardize catch data (e.g., from 30x30 to grid_size x grid_size):
+# Catch data:
 catch_spt = catch_spt %>% mutate(grid_type = str_sub(grid, 1, 1))
 # No need to standardize catch data since grid type is always 6 (5x5, same as std grid)
 # Double check this:
 table(catch_spt$grid_type)
 
 # -------------------------------------------------------------------------
-# Spatially standardize catch data (e.g., from 30x30 to grid_size x grid_size):
+# Size data:
 size_spt = size_spt %>% mutate(grid_type = str_sub(grid, 1, 1))
-# Do some processing:
-size_spt = size_spt %>% mutate(samp_ID = 1:n()) # add samp_ID column
-dim(size_spt)
-# Transform to std grid (from larger irregular grids to grid_size):
-size_spt_tf = size_spt %>% group_split(samp_ID) %>% 
-  purrr::map(~ transform_to_stdgrid(.x, std_res = grid_size)) %>% 
-  list_rbind()
-dim(size_spt_tf)
+# No need to standardize size data since grid type is always 6 (5x5, same as std grid)
+# Double check this:
+table(size_spt$grid_type)
 
+# # -------------------------------------------------------------------------
+# # Spatially standardize catch data (e.g., from 30x30 to grid_size x grid_size):
+# size_spt = size_spt %>% mutate(grid_type = str_sub(grid, 1, 1))
+# # Do some processing:
+# size_spt = size_spt %>% mutate(samp_ID = 1:n()) # add samp_ID column
+# dim(size_spt)
+# # Transform to std grid (from larger irregular grids to grid_size):
+# size_spt_tf = size_spt %>% group_split(samp_ID) %>% 
+#   purrr::map(~ transform_to_stdgrid(.x, std_res = grid_size)) %>% 
+#   list_rbind()
+# dim(size_spt_tf)
+size_spt_tf = size_spt 
 
 # -------------------------------------------------------------------------
 # -------------------------------------------------------------------------
@@ -101,30 +108,30 @@ save(catchStd, file = file.path(shrpoint_path, data_folder, paste0('catchStd_', 
 # Merge std grid with size data:
 sizePoints = size_spt_tf %>% st_as_sf(coords = c("long", "lat"), crs = 4326, remove = FALSE)
 dim(sizePoints)
-sum(is.na(sizePoints$reporting_quality)) # check no NAs for reporting quality
+sum(is.na(sizePoints$quality)) # check no NAs for reporting quality
 # Find stdGrid that corresponds to each size point (it takes a while):
 sizeStd = st_join(stdGrid, left = TRUE, sizePoints) %>% dplyr::filter(!is.na(year))
 dim(sizeStd) # should be the same as before
-sum(is.na(sizeStd$reporting_quality)) # check no NAs
+sum(is.na(sizeStd$quality)) # check no NAs
 # Remove sf object since not important for now and may make things slower:
 st_geometry(sizeStd) = NULL
 # Remove extrapolated grids (i.e., grid_type = 1:4) that are 99.9% on land:
-sizeStd = sizeStd %>% dplyr::filter(!(grid_type %in% as.character(1:4) & portion_on_land >= 0.999))
-dim(sizeStd)
+# sizeStd = sizeStd %>% dplyr::filter(!(grid_type %in% as.character(1:4) & portion_on_land >= 0.999))
+# dim(sizeStd)
 # Now correct sno and length freq for extrapolated grids (divide proportionally)
 # Do it in two parts to save some time:
-df_1 = sizeStd %>% dplyr::filter(grid_type %in% as.character(5:6))
-df_2 = sizeStd %>% dplyr::filter(grid_type %in% as.character(1:4)) %>% group_split(samp_ID) %>% 
-  purrr::map(~ correct_size_comp(.x)) %>% 
-  list_rbind()
-sizeStd = rbind(df_1, df_2)
+# df_1 = sizeStd %>% dplyr::filter(grid_type %in% as.character(5:6))
+# df_2 = sizeStd %>% dplyr::filter(grid_type %in% as.character(1:4)) %>% group_split(samp_ID) %>% 
+#   purrr::map(~ correct_size_comp(.x)) %>% 
+#   list_rbind()
+# sizeStd = rbind(df_1, df_2)
 
-# Aggregate information by std grid (important for 1x1 grids in size data):
+# Aggregate information by quarter (remove month):
 # These variables are aggregated without any kind of weighting: month, schooltype
 tmp_1 = sizeStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode) %>%
-          summarise_at(c('reporting_quality'), mean) # IMPORTANT: mean reporting quality
+          summarise_at(c('quality'), mean) # IMPORTANT: mean reporting quality
 tmp_2 = sizeStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode) %>%
-  summarise_at(c('sno', C_labels), sum)
+  summarise_at(c('nfish_samp', len_bins), sum)
 # Merge both datasets:
 sizeStd = inner_join(tmp_1, tmp_2)
 save(sizeStd, file = file.path(shrpoint_path, data_folder, paste0('sizeStd_', grid_size,'.RData')))
@@ -150,8 +157,11 @@ catchStdAgg2 = catchStd %>% group_by(year, fleet, gear, fisherycode) %>%
 # Third level of aggregation (remove grid, quarter, and modelarea resolution)
 catchStdAgg3 = catchStd %>% group_by(year, gear, fisherycode) %>%
   summarise_at(c('ncnofish', 'ncmtfish'), mean) # Important to get mean to not overweights missing information
-# Last level of aggregation (remove grid, quarter, modelarea, fleet, and gear resolution)
+# Fourth level of aggregation (remove grid, quarter, modelarea, fleet, and gear resolution)
 catchStdAgg4 = catchStd %>% group_by(year, fisherycode) %>%
+  summarise_at(c('ncnofish', 'ncmtfish'), mean) # Important to get mean to not overweights missing information
+# Last level of aggregation (remove grid, quarter, modelarea, fleet, and gear resolution)
+catchStdAgg5 = catchStd %>% group_by(fisherycode) %>%
   summarise_at(c('ncnofish', 'ncmtfish'), mean) # Important to get mean to not overweights missing information
 
 # Merge all aggregated data.frames:
@@ -167,6 +177,9 @@ mergedStd = left_join(mergedStd, catchStdAgg3,
 mergedStd = left_join(mergedStd, catchStdAgg4, 
                       by = c('year', 'fisherycode'),
                       suffix = c('', '_4'))
+mergedStd = left_join(mergedStd, catchStdAgg5, 
+                      by = c('fisherycode'),
+                      suffix = c('', '_5'))
 
 # Now fill in NA in catch columns based on levels of imputation:
 mergedStd = mergedStd %>% mutate(type_imputation = if_else(!is.na(ncnofish), 0, NA))
@@ -182,10 +195,13 @@ mergedStd = mergedStd %>% mutate(ncnofish = if_else(is.na(ncnofish), ncnofish_3,
 mergedStd = mergedStd %>% mutate(ncnofish = if_else(is.na(ncnofish), ncnofish_4, ncnofish), 
                                  ncmtfish = if_else(is.na(ncmtfish), ncmtfish_4, ncmtfish),
                                  type_imputation = if_else(is.na(type_imputation) & !is.na(ncnofish), 4, type_imputation))
+mergedStd = mergedStd %>% mutate(ncnofish = if_else(is.na(ncnofish), ncnofish_5, ncnofish), 
+                                 ncmtfish = if_else(is.na(ncmtfish), ncmtfish_5, ncmtfish),
+                                 type_imputation = if_else(is.na(type_imputation) & !is.na(ncnofish), 5, type_imputation))
 
 # Remove imputation columns:
-mergedStd = mergedStd %>% select(-c('ncnofish_1', 'ncnofish_2', 'ncnofish_3', 'ncnofish_4',
-                                    'ncmtfish_1', 'ncmtfish_2', 'ncmtfish_3', 'ncmtfish_4'))
+mergedStd = mergedStd %>% select(-c('ncnofish_1', 'ncnofish_2', 'ncnofish_3', 'ncnofish_4', 'ncnofish_5',
+                                    'ncmtfish_1', 'ncmtfish_2', 'ncmtfish_3', 'ncmtfish_4', 'ncmtfish_5'))
 
 # Make sure we dont have NA:
 sum(is.na(mergedStd$ncnofish))

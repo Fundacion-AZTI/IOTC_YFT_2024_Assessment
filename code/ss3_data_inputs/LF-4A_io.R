@@ -40,7 +40,7 @@ source(here('code', 'auxiliary_functions.R'))
 # Fishery 18  Troll (TR 2)                                [region 3] 2
 # Fishery 19  Purse-seine - free schools (FS 4)           [region 5] 4
 # Fishery 20  Purse-seine - log schools (LS 4)            [region 5] 4
-# Fishery 21  Longline - fresh tuna (FL 4)                [region 5] 4
+# Fishery 21  Longline - fresh tuna (LF 4)                [region 5] 4
 
 ModelFisheries <- c('GI 1a','HD 1a','LL 1a','OT 1a','BB 1b','FS 1b','LL 1b','LS 1b','TR 1b','LL 2','LL 3','GI 4','LL 4','OT 4','TR 4','FS 2','LS 2','TR 2','FS 4','LS 4','LF 4')
 
@@ -57,7 +57,7 @@ L_labels_SS  =  c(Paste("L0",seq(10,98,4)), Paste("L",seq(102,198,4)))
 
 # -------------------------------------------------------------------------
 # Read traditional LF data after preprocessing:
-data = read.csv(file.path(shrpoint_path, 'data/processed', 'size_grid.csv'))
+data = read.csv(file.path(shrpoint_path, 'data/processed', 'size_grid-irregular.csv'))
 
 # Get area information:
 data$Area = get_4Aarea_from_lonlat(data$Long, data$Lat)
@@ -98,21 +98,41 @@ table(data_std$ModelFleet)
 which(is.na(data_std$ModelFishery))
 which(is.na(data_std$ModelFleet))
 
-# -------------------------------------------------------------------------
-# Get LF input with bug, without weighting and Nsamp 5 ------------------------------
 
-# Filter data based on some criteria:
-work = filter_LF_4A(data) 
+# -------------------------------------------------------------------------
+# Aggregate data (both, simple and std):
+# Remove Month, SchoolType, Grid:
+
+agg_data = data %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
+  summarise_at('Quality', list(mean)) %>%
+  inner_join(data %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
+               summarise_at(c('Nfish_samp', L_labels), list(sum)))
+# Save for data exploration:
+write.csv(agg_data, file = file.path(shrpoint_path, 'data/exploration', 'agg-size-irregular.csv'), row.names = FALSE)
+
+agg_data_std = data_std %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
+  summarise_at('Quality', list(mean)) %>%
+  inner_join(data %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
+               summarise_at(c('Nfish_samp', L_labels), list(sum)))
+# Save for data exploration:
+write.csv(agg_data_std, file = file.path(shrpoint_path, 'data/exploration', 'agg-size-regular.csv'), row.names = FALSE)
+
+
+# -------------------------------------------------------------------------
+# Get LF input with bug, simple aggregation and Nsamp 5 ------------------------------
+
+# Filter data based on criterium type 1 (used in 2021 assessment):
+work = filter_LF_4A_type1(agg_data) 
 # Continue..
 work = work %>%
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>% 
+  dplyr::group_by(ModelFleet,Year,Quarter) %>% 
   dplyr::summarise_at(L_labels_wrong,list(Sum)) %>%
   as.data.frame() %>%
   tidyr::gather(length,total,L010:L198) %>%
   dplyr::mutate(length=as.numeric(substr(length,2,4))) %>%
   dplyr::mutate(length=length-(length-10) %% 4) %>%
   dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>%
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter,length) %>% 
+  dplyr::group_by(ModelFleet,Year,Quarter,length) %>% 
   dplyr::summarise_at("total",list(Sum)) %>% 
   tidyr::spread(length,total,fill=0) %>% 
   as.data.frame()
@@ -124,77 +144,78 @@ work = work %>%
   dplyr::select(Yr,Seas,ModelFleet,Gender,Part,Nsamp,L010:L198) %>%
   dplyr::arrange(ModelFleet,Yr)		
 work[,L_labels_SS] = round(work[,L_labels_SS],1)
+dim(work)
 
 # Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-bug.csv'), row.names = FALSE)
+write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-irregular-bug.csv'), row.names = FALSE)
 
 
 # -------------------------------------------------------------------------
-# Get LF input without bug, without weighting and Nsamp 5 ------------------------------
+# Get LF input without bug, simple aggregation and Nsamp 5 ------------------------------
 
 # Filter data based on some criteria:
-work = filter_LF_4A(data) 
+work = filter_LF_4A_type2(agg_data) 
 # Continue..
 work = work %>%
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>% 
+  dplyr::group_by(ModelFleet,Year,Quarter) %>% 
   dplyr::summarise_at(L_labels,list(Sum)) %>%
   as.data.frame() %>%
   tidyr::gather(length,total,L010:L198) %>%
   dplyr::mutate(length=as.numeric(substr(length,2,4))) %>%
   dplyr::mutate(length=length-(length-10) %% 4) %>%
   dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>%
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter,length) %>% 
+  dplyr::group_by(ModelFleet,Year,Quarter,length) %>% 
   dplyr::summarise_at("total",list(Sum)) %>% 
   tidyr::spread(length,total,fill=0) %>% 
   as.data.frame()
 
 work = work %>%
   dplyr::mutate(sno=rowSums(dplyr::select(work,L010:L198))) %>%
-  dplyr::filter(sno >= 20) %>%	# Filter Nsamp >= 20
   dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0,Nsamp = 5) %>%
   dplyr::select(Yr,Seas,ModelFleet,Gender,Part,Nsamp,L010:L198) %>%
   dplyr::arrange(ModelFleet,Yr)		
 work[,L_labels_SS] = round(work[,L_labels_SS],1)
+dim(work)
 
 # Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size.csv'), row.names = FALSE)
+write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-irregular.csv'), row.names = FALSE)
 
 # -------------------------------------------------------------------------
-# Get LF input without bug, and Nsamp is Rep Quality without weighting ---------
+# Get LF input without bug, simple aggregation, Nsamp is RQ ---------
 
 # Filter data based on some criteria:
-work = filter_LF_4A(data) 
+work = filter_LF_4A_type2(agg_data) 
 # 1. Do the aggregation for length bins (traditional way):
 work1 = work %>%
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>% 
+  dplyr::group_by(ModelFleet,Year,Quarter) %>% 
   dplyr::summarise_at(L_labels,list(Sum)) %>%
   as.data.frame() %>%
   tidyr::gather(length,total,L010:L198) %>%
   dplyr::mutate(length=as.numeric(substr(length,2,4))) %>%
   dplyr::mutate(length=length-(length-10) %% 4) %>%
   dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>%
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter,length) %>% 
+  dplyr::group_by(ModelFleet,Year,Quarter,length) %>% 
   dplyr::summarise_at("total",list(Sum)) %>% 
   tidyr::spread(length,total,fill=0) %>% 
   as.data.frame()
 # 2. Do the aggregation for reporting quality (simple mean)
 work2 = work %>%
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>%
-  summarise(RepQual = mean(REPORTING_QUALITY))
+  dplyr::group_by(ModelFleet,Year,Quarter) %>%
+  summarise(RepQual = mean(Quality))
 # Merge both:
 work = left_join(work1, work2)
 work = work %>% relocate(RepQual, .after = Quarter) 
 
 work = work %>%
   dplyr::mutate(sno=rowSums(dplyr::select(work,L010:L198))) %>%
-  dplyr::filter(sno >= 20) %>%	# Filter Nsamp >= 20
   dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0,Nsamp = 5) %>%
   dplyr::select(Yr,Seas,ModelFleet,Gender,Part,Nsamp,L010:L198) %>%
   dplyr::arrange(ModelFleet,Yr)		
 work[,L_labels_SS] = round(work[,L_labels_SS],1)
+dim(work)
 
 # Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size_RQ.csv'), row.names = FALSE)
+write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-irregular-RQ.csv'), row.names = FALSE)
 
 
 # -------------------------------------------------------------------------
@@ -226,7 +247,7 @@ work = work %>% relocate(RepQual, .after = Quarter)
 # Apply last filters to have the same data:
 work = work %>%
   # dplyr::mutate(sno=rowSums(dplyr::select(work,L010:L198))) %>%
-  # dplyr::filter(sno >= 20) %>%	# do we need to apply this filter? We are now using RepQuality. Confirm with team
+  dplyr::filter(sno >= 20) %>%	
   dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0) %>%
   dplyr::select(Yr,Seas,ModelFleet,Gender,Part,RepQual,L010:L198) %>%
   dplyr::arrange(ModelFleet,Yr)		
@@ -267,7 +288,7 @@ work = work %>% relocate(RepQual, .after = Quarter)
 # Apply last filters to have the same data:
 work = work %>%
   # dplyr::mutate(sno=rowSums(dplyr::select(work,L010:L198))) %>%
-  # dplyr::filter(sno >= 20) %>%	# do we need to apply this filter? We are now using RepQuality. Confirm with team
+  dplyr::filter(sno >= 20) %>%	
   dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0) %>%
   dplyr::select(Yr,Seas,ModelFleet,Gender,Part,RepQual,L010:L198) %>%
   dplyr::arrange(ModelFleet,Yr)		
