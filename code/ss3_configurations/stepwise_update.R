@@ -771,7 +771,42 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
   
   
+  #.......................................................................
+  ### GROWTH JESSICA FARLEY  - 2 STAGE vB best otpion--------------------------------------------
+  # transtiion age 0.82 years (53 cm)
   
+  
+  
+  config_name = '06b_update_GrowthTaggingData'
+  tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+  dir.create(tmp_dir)
+  #read parameters
+  dataTagRelFarley <- read.csv(file=file.path("data","ss3_inputs","tag","Realeased_tag_GrowthFarley.csv"))
+  dataTagRecFarley <- read.csv(file=file.path("data","ss3_inputs","tag","Recovered_tag_GrowthFarley.csv"))
+  # Temporary files:
+  # SS base files path (in Sharepoint):
+  SS_base = 'models/update/06_update_Growth'
+  
+  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+  base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+  base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+  base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+  
+  dat_1 = base_dat
+  ctl_1 = base_ctl
+  fore_1 = base_fore
+  start_1 = base_start
+  names(dataTagRelFarley) <- names(dat_1$tag_releases)
+  dat_1$tag_releases <- dataTagRelFarley
+  names(dataTagRecFarley) <- names(dat_1$tag_recaps)
+  dat_1$tag_recaps <- dataTagRecFarley
+  dat_1$N_tag_groups <- max(dat_1$tag_releases$TG)
+  dat_1$N_recap_events<- nrow(dat_1$tag_recaps)
+  
+  SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+  SS_writectl( ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+  SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+  SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
   #.......................................................................
   ### MATURITY--------------------------------------------
   # FUNCTIONAL L50 101.7

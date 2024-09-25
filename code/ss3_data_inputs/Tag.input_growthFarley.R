@@ -49,19 +49,19 @@ Len_Fair <- c( 29.94634,  44.53486,  51.23907,  59.87039,  69.86614,  78.93331, 
 df <- NULL
 df$Age <- seq(0.25,15,0.25)[1:28]
 df$Len_Fontaneau <- Len_Font
-df$Len_Fairly <- Len_Fair[1:28]
+df$Len_Farley <- Len_Fair[1:28]
 df <- as.data.frame(df)
 p <- ggplot()+
-  geom_line(data=df,aes(x=Age,y=Len_Fairly,colour="Fairly"),size=1)+
+  geom_line(data=df,aes(x=Age,y=Len_Farley,colour="Farley"),size=1)+
   geom_line(data=df,aes(x=Age,y=Len_Fontaneau,colour="Fontaneau"),size=1)+theme_fun()+
   xlab("Age")+ylab("Length (cm)")+
-  scale_color_manual(name = "Tag-Growth", values = c("Fontaneau" = "black", "Fairly" = "red"))
+  scale_color_manual(name = "Tag-Growth", values = c("Fontaneau" = "black", "Farley" = "red"))
 p
 
 dir_plot <- "output/figures/"
-SavePlot('Tag_ALK_Fonteneau_Fairly',15,10)
+SavePlot('Tag_ALK_Fonteneau_Farley',15,10)
 
-Len <- df$Len_Fairly
+Len <- df$Len_Farley
 
 ###########
 # Tagging Data input
@@ -283,5 +283,5 @@ temp = workC %>% select(tag,rec_yr,season,rec_model_fleet,number_prime)
 tmp$rel_assessment_area[tmp$rel_assessment_area==2] <- 1
 tmp$rel_assessment_area[tmp$rel_assessment_area==3] <- 2
 
-write.csv(tmp,"data/ss3_inputs/tag/Realease_tag_GrowthFairly.csv",row.names=FALSE) 
-write.csv(temp,"data/ss3_inputs/tag/Recovered_tag_GrowthFairly.csv" ,row.names=FALSE)
+write.csv(tmp,"data/ss3_inputs/tag/Realeased_tag_GrowthFarley.csv",row.names=FALSE) 
+write.csv(temp,"data/ss3_inputs/tag/Recovered_tag_GrowthFarley.csv" ,row.names=FALSE)
