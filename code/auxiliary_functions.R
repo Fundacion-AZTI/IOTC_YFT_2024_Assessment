@@ -228,12 +228,23 @@ yearqtr2qtr = function(year,qtr,initial,base) {
   qtr = (base-1)+4*(year-initial)+qtr
 }
 
+qtr2yearqtr = function(qtr,initial,base) {
+  yearqtr = (qtr-base)/4+initial+1/8
+}
+yearqtr2numeric = function(year, qtr) {
+  yearqtr = year + (qtr-1)/4+1/8
+}
+
+month2qrt = function(month) {
+  qrt = floor((month-1)/3) + 1
+}
 mutate_cond <- function(.data, condition, ..., envir = parent.frame()) {
   condition <- eval(substitute(condition), .data, envir)
   .data[condition, ] <- .data[condition, ] %>% mutate(...)
   .data
 }
 
+trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 Paste <- function (..., sep = "")  paste(..., sep = sep)
 Sum <- function (..., na.rm = T)  sum(..., na.rm = na.rm)
 
