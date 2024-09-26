@@ -86,10 +86,9 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_cpue', img_type)), plo
 
 
 # Compare (traditional) size information: aggregated size comps ----------------
-# This will use the size matrix with bug
 
 # 2024 size:
-size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-bug.csv'))
+size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-irregular-RQ.csv'))
 size_dat = size_dat %>% select(Yr, ModelFleet, L010:L198)
 size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
 colnames(size_dat) = tolower(colnames(size_dat))
@@ -122,21 +121,20 @@ merged_size = left_join(merged_size, fleet_name_df)
 p2 = ggplot(data = merged_size, aes(x = len_bin, y = prop)) +
   geom_line(aes(color = type)) +
   ylab("Proportion") + xlab('Length bin (cm)') +
-  theme(axis.text.y = element_text(angle = 90, vjust = 0.5, hjust=0.5),
-        legend.position = c(0.875, 0.05)) +
+  theme(legend.position = 'bottom') +
   scale_y_continuous(breaks = breaks_extended(3)) +
+  coord_cartesian(ylim = c(0, 0.25)) +
   guides(color = guide_legend(title = NULL)) +
-  facet_wrap( ~ fleet_name, scales = 'free_y', ncol = 4)
+  facet_wrap( ~ fleet_name, ncol = 4)
 ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_size', img_type)), plot = p2,
        width = img_width, height = 200, units = 'mm', dpi = img_res)
 
 
 # -------------------------------------------------------------------------
 # Compare (traditional) size information: mean length over the years --------------
-# This will use the size matrix with bug
 
 # 2024 size:
-size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-bug.csv'))
+size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-irregular-RQ.csv'))
 size_dat = size_dat %>% select(Yr, ModelFleet, L010:L198)
 size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
 colnames(size_dat) = tolower(colnames(size_dat))

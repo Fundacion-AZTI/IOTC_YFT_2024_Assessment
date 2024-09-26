@@ -17,7 +17,7 @@ fleet_name_df = read.csv(file.path(shrpoint_path, tab_dir, paste0('fleet_label_'
 # -------------------------------------------------------------------------
 # Plot 2024 SS inputs -----------------------------------------------------
 
-# Catch per fleet and year as barplot -------------------------------------
+# Catch per fishery and year as barplot -------------------------------------
 
 catch_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'catch.csv'))
 catch_dat = catch_dat %>% mutate(FisheryCode = str_sub(ModelFishery, start = 1, end = 2))
@@ -46,7 +46,7 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_catch_frac', img_type)), pl
 # Save legend for next plot:
 fish_legend <- get_legend(p2)    
 
-# Catch per fleet, year, and area as barplot ------------------------------
+# Catch per fishery, year, and area as barplot ------------------------------
 
 catch_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'catch.csv'))
 catch_dat = catch_dat %>% mutate(FisheryCode = str_sub(ModelFishery, start = 1, end = 2),
@@ -76,7 +76,7 @@ p2 = ggplot(data = plot_data, aes(x = year, y = catch, fill = fisherycode)) +
 ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_catch_area_frac', img_type)), plot = p2,
        width = img_width, height = 130, units = 'mm', dpi = img_res)
 
-# Pie plot: catch by grid/fleet -------------------------------------------
+# Pie plot: catch by grid/fishery -------------------------------------------
 
 catch_grid = read.csv(file.path(shrpoint_path, 'data/processed', 'catch_grid.csv'))
 
@@ -183,7 +183,7 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_ps_cpue', img_type)), plot 
 
 # Aggregated len comps by fleet -------------------------------------------
 
-size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size.csv'))
+size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-irregular-RQ.csv'))
 size_dat = size_dat %>% select(Yr, ModelFleet, L010:L198)
 size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
 colnames(size_dat) = tolower(colnames(size_dat))
@@ -203,12 +203,76 @@ p2 = ggplot(size_dat, aes(x = len_bin, y = prop, fill = fisherycode, color = fis
   ylab("Proportion") + xlab('Length bin (cm)') +
   scale_fill_manual(values = fleet_col) +
   scale_color_manual(values = fleet_col) +
+  coord_cartesian(ylim = c(0, 0.25)) +
+  theme_classic() +
   theme(legend.position = 'none') +
-  facet_wrap( ~ fleet_name, scales = 'free_y', ncol = 4)
+  facet_wrap( ~ fleet_name, ncol = 4)
 ggsave(file.path(shrpoint_path, plot_dir, paste0('agg_size', img_type)), plot = p2,
        width = img_width, height = 200, units = 'mm', dpi = img_res)
 
-# Aggregated length by grid and fleet -------------------------------------
+
+# Nsamp (RQ) per fishery and time -----------------------------------------
+
+size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-irregular-RQ.csv'))
+size_dat = size_dat %>% select(Yr, ModelFleet, Nsamp)
+size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
+colnames(size_dat) = tolower(colnames(size_dat))
+# Merge
+size_dat = left_join(size_dat, fleet_name_df)
+size_dat = size_dat %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2)) # for colors
+size_dat = size_dat %>% mutate(time2 = ssts2yq(time))
+
+# Make plot:
+p3 = ggplot(size_dat, aes(x = time2, y = fleet_name, color = fisherycode)) + 
+  geom_point(aes(size = nsamp)) +
+  ylab(NULL) + xlab(NULL) +
+  scale_color_manual(values = fleet_col) +
+  scale_size_continuous(range = c(1, 3)) +
+  theme_classic() +
+  theme(legend.position = 'none') +
+  ggtitle(label = 'Simple aggregation')
+ggsave(file.path(shrpoint_path, plot_dir, paste0('rq_size', img_type)), plot = p3,
+       width = img_width, height = 130, units = 'mm', dpi = img_res)
+
+
+# Mean length over the years ----------------------------------------------
+
+# 2024 size:
+size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-irregular-RQ.csv'))
+size_dat = size_dat %>% select(Yr, ModelFleet, L010:L198)
+size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
+colnames(size_dat) = tolower(colnames(size_dat))
+# Find mean length per fleet and year:
+tmp_dat = gather(size_dat, 'len_bin', 'freq', 3:ncol(size_dat))
+tmp_dat = tmp_dat %>% mutate(len_bin = as.numeric(gsub(pattern = 'l', replacement = '', x = len_bin)))
+tmp_dat = tmp_dat %>% group_by(time, fleet_number) %>% summarise(mean_len = weighted.mean(x = len_bin, w = freq))
+# Add extra columns:
+size_dat = tmp_dat
+size_dat = size_dat %>% mutate(type = 'Simple aggregation', .after = 'fleet_number')
+
+# Merge datasets:
+merged_size = rbind(size_dat)
+merged_size$time = ssts2yq(merged_size$time)
+all_times_df = expand.grid(time = seq(from = min(merged_size$time), to = max(merged_size$time), by = 0.25),
+                           fleet_number = unique(merged_size$fleet_number), type = unique(merged_size$type))
+plot_data_df = left_join(all_times_df, merged_size)
+plot_data_df = left_join(plot_data_df, fleet_name_df)
+plot_data_df = plot_data_df %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2)) # for colors
+
+# Make plot:
+p2 = ggplot(data = plot_data_df, aes(x = time, y = mean_len, color = fisherycode)) +
+  geom_point(size = 0.25) +
+  geom_line() +
+  ylab("Mean length (cm)") + xlab(NULL) +
+  scale_color_manual(values = fleet_col) +
+  coord_cartesian(ylim = c(10, 200)) +
+  theme_classic() +
+  theme(legend.position = 'none') +
+  facet_wrap( ~ fleet_name, ncol = 4)
+ggsave(file.path(shrpoint_path, plot_dir, paste0('mlen', img_type)), plot = p2,
+       width = img_width, height = 200, units = 'mm', dpi = img_res)
+
+# Aggregated length by grid and fishery -------------------------------------
 
 load(file.path(shrpoint_path, data_folder, 'mergedStd_5.RData'))
 size_grid = mergedStd

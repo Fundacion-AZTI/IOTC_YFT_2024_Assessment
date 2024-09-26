@@ -15,7 +15,7 @@ grid_size = 5
 
 # Read datasets:
 catch_spt = read_csv(file.path(shrpoint_path, data_folder, 'catch_grid.csv'))
-size_spt = read_csv(file.path(shrpoint_path, data_folder, 'size_grid-regular.csv')) # always with regular
+size_spt = read_csv(file.path(shrpoint_path, data_folder, 'size_grid-cwp55.csv')) # always with regular
 # Some processing:
 colnames(catch_spt) = tolower(colnames(catch_spt))
 colnames(size_spt) = tolower(colnames(size_spt))
@@ -134,6 +134,7 @@ tmp_2 = sizeStd %>% group_by(grid_ID, year, quarter, gear, fleet, fisherycode) %
   summarise_at(c('nfish_samp', len_bins), sum)
 # Merge both datasets:
 sizeStd = inner_join(tmp_1, tmp_2)
+dim(sizeStd)
 save(sizeStd, file = file.path(shrpoint_path, data_folder, paste0('sizeStd_', grid_size,'.RData')))
 
 

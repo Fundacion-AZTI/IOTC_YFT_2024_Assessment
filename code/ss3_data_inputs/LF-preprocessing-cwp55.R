@@ -12,21 +12,19 @@ source(here('code', 'auxiliary_functions.R'))
 ##############
 
 # Read size datasets:
-Data_1 = read.csv(file.path(shrpoint_path, 'data/raw',  "YFT_STD_SF_WPTT26_REGULAR_TO_CWP55_GRIDS.csv"))
-Data_2 = read.csv(file.path(shrpoint_path, 'data/raw',  "YFT_STD_SF_WPTT26_NON_REGULAR_TO_CWP55_GRIDS.csv"))
-
-# Merge both:
-Data = bind_rows(Data_1, Data_2)
+Data = read.csv(file.path(shrpoint_path, 'data/raw',  "IOTC-2024-WPTT26(AS) - YFT - SF frequencies (cwp55).csv"))
+head(Data)
 
 # Some checks (all 5x5 grids):
 table(substring(Data$FISHING_GROUND_CODE, 1, 1))
+Data %>% group_by(CLASS_LOW) %>% summarise(nfish = sum(FISH_COUNT))
 
 # Filtering:
 Data = Data %>% 
   dplyr::select(YEAR,MONTH_START,FLEET_CODE,GEAR_CODE,FISHING_GROUND_CODE,SCHOOL_TYPE_CODE,CLASS_LOW,CLASS_HIGH,REPORTING_QUALITY,FISH_COUNT) %>% 
   mutate(Year = YEAR, Month=MONTH_START, Fleet=FLEET_CODE, Gear = GEAR_CODE, SchoolType =SCHOOL_TYPE_CODE, Grid=FISHING_GROUND_CODE,LowBin=CLASS_LOW,HighBin=CLASS_HIGH,Quality=REPORTING_QUALITY,Nfish=FISH_COUNT)  
 
-dHelper = read.csv(file.path(shrpoint_path, 'data/raw', "IOTC-2024-WPTT26(AS) - YFT - Fishery mapping.csv"))
+dHelper = read.csv(file.path(shrpoint_path, 'data/raw', "IOTC-2024-WPTT26(AS) - YFT - Fishery mapping_Rev1.csv"))
 dHelper = dHelper %>% 
   mutate(Fleet=FLEET, Gear=GEAR_CODE, SchoolType=SCHOOL_TYPE_CODE,FisheryCode=FISHERY) %>% 
   dplyr::select(Fleet,Gear,SchoolType,FisheryCode)
@@ -34,10 +32,11 @@ dHelper = dHelper %>%
 Data = Data %>% 
   dplyr::filter(!(Gear == 'HOOK' | Gear == 'HATR' | Gear=='PSOB' | (Gear == 'PS' & SchoolType == 'UNCL'))) %>%  # I exclude HATR here but please check again if the HATR LF is good enough now
   dplyr::left_join(dHelper,by=c("Gear"="Gear","Fleet"="Fleet","SchoolType"="SchoolType")) %>% 
-  dplyr::mutate(Quarter = floor((Month-1)/3) + 1) %>%
-  mutate(CellType = substring(Grid,1,1)) 
+  mutate_cond(FisheryCode=='PS',FisheryCode=SchoolType) %>%
+  dplyr::mutate(Quarter = floor((Month-1)/3) + 1)
 
 # Check fishery mapping:
+table(substring(Data$Grid, 1, 1))
 which(is.na(Data$FisheryCode))
 
 Data = plyr::ddply(Data, "Grid", .fun = function(d) {
@@ -72,4 +71,4 @@ out_data = out_data %>% tidyr::spread(LenBin,Nfish,fill=0)
 out_data = out_data %>% mutate(Nfish_samp=rowSums(across(L010:L198)), .before = 'L010')
 
 # Save this object for analyses:
-write.csv(out_data, file = file.path(shrpoint_path, 'data/processed', 'size_grid-regular.csv'), row.names = FALSE)
+write.csv(out_data, file = file.path(shrpoint_path, 'data/processed', 'size_grid-cwp55.csv'), row.names = FALSE)
