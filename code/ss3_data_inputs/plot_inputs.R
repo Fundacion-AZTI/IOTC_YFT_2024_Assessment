@@ -8,7 +8,7 @@ source(here('code', 'auxiliary_functions.R'))
 # Spatial configuration:
 spat_config = '4A_io'
 
-data_folder = 'data/processed'
+# Length bins
 L_labels  =  c(Paste("L0",seq(10,98,2)), Paste("L",seq(100,198,2))) 
 
 # Read fleet labels
@@ -183,7 +183,8 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_ps_cpue', img_type)), plot 
 
 # Aggregated len comps by fleet -------------------------------------------
 
-size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-irregular-RQ.csv'))
+# Simple aggregation
+size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-original.csv'))
 size_dat = size_dat %>% select(Yr, ModelFleet, L010:L198)
 size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
 colnames(size_dat) = tolower(colnames(size_dat))
@@ -195,25 +196,46 @@ size_dat = gather(size_dat, 'len_bin', 'prop', 2:ncol(size_dat))
 size_dat$len_bin = as.numeric(gsub(pattern = 'l', replacement = '', x = size_dat$len_bin))
 size_dat = left_join(size_dat, fleet_name_df)
 size_dat = size_dat %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2)) # for colors
+size_dat = size_dat %>% mutate(type = 'Simple aggregation', .after = 'fleet_number')
+size_dat1 = size_dat
+
+
+# Catch raised aggregation
+size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-cwp55.csv'))
+size_dat = size_dat %>% select(Yr, ModelFleet, L010:L198)
+size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
+colnames(size_dat) = tolower(colnames(size_dat))
+# Aggregate over time:
+size_dat = size_dat %>% group_by(fleet_number) %>% summarise_at(.vars = colnames(.)[3:ncol(size_dat)], sum)
+# Sum by row to get freq:
+size_dat = size_dat %>% ungroup() %>% mutate(across(-1)/rowSums(across(-1)))
+size_dat = gather(size_dat, 'len_bin', 'prop', 2:ncol(size_dat))
+size_dat$len_bin = as.numeric(gsub(pattern = 'l', replacement = '', x = size_dat$len_bin))
+size_dat = left_join(size_dat, fleet_name_df)
+size_dat = size_dat %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2)) # for colors
+size_dat = size_dat %>% mutate(type = 'Catch-raised aggregation', .after = 'fleet_number')
+size_dat2 = size_dat
+
+# Merge datasets:
+plot_data = rbind(size_dat1, size_dat2)
 
 # Make plot:
-p2 = ggplot(size_dat, aes(x = len_bin, y = prop, fill = fisherycode, color = fisherycode)) + 
-  geom_area(alpha = 0.2) +
-  geom_line() +
+p2 = ggplot(plot_data, aes(x = len_bin, y = prop, color = fisherycode)) + 
+  geom_line(aes(linetype = type)) +
   ylab("Proportion") + xlab('Length bin (cm)') +
-  scale_fill_manual(values = fleet_col) +
   scale_color_manual(values = fleet_col) +
   coord_cartesian(ylim = c(0, 0.25)) +
   theme_classic() +
   theme(legend.position = 'none') +
   facet_wrap( ~ fleet_name, ncol = 4)
 ggsave(file.path(shrpoint_path, plot_dir, paste0('agg_size', img_type)), plot = p2,
-       width = img_width, height = 200, units = 'mm', dpi = img_res)
+       width = img_width, height = 180, units = 'mm', dpi = img_res)
 
 
 # Nsamp (RQ) per fishery and time -----------------------------------------
 
-size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-irregular-RQ.csv'))
+# Simple aggregation
+size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-original.csv'))
 size_dat = size_dat %>% select(Yr, ModelFleet, Nsamp)
 size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
 colnames(size_dat) = tolower(colnames(size_dat))
@@ -231,14 +253,37 @@ p3 = ggplot(size_dat, aes(x = time2, y = fleet_name, color = fisherycode)) +
   theme_classic() +
   theme(legend.position = 'none') +
   ggtitle(label = 'Simple aggregation')
-ggsave(file.path(shrpoint_path, plot_dir, paste0('rq_size', img_type)), plot = p3,
-       width = img_width, height = 130, units = 'mm', dpi = img_res)
+
+# Catch raised aggregation
+size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-cwp55.csv'))
+size_dat = size_dat %>% select(Yr, ModelFleet, Nsamp)
+size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
+colnames(size_dat) = tolower(colnames(size_dat))
+# Merge
+size_dat = left_join(size_dat, fleet_name_df)
+size_dat = size_dat %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2)) # for colors
+size_dat = size_dat %>% mutate(time2 = ssts2yq(time))
+
+# Make plot:
+p4 = ggplot(size_dat, aes(x = time2, y = fleet_name, color = fisherycode)) + 
+  geom_point(aes(size = nsamp)) +
+  ylab(NULL) + xlab(NULL) +
+  scale_color_manual(values = fleet_col) +
+  scale_size_continuous(range = c(1, 3)) +
+  theme_classic() +
+  theme(legend.position = 'none') +
+  ggtitle(label = 'Catch-raised aggregation')
+
+# Merge:
+p5 = grid.arrange(p3, p4, ncol = 1)
+ggsave(file.path(shrpoint_path, plot_dir, paste0('rq_size', img_type)), plot = p5,
+       width = img_width, height = 220, units = 'mm', dpi = img_res)
 
 
 # Mean length over the years ----------------------------------------------
 
-# 2024 size:
-size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-irregular-RQ.csv'))
+# Original:
+size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-original.csv'))
 size_dat = size_dat %>% select(Yr, ModelFleet, L010:L198)
 size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
 colnames(size_dat) = tolower(colnames(size_dat))
@@ -249,9 +294,24 @@ tmp_dat = tmp_dat %>% group_by(time, fleet_number) %>% summarise(mean_len = weig
 # Add extra columns:
 size_dat = tmp_dat
 size_dat = size_dat %>% mutate(type = 'Simple aggregation', .after = 'fleet_number')
+size_dat1 = size_dat
+
+# cwp55
+size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-cwp55.csv'))
+size_dat = size_dat %>% select(Yr, ModelFleet, L010:L198)
+size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
+colnames(size_dat) = tolower(colnames(size_dat))
+# Find mean length per fleet and year:
+tmp_dat = gather(size_dat, 'len_bin', 'freq', 3:ncol(size_dat))
+tmp_dat = tmp_dat %>% mutate(len_bin = as.numeric(gsub(pattern = 'l', replacement = '', x = len_bin)))
+tmp_dat = tmp_dat %>% group_by(time, fleet_number) %>% summarise(mean_len = weighted.mean(x = len_bin, w = freq))
+# Add extra columns:
+size_dat = tmp_dat
+size_dat = size_dat %>% mutate(type = 'Catch-raised aggregation', .after = 'fleet_number')
+size_dat2 = size_dat
 
 # Merge datasets:
-merged_size = rbind(size_dat)
+merged_size = rbind(size_dat1, size_dat2)
 merged_size$time = ssts2yq(merged_size$time)
 all_times_df = expand.grid(time = seq(from = min(merged_size$time), to = max(merged_size$time), by = 0.25),
                            fleet_number = unique(merged_size$fleet_number), type = unique(merged_size$type))
@@ -261,20 +321,20 @@ plot_data_df = plot_data_df %>% mutate(fisherycode = str_sub(fleet_name, start =
 
 # Make plot:
 p2 = ggplot(data = plot_data_df, aes(x = time, y = mean_len, color = fisherycode)) +
-  geom_point(size = 0.25) +
-  geom_line() +
+  geom_point(aes(shape = type), size = 0.5) +
+  geom_line(aes(linetype = type)) +
   ylab("Mean length (cm)") + xlab(NULL) +
   scale_color_manual(values = fleet_col) +
-  coord_cartesian(ylim = c(10, 200)) +
+  #coord_cartesian(ylim = c(10, 200)) +
   theme_classic() +
   theme(legend.position = 'none') +
-  facet_wrap( ~ fleet_name, ncol = 4)
+  facet_wrap( ~ fleet_name, scales = 'free_y', ncol = 4)
 ggsave(file.path(shrpoint_path, plot_dir, paste0('mlen', img_type)), plot = p2,
-       width = img_width, height = 200, units = 'mm', dpi = img_res)
+       width = img_width, height = 180, units = 'mm', dpi = img_res)
 
 # Aggregated length by grid and fishery -------------------------------------
 
-load(file.path(shrpoint_path, data_folder, 'mergedStd_5.RData'))
+load(file.path(shrpoint_path, 'data/processed', 'mergedStd_5.RData'))
 size_grid = mergedStd
 
 colnames(size_grid) = str_to_title(colnames(size_grid))
