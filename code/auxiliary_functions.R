@@ -24,25 +24,25 @@ add_sf_map = function(my_plot) {
 # Get grid dimension (latitude and longitude) from grid type:
 get_grid_lat_dim = function(grid_type) {
   
-  grid_type = as.numeric(grid_type)
-  out_val = ifelse(grid_type==1, 30, # Type 1, corrected based on metadata
-                     ifelse(grid_type==2, 10, # Type 2
-                            ifelse(grid_type==3, 10, # Type 3
-                                   ifelse(grid_type==4, 20, # Type 4
-                                          ifelse(grid_type==5, 1, 
-                                                 ifelse(grid_type==6, 5, 0)))))) # Type 5 (dim = 1) and 6 (dim = 5)
+  grid_type = as.character(grid_type)
+  out_val = ifelse(grid_type=='9', 30, # new classification, confirmed by Manu
+                   ifelse(grid_type=='A', 10, # new classification, confirmed by Manu
+                          ifelse(grid_type=='7', 10, # new classification, confirmed by Manu
+                                 ifelse(grid_type=='8', 20, # new classification, confirmed by Manu
+                                        ifelse(grid_type=='5', 1, 
+                                               ifelse(grid_type=='6', 5, 0)))))) # Type 5 (dim = 1) and 6 (dim = 5)
   return(out_val)
   
 }
 get_grid_lon_dim = function(grid_type) {
   
-  grid_type = as.numeric(grid_type)
-  out_val = ifelse(grid_type==1, 30, # Type 1, corrected based on metadata
-                   ifelse(grid_type==2, 20, # Type 2
-                          ifelse(grid_type==3, 10, # Type 3
-                                 ifelse(grid_type==4, 20, # Type 4
-                                        ifelse(grid_type==5, 1, 
-                                               ifelse(grid_type==6, 5, 0)))))) # Type 5 (dim = 1) and 6 (dim = 5)
+  grid_type = as.character(grid_type)
+  out_val = ifelse(grid_type=='9', 30, # new classification, confirmed by Manu
+                   ifelse(grid_type=='A', 20, # new classification, confirmed by Manu
+                          ifelse(grid_type=='7', 10, # new classification, confirmed by Manu
+                                 ifelse(grid_type=='8', 20, # new classification, confirmed by Manu
+                                        ifelse(grid_type=='5', 1, 
+                                               ifelse(grid_type=='6', 5, 0)))))) # Type 5 (dim = 1) and 6 (dim = 5)
   return(out_val)
   
 }
@@ -283,13 +283,16 @@ filter_LF_4A_type2 = function(data) { # new filtering
     dplyr::filter(!(ModelFishery == "LL 3" & Year %in% c(1950:1959))) %>%
     dplyr::filter(!(ModelFishery == "LL 4" & Year %in% c(1950:1959,2001:2005,2015,2019))) %>%
     dplyr::filter(!(ModelFishery == "LF 4" & Year < 2005)) %>% # confirmed by Agurtzane
+    dplyr::filter(!(Fleet %in% c('SYC') & Gear == 'ELL' & Year %in% 2003:2019)) %>% # temporarily, Manu will fix this in the raw data
     # Remove rows with less than 100 Nfish sampled:
     dplyr::filter(!(Nfish_samp < 100 & Quality > 0)) %>% # remove low sample size but only those rows not considered best quality
     # Remove weird patterns:
     dplyr::filter(!(ModelFishery == "GI 1a" & Fleet == 'LKA' & Year %in% c(2021))) %>%
     dplyr::filter(!(ModelFishery == "HD 1a" & Fleet == 'MDV' & Year %in% c(2003))) %>%
     dplyr::filter(!(ModelFishery == "OT 1a" & Year %in% c(2021:2022))) %>%
-    dplyr::filter(!(ModelFishery == "OT 4" & Year %in% c(2016)))
+    dplyr::filter(!(ModelFishery == "OT 4" & Year %in% c(2016))) %>%
+    dplyr::filter(!(ModelFishery == "TR 1b")) %>%
+    dplyr::filter(!(ModelFishery == "TR 2"))
   
   return(work)
   
