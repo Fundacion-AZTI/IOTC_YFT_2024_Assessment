@@ -293,7 +293,7 @@ filter_LF_4A_type2 = function(data) { # new filtering
     dplyr::filter(!(ModelFishery == "OT 4" & Year %in% c(2016))) %>%
     dplyr::filter(!(ModelFishery == "TR 1b")) %>%
     dplyr::filter(!(ModelFishery == "TR 2"))
-  
+
   return(work)
   
 }
