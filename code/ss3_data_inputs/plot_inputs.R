@@ -220,8 +220,9 @@ size_dat2 = size_dat
 plot_data = rbind(size_dat1, size_dat2)
 
 # Make plot:
-p2 = ggplot(plot_data, aes(x = len_bin, y = prop, color = fisherycode)) + 
-  geom_line(aes(linetype = type)) +
+p2 = ggplot(plot_data %>% dplyr::filter(type == 'Simple aggregation'), aes(x = len_bin, y = prop, color = fisherycode)) + 
+  geom_line() +
+  geom_line(data = plot_data %>% dplyr::filter(type == 'Catch-raised aggregation'), aes(x = len_bin, y = prop), color = 'black') +
   ylab("Proportion") + xlab('Length bin (cm)') +
   scale_color_manual(values = fleet_col) +
   coord_cartesian(ylim = c(0, 0.25)) +
@@ -245,11 +246,12 @@ size_dat = size_dat %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end 
 size_dat = size_dat %>% mutate(time2 = ssts2yq(time))
 
 # Make plot:
-p3 = ggplot(size_dat, aes(x = time2, y = fleet_name, color = fisherycode)) + 
-  geom_point(aes(size = nsamp)) +
+p3 = ggplot(size_dat, aes(x = time2, y = fleet_name, fill = fisherycode)) + 
+  geom_point(aes(size = nsamp), pch = 21, color = 'black') +
   ylab(NULL) + xlab(NULL) +
-  scale_color_manual(values = fleet_col) +
+  scale_fill_manual(values = fleet_col) +
   scale_size_continuous(range = c(1, 3)) +
+  coord_cartesian(xlim = c(1955, 2023)) +   
   theme_classic() +
   theme(legend.position = 'none') +
   ggtitle(label = 'Simple aggregation')
@@ -265,11 +267,12 @@ size_dat = size_dat %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end 
 size_dat = size_dat %>% mutate(time2 = ssts2yq(time))
 
 # Make plot:
-p4 = ggplot(size_dat, aes(x = time2, y = fleet_name, color = fisherycode)) + 
-  geom_point(aes(size = nsamp)) +
+p4 = ggplot(size_dat, aes(x = time2, y = fleet_name, fill = fisherycode)) + 
+  geom_point(aes(size = nsamp), pch = 21, color = 'black') +
   ylab(NULL) + xlab(NULL) +
-  scale_color_manual(values = fleet_col) +
+  scale_fill_manual(values = fleet_col) +
   scale_size_continuous(range = c(1, 3)) +
+  coord_cartesian(xlim = c(1955, 2023)) +
   theme_classic() +
   theme(legend.position = 'none') +
   ggtitle(label = 'Catch-raised aggregation')
@@ -320,9 +323,11 @@ plot_data_df = left_join(plot_data_df, fleet_name_df)
 plot_data_df = plot_data_df %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2)) # for colors
 
 # Make plot:
-p2 = ggplot(data = plot_data_df, aes(x = time, y = mean_len, color = fisherycode)) +
-  geom_point(aes(shape = type), size = 0.5) +
-  geom_line(aes(linetype = type)) +
+p2 = ggplot(data = plot_data_df %>% dplyr::filter(type == 'Simple aggregation'), aes(x = time, y = mean_len, color = fisherycode)) +
+  geom_point(size = 0.5) +
+  geom_line() +
+  geom_point(data = plot_data_df  %>% dplyr::filter(type == 'Catch-raised aggregation'), aes(x = time, y = mean_len), color = 'black', size = 0.5) +
+  geom_line(data = plot_data_df  %>% dplyr::filter(type == 'Catch-raised aggregation'), aes(x = time, y = mean_len), color = 'black') +
   ylab("Mean length (cm)") + xlab(NULL) +
   scale_color_manual(values = fleet_col) +
   #coord_cartesian(ylim = c(10, 200)) +

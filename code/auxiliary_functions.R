@@ -291,6 +291,7 @@ filter_LF_4A_type2 = function(data) { # new filtering
     dplyr::filter(!(ModelFishery == "HD 1a" & Fleet == 'MDV' & Year %in% c(2003))) %>%
     dplyr::filter(!(ModelFishery == "OT 1a" & Year %in% c(2021:2022))) %>%
     dplyr::filter(!(ModelFishery == "OT 4" & Year %in% c(2016))) %>%
+    dplyr::filter(!(ModelFishery == "TR 4" & Year %in% c(2016:2019))) %>%
     dplyr::filter(!(ModelFishery == "TR 1b")) %>%
     dplyr::filter(!(ModelFishery == "TR 2"))
 

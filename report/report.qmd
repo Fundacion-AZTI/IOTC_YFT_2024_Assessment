@@ -127,17 +127,17 @@ The time step in the assessment model was quarter (i.e., three months duration, 
 
 # Model inputs
 
-Catch and size information (1952-2023) was provided by the IOTC Secretariat in a comma-separated values (CSV) format. These datasets and the metadata can be found online at the IOTC website: <https://iotc.org/documents/WPTT/26AS/Data/01>. Four indices of abundance were also available: joint longline, purse seine fishing on free schools, purse seine fishing on associated schools, and the associative behavior-based abundance index. These indices can also be found online at: <https://iotc.org/documents/standardised-cpue-yft-and-bet>. Release and recovery data (2005-2014) from two tagging programs were also available, as well as age data from the GERUNDIO project (2013-2021). 
+Catch (1950-2023) and size (1952-2023) information was provided by the IOTC Secretariat in a comma-separated values (CSV) format. These datasets and the metadata can be found online at the IOTC website: <https://iotc.org/documents/WPTT/26AS/Data/01>. Four indices of abundance were also available: joint longline, purse seine fishing on free schools, purse seine fishing on associated schools, and the associative behavior-based abundance index. These indices can also be found online at: <https://iotc.org/documents/standardised-cpue-yft-and-bet>. Release and recovery data (2005-2014) from two tagging programs were also available, as well as age data from the GERUNDIO project (2013-2021). 
 
 ## Definition of fisheries
 
-The assessment adopted the equivalent fisheries definitions used in the previous stock assessments (@tbl-fishery-codes). First, nine *fishery groups* were defined based on gear, purse seine set type, and type of vessel in the case of longline fleet (@tbl-fishery-codes), which represent relatively homogeneous fishing units, with similar selectivity and catchability characteristics that do not vary greatly over time. Then, *fishery groups* were divided into regions (@tbl-fleet-4A), producing a total of twenty-one *fisheries* in the assessment model. A brief description of each *fishery group* is provided below.
+The assessment adopted the equivalent fisheries definitions used in the previous stock assessments (@tbl-fishery-codes). First, nine *fishery groups* were defined based on fleet, gear, purse seine set type, and type of vessel in the case of longline fleet (@tbl-fishery-codes), which represent relatively homogeneous fishing units, with similar selectivity and catchability characteristics that do not vary greatly over time. Then, *fishery groups* were divided into regions (@tbl-fleet-4A), producing a total of twenty-one *fisheries* in the assessment model. A brief description of each *fishery group* is provided below.
 
 The longline fishery was partitioned into two main components:
 
-- *Freezing longline fisheries (LL)*, or all those using drifting longlines for which one or more of the following three conditions apply: (i) the vessel hull is made up of steel; (ii) vessel length overall of 30 m or greater; (iii) the majority of the catches of target species are preserved frozen or deep-frozen. A composite longline fishery was defined in each model area (LL 1–4) aggregating the longline catch from all freezing longline fleets (principally Japan and Taiwan).
+- *Freezing longline fisheries (LL)*, or all those using drifting longlines for which one or more of the following three conditions apply: (i) the vessel hull is made up of steel; (ii) vessel length overall of 30 m or greater; (iii) the majority of the catches of target species are preserved frozen or deep-frozen. A composite longline fishery was defined in each model area aggregating the longline catch from all freezing longline fleets (principally Japan and Taiwan).
 
-- *Fresh-tuna longline fisheries (LF)*, or all those using drifting longlines and made of vessels (i) having fibreglass, fibre reinforced plastic, or wooden hull; (ii) having length overall less than 30 m; (iii) preserving the catches of target species fresh or in refrigerated seawater. A composite longline fishery was defined aggregating the longline catch from all fresh-tuna longline fleets (principally Indonesia and Taiwan) in region 4 (LF 4), which is where the majority of the fresh-tuna longliners have traditionally operated. 
+- *Fresh-tuna longline fisheries (LF)*, or all those using drifting longlines and made of vessels (i) having fibreglass, fibre reinforced plastic, or wooden hull; (ii) having length overall less than 30 m; (iii) preserving the catches of target species fresh or in refrigerated seawater. A composite longline fishery was defined aggregating the longline catch from all fresh-tuna longline fleets (principally Indonesia and Taiwan) in region 4, which is where the majority of the fresh-tuna longliners have traditionally operated. 
 
 - The purse-seine catch and effort data were apportioned into two separate method fisheries: catches from sets on associated schools of tuna (log and drifting FAD sets; *LS*) and from sets on unassociated schools (free schools; *FS*). 
 
@@ -159,7 +159,7 @@ The catch datasets was composed of information about time (year and month), flee
 
 We followed the next steps to produce the catch input for SS3: 
 
-* Month information was used to assign quarters, having four quarters from January to December.
+* Month information was used to assign quarters (i.e., four quarters from January to December).
 * Fishery group was assigned based on the fleet, gear type, and the type of association of the fish school.
 * Catch was summed by year, quarter, fleet, gear type, fishery group, and grid code.
 * The grid code was used to calculate the longitude and latitude of the center of the grid (called *centroid* hereafter).
@@ -186,15 +186,15 @@ To simplify the fishery structure in the stock assessment model, we reassigned c
 
 ### Aggregation
 
-After catch reassignment, catch data (in metric tons) was aggregated by year, quarter, and fishery, and then organized in a SS3 format assuming an error of 0.01. Overall, the time series of catches were quite similar to the catch series included in the 2021 assessment (@fig-comp-catch). The largest differences were observed for *OT* and *TR* in region 4, especially during the last two decades. Also, current catch estimates for *LL* in region 3 are slightly larger than the previous assessment during 2008-2020. The changes are mostly attributed to revisions of catch estimation by the IOTC Secretariat.
+After catch reassignment, catch data (in metric tons) was summed by year, quarter, and fishery, and then organized in a SS3 format assuming an error of 0.01. Overall, the time series of catches were quite similar to the catch series included in the 2021 assessment (@fig-comp-catch). The largest differences were observed for *OT* and *TR* in region 4, especially during the last two decades. Also, current catch estimates for *LL* in region 3 are slightly larger than the previous assessment during 2008-2020. The changes are mostly attributed to revisions of catch estimation by the IOTC Secretariat.
 
 ## Size data
 
-The size data was composed of information about time (year and month), fleet, gear type, type of association of the fish school, grid code, number of fish sampled per fork length bin (cm), and the score of reporting quality (RQ) [@herreraProposalSystemAssess2010; @iotcReviewStatisticalData2024]. The length bin width was 2 cm and the length bins spanned from 10 to 308 cm. The data were collected from a variety of sampling programmes, which can be summarized as follows:
+The size data was composed of information about time (year and month), fleet, gear type, type of association of the fish school, grid code, number of fish sampled per fork length bin (cm), and the score of reporting quality (RQ) [@herreraProposalSystemAssess2010; @iotcReviewStatisticalData2024]. The length bin width was 2 cm and the length bins spanned from 10 to 340 cm. The data were collected from a variety of sampling programmes, which can be summarized as follows:
 
-- *FS* and *LS* fisheries: Length-frequency samples from purse seiners have been collected from a variety of port sampling programmes since the mid-1980s. The samples are comprised of very large numbers of individual fish measurements. The length frequency samples are available by set type with sets catches from associated sets typically composed of smaller fish than free school catches (@fig-agg-size). The size composition of the catch from the free-school fishery is bimodal, being comprised of the smaller size range of yellowfin and a broad mode of larger fish (@fig-agg-size). The bimodal distribution is likely to have reflected different types of schools in the catch composition (e.g., free schools of mostly large adult yellowfin, or mixed species schools consisting of smaller yellowfin, M. Chassot, pers. comm.). Hence, the relative composition of large (>80cm) vs. small (<80cm) yellowfin in the purse seine free schools fluctuates considerably over time. Between 2010 and 2020, there was both a dip in the average size of large fish caught in the FAD fishery, and a temporary increase in the average sizes of large fish caught in the free school fishery (Figure XX). There is also considerable catch of smaller fish taken during free school fishing operation in the Mozambique Channel area in region 2 [@chassotAreThereSmall2014]. The free-school fishery in region 4 appears to catch larger fish (@fig-size-grid).
+- *FS* and *LS* fisheries: Length-frequency samples from purse seiners have been collected from a variety of port sampling programmes since the mid-1980s. The samples are comprised of very large numbers of individual fish measurements. The length frequency samples are available by set type with sets catches from associated sets typically composed of smaller fish than free school catches (@fig-agg-size). The size composition of the catch from the free-school fishery is bimodal, being comprised of the smaller size range of yellowfin and a broad mode of larger fish (@fig-agg-size). The bimodal distribution is likely to have reflected different types of schools in the catch composition (e.g., free schools of mostly large adult yellowfin, or mixed species schools consisting of smaller yellowfin, M. Chassot, pers. comm.). Hence, the relative composition of large (>80cm) vs. small (<80cm) yellowfin in the purse seine free schools fluctuates considerably over time. Between 2010 and 2020, there was both a dip in the average size of large fish caught in the FAD fishery, and a temporary increase in the average sizes of large fish caught in the free school fishery (@fig-mlen). There is also considerable catch of smaller fish taken during free school fishing operation in the Mozambique Channel area in region 2 [@chassotAreThereSmall2014]. The free-school fishery in region 4 appears to catch larger fish (@fig-size-grid).
 
-- *LL* fishery: Length and weight data have been collected from sampling at ports and aboard Japanese commercial, research vessels, and observer programmes. Weight frequency data collected from the fleet have been converted to length frequency data via a processed weight-whole weight conversion factor and a weight-length key. Length frequency data from the Taiwanese longline fleet from 1980−2003 were included in the 2018 assessment, although data from the more recent years were excluded due to concerns regarding their reliability [@greehanReviewLengthFrequency2013]. Length data are also available from other fleets (e.g., Seychelles, Korean, China, etc.) in more recent years. However, a recent review of the longline size data shows that the sampling behaviour of Taiwanese and Seychelles fleets (mostly reflagged Taiwanese vessels) have changed over time, with patterns in the logbook length data inconsistent with other fleet [@hoyleReviewSizeData2021], and as such the WPTT23 (Data Preparatory) recommended omitting all Taiwanese and Seychelles logbook length data from the current assessment [@iotcReviewYellowfinTuna2021]. Analyses of size data show that the average lengths of yellowfin caught by the longline fleet are generally larger in the southern regions, particularly in the southwest [@hoyleReviewSizeData2021]. There is considerable temporal variation in the length of fish caught, but some of this variation is inconsistent between datasets, such as temporal patterns of variation in the 1970s that differ between length and weight data from the Japanese fleet (Figure XX). For all longline fisheries there was a marked decline in the size of fish caught by Japan during the 1950s and 1960s, while the size of fish caught stabilised during the 1970s and 1980s. 
+- *LL* fishery: Length and weight data have been collected from sampling at ports and aboard Japanese commercial, research vessels, and observer programmes. Weight frequency data collected from the fleet have been converted to length frequency data via a processed weight-whole weight conversion factor and a weight-length key. Length frequency data from the Taiwanese longline fleet from 1980−2003 were included in the 2018 assessment, although data from the more recent years were excluded due to concerns regarding their reliability [@greehanReviewLengthFrequency2013]. Length data are also available from other fleets (e.g., Seychelles, Korean, China, etc.) in more recent years. Analyses of size data show that the average lengths of yellowfin caught by the longline fleet are generally larger in the southern regions, particularly in the southwest [@hoyleReviewSizeData2021]. There is considerable temporal variation in the length of fish caught (@fig-mlen), but some of this variation is inconsistent between datasets, such as temporal patterns of variation in the 1970s that differ between length and weight data from the Japanese fleet. For all longline fisheries there was a marked decline in the size of fish caught by Japan during the 1950s and 1960s, while the size of fish caught stabilised during the 1970s and 1980s (@fig-mlen).
 
 - *LF* fishery: Length and weight data were collected in port, during unloading of catches, for several landing locations and time periods, especially on fresh-tuna longline vessels flagged in Indonesia and Taiwan/China (IOTC-OFCF sampling). 
 
@@ -210,12 +210,12 @@ The size data was composed of information about time (year and month), fleet, ge
 
 The IOTC Secretariat provided two size datasets with two distinct grid resolutions: 
 
-* *Irregular grids*: the size dataset had six main types of grid dimensions (see @tbl-grid-size and @fig-map-grid-agg1), although $\sim$ 97% of observations were category 5 or 6. A seventh category of grid dimension was also present, but those observations were removed from the size database since it covered a very large and uncertain zone in the IO. This type of size dataset was used in the 2021 assessment.
-* *Regular grids*: the size dataset was provided at a $5^\circ\times 5^\circ$ grid resolution (@fig-map-grid-agg2). 
+* *Original data*: the size dataset had six main types of grid dimensions (see @tbl-grid-size and @fig-map-grid-agg1), although $\sim$ 97% of observations were category 5 or 6. A seventh category was also present that covered the Seychelles National Jurisdiction Area, but those observations were removed from the size database. This type of size dataset was used in the 2021 assessment.
+* *cwp55 data*: the size dataset was provided at a $5^\circ\times 5^\circ$ grid resolution (@fig-map-grid-agg2). 
 
 ### Processing
 
-First, we removed gear types with unclear classification (*HOOK*, *HATR*, *PSOB*, and *PS* with unclassified school type *UNCL*). Then, we reduced the number of length bins in the data by summing the number of sampled fish from 198 to 308 cm and assign it to the 198 cm length bin. Likewise, we summed the number of sampled fish $\leq$ 10 cm and assigned to the 10 cm length bin. We followed these steps to produce the SS3 size inputs:
+First, we removed gear types with unclear classification (*HOOK*, *HATR*, *PSOB*, and *PS* with unclassified school type *UNCL*). Then, we reduced the number of length bins in the data by summing the number of sampled fish equal or larger than 198 cm and assign it to the 198 cm length bin. Likewise, we summed the number of sampled fish $\leq$ 10 cm and assigned to the 10 cm length bin. We followed these steps to produce the SS3 size inputs:
 
 * Month information was used to assign quarters, having four quarters from January to December.
 * Fishery group was assigned based on the fleet, gear type, and type of association of the fish school.
@@ -225,19 +225,19 @@ First, we removed gear types with unclear classification (*HOOK*, *HATR*, *PSOB*
 * Fishery was assigned based on fishery group and region.
 * We converted the length bin width from 2 to 4 cm. To do so, we summed the number of sampled fish from pairs of length bins (e.g., 10 and 12 cm were summed and assigned to 10 cm, 14 and 16 cm were summed and assigned to 14 cm, and so on). After this conversion, we had a total of 48 length bins.
 
-Only for the size dataset with regular grids, we then assigned the catch (in numbers) that corresponded to every observation in the size data (i.e., year, quarter, grid, fleet, and gear type). We found a perfect match for $\sim$ 74% of cases but there were some size observations without catch. In order to fill in these catch gaps, we followed an imputation procedure with four levels:
+Only for the size dataset with regular grids, we then assigned the catch (in numbers) that corresponded to every observation in the size data (i.e., year, quarter, grid, fleet, and gear type). We found a perfect match for $\sim$ 74% of cases but there were some size observations without catch. In order to fill in these catch gaps, we followed an imputation procedure with five levels:
 
--   *Level 1*: Fill in catch gaps with the average catch per grid for a given year, quarter, fleet, and gear type.
--   *Level 2*: Fill in catch gaps with the average catch per grid for a given year, fleet, and gear type.
--   *Level 3*: Fill in catch gaps with the average catch per grid for a given year and gear type.
--   *Level 4*: Fill in catch gaps with the average catch per grid for a given gear type.
+-   *Level 1*: Fill in catch gaps with the average catch per grid for a given year, quarter, fleet, gear type, and fishery group.
+-   *Level 2*: Fill in catch gaps with the average catch per grid for a given year, fleet, gear type, and fishery group.
+-   *Level 3*: Fill in catch gaps with the average catch per grid for a given year, gear type, and fishery group.
+-   *Level 4*: Fill in catch gaps with the average catch per grid for a given gear type and fishery group.
 -   *Level 5*: Fill in catch gaps with the average catch per grid for a given fishery group.
 
 @fig-imputation shows the percentage of size observations that needed each level of imputation.
 
 ### Reassignment
 
-We conducted the fishery reassignment as done for the catch data in @sec-catchreassign.
+We conducted the size data reassignment as done for the catch data in @sec-catchreassign.
 
 ### Filtering
 
@@ -245,7 +245,7 @@ In order to remove inconsistent patterns in the length frequency data, we carrie
 
 - The first filter was to remove observations with less than 100 fish sampled and not considered best quality based on the RQ score. 
 
-- *LL* fishery: length frequency data from the Taiwanese and Seychelles longline logbooks were excluded from the final length frequency data sets.
+- *LL* fishery: a review of the longline size data shows that the sampling behaviour of Taiwanese and Seychelles fleets (mostly reflagged Taiwanese vessels) have changed over time, with patterns in the logbook length data inconsistent with other fleet [@hoyleReviewSizeData2021], and as such the WPTT23 (Data Preparatory) recommended omitting all Taiwanese and Seychelles logbook length data from the 2021 assessment [@iotcReviewYellowfinTuna2021]. Following this advice, we removed length frequency data from the Taiwanese and Seychelles longline logbooks from the final length frequency data sets.
 
 - *LL* fishery: longline length frequency data during 1970-1995 and 2010-2020 in region 1a was removed.
 
@@ -261,7 +261,7 @@ In order to remove inconsistent patterns in the length frequency data, we carrie
 
 - *OT* fishery: we removed size data sampled during 2021-2022 in region 1a, and data sampled in 2016 in region 4.
 
-- *TR* fishery: we removed size data in region 1b and 2.
+- *TR* fishery: we removed size data in region 1b and 2. Also, we removed size data in region 4 from 2016 to 2019.
 
 The filters applied to the *LL*, *LF*, and *TR* fisheries were also applied in the 2021 assessment. Other filters were exclusive to the current assessment.
 
@@ -269,11 +269,15 @@ The filters applied to the *LL*, *LF*, and *TR* fisheries were also applied in t
 
 After filtering and in order to aggregate the size data by year, quarter, and fishery for SS3, we followed two approaches: simple and catch-raised aggregation.
 
-* Simple aggregation: we summed the number of sampled fish per length bin and averaged the RQ values by year, quarter, and fishery. RQ values was treated as input sample size. This type of aggregation was performed only for the size dataset with irregular grids. This approach was used in the 2021 assessment and assumes that the collection of samples was broadly representative of the operation of the fishery in each quarter. We tested using an input sample size in SS3 of 5 for every size observation (as done in the 2021 assessment) or using the RQ scores.
+* *Simple aggregation*: this type of aggregation was performed only for the *original* size dataset. We summed the number of sampled fish per length bin and averaged the RQ values by year, quarter, and fishery. RQ values was treated as input sample size in SS3, but we also tested using an input sample size of 5 for every observations as done in the 2021 assessment. This aggregation approach was used in the 2021 assessment and assumes that the collection of samples was broadly representative of the operation of the fishery in each quarter. 
 
-* Catch-raised aggregation: this spatial aggregation method was performed only for the size dataset with a regular grid. We performed a catch-weighted sum of the number of sampled fish by length bin and a catch-weighted average of the RQ values. RQ values was treated as input sample size in SS3. 
+* *Catch-raised aggregation*: this type of aggregation was performed only for the *cwp55* size dataset. We performed a catch-weighted sum of the number of sampled fish by length bin and a catch-weighted average of the RQ values. RQ values was treated as input sample size in SS3. 
 
-ADD COMPARISON SIZE WITH 2021 ASSESSMENT. A graphical representation of the availability of length samples is provided in @fig-rq-size.
+A graphical representation of the availability of length samples is provided in @fig-rq-size. The longline fishery provided size data from the 1960s but with relatively low quality during the first decades. Most of the size information started to appear in the 1980s, being the purse seine fisheries the most consistent and with the highest quality (@fig-rq-size). The RQ scores did not differ between aggregation methods. 
+
+The differences in size compositions between the simple and catch-raised aggregation methods were minimal for most fisheries (@fig-agg-size). The largest differences were found for the *OT* fisheries in region 1a and 4, and for the handline fishery in region 1a. We observed an increase in the mean length for the *LL* fisheries in all regions (@fig-mlen). In the case of the free school purse seine fishery, we also noted an increase in mean length over time in region 1b. Conversely, we noted a decrease in the mean length for the log school purse seine fishery over the years in regions 1b, 2, and 4, especially from 1980 to $\sim$ 2005. For the handline fishery, we noted an increase in mean length from the 1990 until $\sim$ 2010, and then a decrease until recent years. These patterns were quite similar between the two aggregation methods (@fig-mlen). 
+
+The size compositions used in the current assessment were comparable with the 2021 assessment (both using the simple aggregation approach), although small differences can be observed for the *OT* and *TR* fisheries in region 4 (@fig-comp-agg-size). Regarding mean length, most fisheries other than longline had similar tendencies over time when comparing 2021 and current values. For longline *LL* fisheries, size compositions in 2021 had larger mean lengths before 1990 compared with the current size compositions (@fig-comp-mlen). 
 
 <!-- There was an error detected in the 2021 assessment when converting the length bin width from 2 to 4 cm, which only retained information on the number of sampled fish for length bins 10, 14, 18 cm, $...$, and ignored the number of sampled fish for length bins 12, 16, 20 cm, $...$ from the size database. The impact of this error was evaluated during the model implementation. -->
 
@@ -303,7 +307,7 @@ A number of important trends are evident in the CPUE indices:
 
 - The spike in the CPUE indices around 2012 in the west equatorial region (region 1) was evident for most fishing fleets. Several hypotheses have been proposed on what could have caused CPUE to have increased, including a return to fishing in areas that were most affected by piracy. However, further investigation is required.
 
-The values and trend of LL CPUE used in the 2021 assessment and in this assessment were quite similar for all model areas before 1990 (@fig-comp-cpue). After 1990, we noted large differences for model area 1b, where the current CPUE showed consistently larger values ($\sim$40%) than the 2021 CPUE, especially after 2005. For region 4, we also observed slightly larger 2024 CPUE values compared to the 2021 CPUE after 2005. However, this discrepancy was minimal for regions 2 and 3. 
+The values and trend of LL CPUE used in the 2021 assessment and in this assessment were quite similar for all model areas before 1990 (@fig-comp-cpue). After 1990, we noted large differences for model area 1b, where the current CPUE showed consistently larger values ( $\sim$ 40%) than the 2021 CPUE, especially after 2005. For region 4, we also observed slightly larger 2024 CPUE values compared to the 2021 CPUE after 2005. However, this discrepancy was minimal for regions 2 and 3. 
 
 ### Purse seine CPUE indices
 
@@ -452,11 +456,11 @@ Write your acknowledgements.
 | 6         | $5^\circ\times 5^\circ$                  |
 | NJA_SYC         | Seychelles National Jurisdiction Area       |
 
-: Grid size categories in the size dataset with irregular grids. {#tbl-grid-size}
+: Grid size categories in the *original* size dataset. {#tbl-grid-size}
 
 {{< pagebreak >}}
 
-| Fishery code | Gear                     |
+| Fishery code | Fishery group            |
 |--------------|--------------------------|
 | GI           | Gillnet                  |
 | HD           | Handline                 |
@@ -468,18 +472,17 @@ Write your acknowledgements.
 | TR           | Troll                    |
 | LF           | Longline (fresh tuna)    |
 
-: Fishery classification used in the assessment. {#tbl-fishery-codes}
+: Nine fishery groups and codes used in the current assessment. {#tbl-fishery-codes}
 
 {{< pagebreak >}}
 
 ```{r}
 #| label: tbl-fleet-4A
-#| tab-cap: "Fishery definition in the assessment configuration with 4 areas."
+#| tab-cap: "Fishery definition in the four-areas assessment configuration."
 my_tab = read.csv(file.path(shrpoint_path, 'output/tables', "fleet_label_4A_io.csv"))
 colnames(my_tab) = c('Fishery number', 'Fishery code and region')
 knitr::kable(my_tab, align=rep('l', 2))
 ```
-
 
 {{< pagebreak >}}
 
@@ -487,7 +490,7 @@ knitr::kable(my_tab, align=rep('l', 2))
 
 ```{r}
 #| label: fig-4A-config
-#| fig-cap: "Add your caption here."
+#| fig-cap: "Model areas or regions used in the four-areas assessment configuration. The region 1 is divided into two sub-regions implicitly modelled in the assessment model using the fleets-as-areas approach."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_IO_4ARegions.png"), rel_path = FALSE)
 ```
@@ -496,7 +499,7 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_IO_4AReg
 
 ```{r}
 #| label: fig-catch-bar
-#| fig-cap: "Add your caption here."
+#| fig-cap: "Total annual catch of yellowfin tuna by fishery group from 1950 to 2023. Fishery group codes are described in @tbl-fishery-codes."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_catch.png"), rel_path = FALSE)
 ```
@@ -504,17 +507,8 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_catch.png
 {{< pagebreak >}}
 
 ```{r}
-#| label: fig-catch-bar-area
-#| fig-cap: "Add your caption here."
-#| fig-align: center
-knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_catch_area.png"), rel_path = FALSE)
-```
-
-{{< pagebreak >}}
-
-```{r}
 #| label: fig-agg-size
-#| fig-cap: "Add your caption here."
+#| fig-cap: "Size compositions per fishery included in the assessment model. Colored lines are size compositions obtained using simple aggregation while black lines used the catch-raised aggregation. Size compositions were summed over time."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "agg_size.png"), rel_path = FALSE)
 ```
@@ -522,8 +516,17 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "agg_size.png
 {{< pagebreak >}}
 
 ```{r}
+#| label: fig-mlen
+#| fig-cap: "Mean length per quarter per fishery. Colored lines used the simple aggregation while black lines used the catch-raised aggregation."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "mlen.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
 #| label: fig-catch-grid
-#| fig-cap: "Add your caption here."
+#| fig-cap: "Spatial distribution of IO catches per fishery group. The pie radius represents the aggregated catch from 1980 to 2023. Fishery group codes are described in @tbl-fishery-codes."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "catch_grid.png"), rel_path = FALSE)
 ```
@@ -532,7 +535,7 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "catch_grid.p
 
 ```{r}
 #| label: fig-size-grid
-#| fig-cap: "Add your caption here."
+#| fig-cap: "Spatial distribution of size compositions per fishery group. The size compositions were aggregated over time. Fishery group codes are described in @tbl-fishery-codes."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "size_grid.png"), rel_path = FALSE)
 ```
@@ -541,26 +544,16 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "size_grid.pn
 
 ```{r}
 #| label: fig-rq-size
-#| fig-cap: "Add your caption here."
+#| fig-cap: "The availability of size composition data from each fishery by quarter. The size of the bubble indicates the reporting quality score (small size = high quality, large size = low quality)."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "rq_size.png"), rel_path = FALSE)
-```
-
-
-{{< pagebreak >}}
-
-```{r}
-#| label: fig-map-grid
-#| fig-cap: "Add your caption here."
-#| fig-align: center
-knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_size_grid.png"), rel_path = FALSE)
 ```
 
 {{< pagebreak >}}
 
 ```{r}
 #| label: fig-map-grid-agg1
-#| fig-cap: "Add your caption here."
+#| fig-cap: "Example of grid categories in the original size dataset. The region assignment was done based on the grid centroid."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_size_grid_4A.png"), rel_path = FALSE)
 ```
@@ -569,7 +562,7 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_size_gri
 
 ```{r}
 #| label: fig-map-grid-agg2
-#| fig-cap: "Add your caption here."
+#| fig-cap: "Example of grids in the cwp55 size dataset. The region assignment was done based on the grid centroid."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_size_grid_std_4A.png"), rel_path = FALSE)
 ```
@@ -578,7 +571,7 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_size_gri
 
 ```{r}
 #| label: fig-imputation
-#| fig-cap: "Add your caption here."
+#| fig-cap: "Percentage of size observations by imputation level. Level 0 means perfect match, so no imputation was required."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "imputation_grid_5.png"), rel_path = FALSE)
 ```
@@ -587,7 +580,7 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "imputation_g
 
 ```{r}
 #| label: fig-comp-catch
-#| fig-cap: "Add your caption here."
+#| fig-cap: "Comparison between the catch values used in the 2021 assessment and the current (2024) values."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_catch.png"), rel_path = FALSE)
 ```
@@ -596,7 +589,7 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_catc
 
 ```{r}
 #| label: fig-ts-cpue
-#| fig-cap: "Add your caption here."
+#| fig-cap: "Scaled CPUE LL time serie per region. The shaded area is the 95% confidence interval."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_cpue_area.png"), rel_path = FALSE)
 ```
@@ -605,7 +598,7 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_cpue_area
 
 ```{r}
 #| label: fig-ts-ps-cpue
-#| fig-cap: "Add your caption here."
+#| fig-cap: "Scaled purse seine CPUE time series. Both series were used for region 1b. The shaded area is the 95% confidence interval."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_ps_cpue.png"), rel_path = FALSE)
 ```
@@ -615,9 +608,27 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_ps_cpue.p
 
 ```{r}
 #| label: fig-comp-cpue
-#| fig-cap: "Add your caption here."
+#| fig-cap: "Comparison between the scaled CPUE LL values used in the 2021 assessment and the current (2024) values."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_cpue.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-comp-agg-size
+#| fig-cap: "Comparison between the aggregated size compositions per fishery used in the 2021 and the current (2024) assessment."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_size.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-comp-mlen
+#| fig-cap: "Comparison between the mean length per quarter per fishery used in the 2021 and in the current (2024) assessment."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_mlen.png"), rel_path = FALSE)
 ```
 
 {{< pagebreak >}}
@@ -628,9 +639,23 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_cpue
 
 Include a table with acronyms (e.g., GLMM, SS, etc.)
 
-## Likelihood profiles
+{{< pagebreak >}}
 
-## Retrospective analyses
+## Clustering of size compositions
+
+Add text here.
+
+{{< pagebreak >}}
+
+## One-area model configuration
+
+Add text here.
+
+{{< pagebreak >}}
+
+## Two-areas model configuration
+
+Add text here.
 
 {{< pagebreak >}}
 

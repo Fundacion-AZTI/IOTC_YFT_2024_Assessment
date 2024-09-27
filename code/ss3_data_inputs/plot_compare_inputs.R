@@ -85,10 +85,10 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_cpue', img_type)), plo
        width = img_width, height = 170, units = 'mm', dpi = img_res)
 
 
-# Compare (traditional) size information: aggregated size comps ----------------
+# Compare (original) size information: aggregated size comps ----------------
 
 # 2024 size:
-size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-irregular-RQ.csv'))
+size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-original.csv'))
 size_dat = size_dat %>% select(Yr, ModelFleet, L010:L198)
 size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
 colnames(size_dat) = tolower(colnames(size_dat))
@@ -131,10 +131,10 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_size', img_type)), plo
 
 
 # -------------------------------------------------------------------------
-# Compare (traditional) size information: mean length over the years --------------
+# Compare (original) size information: mean length over the years --------------
 
 # 2024 size:
-size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-irregular-RQ.csv'))
+size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-original.csv'))
 size_dat = size_dat %>% select(Yr, ModelFleet, L010:L198)
 size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
 colnames(size_dat) = tolower(colnames(size_dat))
@@ -181,91 +181,46 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_mlen', img_type)), plo
 
 # -------------------------------------------------------------------------
 # Compare 2024 (traditional) size with and without bug ----------------------------------
-
-# 2024 size with bug:
-size_dat_bug = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-bug.csv'))
-size_dat_bug = size_dat_bug %>% select(Yr, ModelFleet, L010:L198)
-size_dat_bug = dplyr::rename(size_dat_bug, c(time = 'Yr', fleet_number = 'ModelFleet'))
-colnames(size_dat_bug) = tolower(colnames(size_dat_bug))
-size_dat_bug = size_dat_bug %>% dplyr::filter(time >= 13) # same period for both assessments
-# Aggregate over time:
-size_dat_bug = size_dat_bug %>% group_by(fleet_number) %>% summarise_at(.vars = colnames(.)[3:ncol(size_dat_bug)], sum)
-# Sum by row to get freq:
-size_dat_bug = size_dat_bug %>% ungroup() %>% mutate(across(-1)/rowSums(across(-1)))
-size_dat_bug = size_dat_bug %>% mutate(type = 'With bug', .after = 'fleet_number')
-
-# 2024 size without bug:
-size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size.csv'))
-size_dat = size_dat %>% select(Yr, ModelFleet, L010:L198)
-size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
-colnames(size_dat) = tolower(colnames(size_dat))
-size_dat = size_dat %>% dplyr::filter(time >= 13) # same period for both assessments
-# Aggregate over time:
-size_dat = size_dat %>% group_by(fleet_number) %>% summarise_at(.vars = colnames(.)[3:ncol(size_dat)], sum)
-# Sum by row to get freq:
-size_dat = size_dat %>% ungroup() %>% mutate(across(-1)/rowSums(across(-1)))
-size_dat = size_dat %>% mutate(type = 'Without bug', .after = 'fleet_number')
-
-# Merge datasets:
-merged_size = rbind(size_dat, size_dat_bug)
-merged_size = gather(merged_size, 'len_bin', 'prop', 3:ncol(merged_size))
-merged_size$len_bin = as.numeric(gsub(pattern = 'l', replacement = '', x = merged_size$len_bin))
-merged_size = left_join(merged_size, fleet_name_df)
-
-# Make plot:
-p2 = ggplot(data = merged_size, aes(x = len_bin, y = prop)) +
-  geom_line(aes(color = type)) +
-  ylab("Proportion") + xlab('Length bin (cm)') +
-  theme(axis.text.y = element_text(angle = 90, vjust = 0.5, hjust=0.5),
-        legend.position = c(0.875, 0.05)) +
-  scale_y_continuous(breaks = breaks_extended(3)) +
-  scale_color_brewer(palette="Dark2") +
-  guides(color = guide_legend(title = NULL)) +
-  facet_wrap( ~ fleet_name, scales = 'free_y', ncol = 4)
-ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_size_bug', img_type)), plot = p2,
-       width = img_width, height = 200, units = 'mm', dpi = img_res)
-
-# Compare 2024 traditional and catch-weighted size ----------------------------------
-
-# 2024 size catch-weighted:
-size_dat_wgt = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size_LF-w_RQ-w.csv'))
-size_dat_wgt = size_dat_wgt %>% select(Yr, ModelFleet, L010:L198)
-size_dat_wgt = dplyr::rename(size_dat_wgt, c(time = 'Yr', fleet_number = 'ModelFleet'))
-colnames(size_dat_wgt) = tolower(colnames(size_dat_wgt))
-size_dat_wgt = size_dat_wgt %>% dplyr::filter(time >= 13) # same period for both assessments
-# Aggregate over time:
-size_dat_wgt = size_dat_wgt %>% group_by(fleet_number) %>% summarise_at(.vars = colnames(.)[3:ncol(size_dat_wgt)], sum)
-# Sum by row to get freq:
-size_dat_wgt = size_dat_wgt %>% ungroup() %>% mutate(across(-1)/rowSums(across(-1)))
-size_dat_wgt = size_dat_wgt %>% mutate(type = 'Catch-weighted', .after = 'fleet_number')
-
-# 2024 size without bug:
-size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size.csv'))
-size_dat = size_dat %>% select(Yr, ModelFleet, L010:L198)
-size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
-colnames(size_dat) = tolower(colnames(size_dat))
-size_dat = size_dat %>% dplyr::filter(time >= 13) # same period for both assessments
-# Aggregate over time:
-size_dat = size_dat %>% group_by(fleet_number) %>% summarise_at(.vars = colnames(.)[3:ncol(size_dat)], sum)
-# Sum by row to get freq:
-size_dat = size_dat %>% ungroup() %>% mutate(across(-1)/rowSums(across(-1)))
-size_dat = size_dat %>% mutate(type = 'No weighting', .after = 'fleet_number')
-
-# Merge datasets:
-merged_size = rbind(size_dat, size_dat_wgt)
-merged_size = gather(merged_size, 'len_bin', 'prop', 3:ncol(merged_size))
-merged_size$len_bin = as.numeric(gsub(pattern = 'l', replacement = '', x = merged_size$len_bin))
-merged_size = left_join(merged_size, fleet_name_df)
-
-# Make plot:
-p2 = ggplot(data = merged_size, aes(x = len_bin, y = prop)) +
-  geom_line(aes(color = type)) +
-  ylab("Proportion") + xlab('Length bin (cm)') +
-  theme(axis.text.y = element_text(angle = 90, vjust = 0.5, hjust=0.5),
-        legend.position = c(0.875, 0.05)) +
-  scale_y_continuous(breaks = breaks_extended(3)) +
-  scale_color_brewer(palette="Dark2") +
-  guides(color = guide_legend(title = NULL)) +
-  facet_wrap( ~ fleet_name, scales = 'free_y', ncol = 4)
-ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_size_weight', img_type)), plot = p2,
-       width = img_width, height = 200, units = 'mm', dpi = img_res)
+# 
+# # 2024 size with bug:
+# size_dat_bug = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-bug.csv'))
+# size_dat_bug = size_dat_bug %>% select(Yr, ModelFleet, L010:L198)
+# size_dat_bug = dplyr::rename(size_dat_bug, c(time = 'Yr', fleet_number = 'ModelFleet'))
+# colnames(size_dat_bug) = tolower(colnames(size_dat_bug))
+# size_dat_bug = size_dat_bug %>% dplyr::filter(time >= 13) # same period for both assessments
+# # Aggregate over time:
+# size_dat_bug = size_dat_bug %>% group_by(fleet_number) %>% summarise_at(.vars = colnames(.)[3:ncol(size_dat_bug)], sum)
+# # Sum by row to get freq:
+# size_dat_bug = size_dat_bug %>% ungroup() %>% mutate(across(-1)/rowSums(across(-1)))
+# size_dat_bug = size_dat_bug %>% mutate(type = 'With bug', .after = 'fleet_number')
+# 
+# # 2024 size without bug:
+# size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size.csv'))
+# size_dat = size_dat %>% select(Yr, ModelFleet, L010:L198)
+# size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
+# colnames(size_dat) = tolower(colnames(size_dat))
+# size_dat = size_dat %>% dplyr::filter(time >= 13) # same period for both assessments
+# # Aggregate over time:
+# size_dat = size_dat %>% group_by(fleet_number) %>% summarise_at(.vars = colnames(.)[3:ncol(size_dat)], sum)
+# # Sum by row to get freq:
+# size_dat = size_dat %>% ungroup() %>% mutate(across(-1)/rowSums(across(-1)))
+# size_dat = size_dat %>% mutate(type = 'Without bug', .after = 'fleet_number')
+# 
+# # Merge datasets:
+# merged_size = rbind(size_dat, size_dat_bug)
+# merged_size = gather(merged_size, 'len_bin', 'prop', 3:ncol(merged_size))
+# merged_size$len_bin = as.numeric(gsub(pattern = 'l', replacement = '', x = merged_size$len_bin))
+# merged_size = left_join(merged_size, fleet_name_df)
+# 
+# # Make plot:
+# p2 = ggplot(data = merged_size, aes(x = len_bin, y = prop)) +
+#   geom_line(aes(color = type)) +
+#   ylab("Proportion") + xlab('Length bin (cm)') +
+#   theme(axis.text.y = element_text(angle = 90, vjust = 0.5, hjust=0.5),
+#         legend.position = c(0.875, 0.05)) +
+#   scale_y_continuous(breaks = breaks_extended(3)) +
+#   scale_color_brewer(palette="Dark2") +
+#   guides(color = guide_legend(title = NULL)) +
+#   facet_wrap( ~ fleet_name, scales = 'free_y', ncol = 4)
+# ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_size_bug', img_type)), plot = p2,
+#        width = img_width, height = 200, units = 'mm', dpi = img_res)
