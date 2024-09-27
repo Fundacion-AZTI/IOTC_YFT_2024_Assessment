@@ -12,7 +12,7 @@ proj_dir = here::here()
 setwd(proj_dir)
 
 #source("code/analysingModels/auxiliary_functions_4analysingModels.R")
-source("code/auxiliary_functions2.R")
+source("code/auxiliary_functions.R")
 # Sharepoint path:
 source('sharepoint_path.R')
 setwd(shrpoint_path)
@@ -164,14 +164,14 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   dat_1$CPUE <- cpue_df
   
   #update length
-  length_df = read.csv(file.path(shrpoint_path, SS_data, 'size.csv'))
-  dat_1$lencomp <- length_df %>% subset(!is.na(ModelFleet )) %>% subset(!(Yr<230 & ModelFleet==21))
+  length_df = read.csv(file.path(shrpoint_path, SS_data, 'size-original.csv'))
+  dat_1$lencomp <- length_df %>% subset(!is.na(ModelFleet )) #%>% subset(!(Yr<230 & ModelFleet==21))
   fleetNames <- read.csv(file=file.path("data","ss3_inputs","4A_io","FleetNames.csv"))
   dat_1$fleetnames <- fleetNames$FleetNames
   # Read base SS inputs (from 2021 assessment)
 
   # Write SS files:
-
+dat_1$lencomp$Nsamp=5
   SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
      SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
   SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
@@ -996,6 +996,41 @@ ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY8(8)",1:3] <- c(0,2,2)
  SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
  SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
  
-
-
+ ### Update PS selectivity --------------------------------------------
+ #.......................................................................
+ 
+ config_name = '09_IrregularSize'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/08_selectivity_PS'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ length_df = read.csv(file.path(shrpoint_path, SS_data, 'size-irregular.csv'))
+ #length_df$Nsamp=ifelse(length_df$Nsamp==0,2.5,5)
+ 
+ dat_1$lencomp <- length_df %>% subset(!is.na(ModelFleet ))
+ fleetNames <- read.csv(file=file.path("data","ss3_inputs","4A_io","FleetNames.csv"))
+ dat_1$fleetnames <- fleetNames$FleetNames
+ 
+ # Read base SS inputs (from 2021 assessment)
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
  
