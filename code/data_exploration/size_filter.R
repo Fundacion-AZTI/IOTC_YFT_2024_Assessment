@@ -9,8 +9,17 @@ source(here('code', 'auxiliary_functions.R'))
 L_labels  =  c(Paste("L0",seq(10,98,2)), Paste("L",seq(100,198,2))) 
 
 # Read data
-size_dat = read_csv(file.path(shrpoint_path, 'data/exploration', 'agg-size-irregular.csv'))
+size_dat = read_csv(file.path(shrpoint_path, 'data/processed', 'agg-size-original.csv'))
 size_dat = size_dat %>% mutate(Time = paste(Year, Quarter, sep = '-'), .after = 'Quarter')
+
+# Create folder to save plots:
+dir.create(file.path(shrpoint_path, plot_dir, 'exploration'))
+
+# Now create subfolders:
+dir.create(file.path(shrpoint_path, plot_dir, 'exploration/Nsamp_by_year_cpc'))
+dir.create(file.path(shrpoint_path, plot_dir, 'exploration/RQ_by_year_cpc'))
+dir.create(file.path(shrpoint_path, plot_dir, 'exploration/size_by_year'))
+dir.create(file.path(shrpoint_path, plot_dir, 'exploration/size_by_year_cpc'))
 
 # Plot Nsamp + size by CPC and year ---------------------------------------
 
