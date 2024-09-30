@@ -355,14 +355,13 @@ mesopelagic fishes
 1994}; \citeproc{ref-duffyGlobalTrophicEcology2017}{Duffy et al. 2017}).
 Recent growth studies have generally supported a two-stanza growth
 curve, with a slow initial growth phase up to \(\sim\) 60 cm followed by
-much faster growth
-(\citeproc{ref-farleyUpdatingEstimationAge2023}{Farley et al. 2023}). In
-addition, differences in mean length-at-age have been identified between
-males and females for fish older than four years. Environmental
-variability in the IO impacts the abundance and catch rates of this
-species. A significant negative association between the Indian Ocean
-Dipoles (IODs) and the catch rates of yellowfin tuna with a periodicity
-of approximately four years was observed
+much faster growth (\citeproc{ref-farleyUpdatingEstimationAge2023}{J. H.
+Farley et al. 2023}). In addition, differences in mean length-at-age
+have been identified between males and females for fish older than four
+years. Environmental variability in the IO impacts the abundance and
+catch rates of this species. A significant negative association between
+the Indian Ocean Dipoles (IODs) and the catch rates of yellowfin tuna
+with a periodicity of approximately four years was observed
 (\citeproc{ref-lanEffectsClimateVariability2013}{Lan, Evans, and Lee
 2013}; \citeproc{ref-lanInfluenceOceanographicClimatic2020}{Lan, Chang,
 and Wu 2020}). Likewise, Lan, Chang, and Wu
@@ -1234,7 +1233,61 @@ current assessment: 1.5 and 4.35\% per annum.
 
 \subsection{Age data}\label{age-data}
 
-Describe age-length information, etc.
+Age and size information was available for fish sampled between 2009 and
+2022 (Figure~\ref{fig-caal-nsamp}) from the \emph{GERUNDIO} project that
+aimed the collection and analysis of biological samples of tropical
+tunas, swordfish, and blue sharks to improve age, growth, and
+reproduction data for the IOTC. In a first step, J. Farley et al.
+(\citeproc{ref-farleyEstimatingAgeGrowth2021}{2021}) presented this data
+that contained information from otoliths from 253 yellowfin tuna sampled
+mainly in the western IO. Then, J. H. Farley et al.
+(\citeproc{ref-farleyUpdatingEstimationAge2023}{2023}) presented an
+updated dataset with age and length information from additional 136
+individuals. To calculate decimal age of sampled fish, daily and annual
+aging methods were used. Decimal age was calculated for each fish with
+an annual count based on the method developed for yellowfin and bigeye
+tuna (\emph{Thunnus obesus}) in the western Pacific Ocean
+(\citeproc{ref-farleyAgeGrowthYellowfin2020}{J. Farley et al. 2020}). To
+find more details on the ageing estimation method, see J. H. Farley et
+al. (\citeproc{ref-farleyUpdatingEstimationAge2023}{2023}).
+
+Age and fork length information from a total of 389 individuals was
+provided to be used in the current stock assessment. This source of
+information can be included in SS3 as conditional age-at-length data,
+which is important to inform growth and stock age structure
+(\citeproc{ref-leeUseConditionalAge2019}{Lee et al. 2019}). We followed
+these steps to produce the input CAAL data for SS3:
+
+\begin{itemize}
+\tightlist
+\item
+  We first removed observations with incomplete age and fleet data,
+  retaining 375 observations.
+\item
+  Month information was used to assign quarters.
+\item
+  There was no discrimination between the set type for the purse seine
+  fishery. So we assigned observations \(\leq\) 80 cm as \emph{LS} (log
+  school) and \textgreater{} 80 cm as \emph{FS} free school.
+\item
+  Fork length was grouped into the length bins used in the assessment
+  model.
+\item
+  Fish older than 7 years was grouped into a single group (age 7).
+\item
+  Region was assigned based on geographical location.
+\item
+  There were several observations ( \(\sim\) 37\%) with no geographical
+  location, which were assigned to region 1b.
+\end{itemize}
+
+Figure~\ref{fig-caal} shows the CAAL information included in the
+assessment model per fishery. Adults were mostly sampled from the
+\emph{LL}, \emph{FS}, and \emph{HD} fisheries. Conversely, juveniles
+were mainly present in the \emph{LS} fishery. The lengths ranged from 18
+to 182 cm and all the model ages (i.e., quarters) were sampled. The
+largest and oldest fish were observed in the \emph{GI}, \emph{LL}, and
+\emph{FS} fisheries. We assumed no ageing error in the assessment model.
 
 \subsection{Tagging}\label{tagging}
 
@@ -1871,6 +1924,37 @@ assessment.}
 
 \newpage{}
 
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=3.34in,height=\textheight]{C:/Use/OneDrive - AZTI/General - IOTC_YFT_2024/output/figures/caal_nsamp.png}
+
+}
+
+\caption{\label{fig-caal-nsamp}Number of sampled fish per year and
+fishery group in the age-length dataset from the GERUNDIO project.}
+
+\end{figure}%
+
+\newpage{}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=6.69in,height=\textheight]{C:/Use/OneDrive - AZTI/General - IOTC_YFT_2024/output/figures/caal.png}
+
+}
+
+\caption{\label{fig-caal}Conditional age-at-length (CAAL) data included
+in the assessment model. The bubble size represents the proportion of
+ages at a given length.}
+
+\end{figure}%
+
+\newpage{}
+
 \section{Appendix}\label{appendix}
 
 \subsection{Acronyms and
@@ -1957,6 +2041,20 @@ Igaratza Fraile, Iraide Artetxe-Arrate, Iker Zudaire, et al. 2023.
 {``Updating the Estimation of Age and Growth of Yellowfin Tuna
 ({Thunnus} Albacares) in the {Indian Ocean} Using Otoliths.''}
 IOTC-2023-WPTT25-20. Indian Ocean Tuna Comission.
+
+\bibitem[\citeproctext]{ref-farleyEstimatingAgeGrowth2021}
+Farley, Jessica, Kyne Krusic-Golub, Paige Eveson, Patricia Luque, Naomi
+Clear, Igaratza Fraile, Iraide Artetxe-Arrate, et al. 2021.
+{``Estimating the Age and Growth of Yellowfin Tuna ({Thunnus} Albacares)
+in the {Indian Ocean} from Counts of Daily and Annual Increments in
+Otoliths.''} IOTC-2021-WPTT23-05\_Rev1. Indian Ocean Tuna Comission.
+
+\bibitem[\citeproctext]{ref-farleyAgeGrowthYellowfin2020}
+Farley, Jessica, Krusic-Golub, Paige Eveson, Naomi Clear, F. Rouspard,
+C. Sanchez, Simon Nicol, and John Hampton. 2020. {``Age and Growth of
+Yellowfin and Bigeye Tuna in the Western and Central {Pacific Ocean}
+from Otoliths.''} WCPFC-SC16-2020/SC16-SA-WP-02. {Western and Central
+Pacific Fisheries Commission}.
 
 \bibitem[\citeproctext]{ref-froeseFishBase2024}
 Froese, Rainer, and Daniel Pauly. 2024. {``{FishBase}.''} World \{\{Wide
@@ -2159,6 +2257,13 @@ Comission.
 ---------. 2012. {``Stock Assessment of Yellowfin Tuna in the {Indian
 Ocean} Using {MULTIFAN-CL}.''} IOTC-2012-WPTT-14-38 Rev\_1. Indian Ocean
 Tuna Comission.
+
+\bibitem[\citeproctext]{ref-leeUseConditionalAge2019}
+Lee, Huihua, Kevin R. Piner, Ian G. Taylor, and Toshihide Kitakado.
+2019. {``On the Use of Conditional Age at Length Data as a Likelihood
+Component in Integrated Population Dynamics Models.''} \emph{Fisheries
+Research} 216 (August): 204--11.
+\url{https://doi.org/10.1016/j.fishres.2019.04.007}.
 
 \bibitem[\citeproctext]{ref-matsumotoJointLonglineCPUE2024}
 Matsumoto, Takayuki, Keisuke Satoh, Wen-Pei Tsai, Sheng-Ping Wang,

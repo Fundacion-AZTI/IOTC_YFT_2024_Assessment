@@ -67,28 +67,28 @@ which(is.na(data$ModelFishery))
 which(is.na(data$ModelFleet))
 
 # -------------------------------------------------------------------------
-# Read spatially standardized data:
-# You will need to run the make_grid.R script before running the following lines
-load(file.path(shrpoint_path, 'data/processed', 'catchStd_5.RData'))
-data_std = catchStd
-# Change columns names to make it work:
-colnames(data_std) = str_to_title(colnames(data_std))
-colnames(data_std)[c(6)] = c('FisheryCode')
-# Update area information since grids info has changed:
-data_std$Area = get_4Aarea_from_lonlat(data_std$Lon, data_std$Lat)
-table(data_std$Area)
-data_std = create_4Aarea_cols(data_std)
-table(data_std$ModelArea)
-# Create ModelFleet column again:
-data_std = data_std %>% 
-  dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName)) %>% 
-  dplyr::mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries)))
-# Table modelfleet:
-table(data_std$ModelFleet)
-# Make sure no NAs:
-which(is.na(data_std$ModelFishery))
-which(is.na(data_std$ModelFleet))
-
+# # Read spatially standardized data:
+# # You will need to run the make_grid.R script before running the following lines
+# load(file.path(shrpoint_path, 'data/processed', 'catchStd_5.RData'))
+# data_std = catchStd
+# # Change columns names to make it work:
+# colnames(data_std) = str_to_title(colnames(data_std))
+# colnames(data_std)[c(6)] = c('FisheryCode')
+# # Update area information since grids info has changed:
+# data_std$Area = get_4Aarea_from_lonlat(data_std$Lon, data_std$Lat)
+# table(data_std$Area)
+# data_std = create_4Aarea_cols(data_std)
+# table(data_std$ModelArea)
+# # Create ModelFleet column again:
+# data_std = data_std %>% 
+#   dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName)) %>% 
+#   dplyr::mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries)))
+# # Table modelfleet:
+# table(data_std$ModelFleet)
+# # Make sure no NAs:
+# which(is.na(data_std$ModelFishery))
+# which(is.na(data_std$ModelFleet))
+# 
 
 # -------------------------------------------------------------------------
 # -------------------------------------------------------------------------
@@ -117,12 +117,12 @@ write.csv(fleet_name_df, file = file.path(shrpoint_path, tab_dir, paste0('fleet_
 # No need to create new catch input from std catch grid since it will not change due to 5x5 grid
 # Double check:
 
-work = data_std	%>% 
-  group_by(Year,Quarter,ModelFishery) %>% 
-  summarise(Catch = sum(Ncmtfish)) %>% as.data.frame() %>%	
-  #spread(ModelFishery,Catch,fill=0) %>% 
-  mutate(qtr = yearqtr2qtr(Year,Quarter,1950,13)) %>%
-  mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries)))
-table(work$ModelFleet)
+# work = data_std	%>% 
+#   group_by(Year,Quarter,ModelFishery) %>% 
+#   summarise(Catch = sum(Ncmtfish)) %>% as.data.frame() %>%	
+#   #spread(ModelFishery,Catch,fill=0) %>% 
+#   mutate(qtr = yearqtr2qtr(Year,Quarter,1950,13)) %>%
+#   mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries)))
+# table(work$ModelFleet)
 
 # If both tables are equal, then no need to produce new catch input

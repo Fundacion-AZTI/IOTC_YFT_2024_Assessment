@@ -14,6 +14,7 @@ size_dat = size_dat %>% mutate(Time = paste(Year, Quarter, sep = '-'), .after = 
 
 # Create folder to save plots:
 dir.create(file.path(shrpoint_path, plot_dir, 'exploration'))
+n_fig_dim = 42 # 6 cols * 7 rows = 42
 
 # Now create subfolders:
 dir.create(file.path(shrpoint_path, plot_dir, 'exploration/Nsamp_by_year_cpc'))
@@ -25,7 +26,6 @@ dir.create(file.path(shrpoint_path, plot_dir, 'exploration/size_by_year_cpc'))
 
 # Find SS fisheries:
 all_ss_fish = unique(size_dat$ModelFishery)
-n_fig_dim = 42 # 6 cols * 7 rows = 42
 
 for(i in seq_along(all_ss_fish)) {
   
@@ -121,3 +121,53 @@ for(i in seq_along(all_ss_fish)) {
   }
   
 }
+
+
+
+# -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+
+# Compare HD vs Maldives size: --------------------------------------------
+
+# Create folder
+dir.create(file.path(shrpoint_path, plot_dir, 'exploration/size_HD_fleetMDV'))
+
+# Filter HD data:
+fsh_dat = size_dat[grep(pattern = 'HD', x = size_dat$ModelFishery), ]
+
+# Find number of plot groups:
+all_ts = unique(fsh_dat$Time)
+n_groups = ceiling(length(all_ts)/n_fig_dim) # 6 cols * 7 rows = 42
+
+# For all fleets:
+all_dat = fsh_dat %>% group_by(Time) %>% dplyr::summarise_at(c('Nfish_samp', L_labels),list(sum)) %>% 
+  ungroup() %>% mutate(across(-c(1,2))/rowSums(across(-c(1,2))))
+all_dat = gather(all_dat, 'len_bin', 'prop', 3:ncol(all_dat))
+all_dat$len_bin = as.numeric(gsub(pattern = 'L', replacement = '', x = all_dat$len_bin))
+
+# For MDV fleet:
+mdv_dat = fsh_dat %>% dplyr::filter(Fleet == 'MDV') %>% group_by(Time) %>% dplyr::summarise_at(c('Nfish_samp', L_labels),list(sum)) %>% 
+  ungroup() %>% mutate(across(-c(1,2))/rowSums(across(-c(1,2))))
+mdv_dat = gather(mdv_dat, 'len_bin', 'prop', 3:ncol(mdv_dat))
+mdv_dat$len_bin = as.numeric(gsub(pattern = 'L', replacement = '', x = mdv_dat$len_bin))
+
+for(j in 1:n_groups) {
+  
+  these_ts = all_ts[(1:n_fig_dim) + (j-1)*n_fig_dim]
+  plot_dat1 = all_dat %>% dplyr::filter(Time %in% these_ts[!is.na(these_ts)])
+  plot_dat2 = mdv_dat %>% dplyr::filter(Time %in% these_ts[!is.na(these_ts)])
+  
+  d0 = ggplot(plot_dat1, aes(x = len_bin, y = prop), color = 'black') + 
+    geom_line() +
+    geom_line(data = plot_dat2, aes(x = len_bin, y = prop), color = 'darksalmon') +
+    ylab(NULL) + xlab('Length (cm)') +
+    coord_cartesian(ylim = c(0, 0.2), xlim = c(2, 198)) +
+    theme_classic() +
+    facet_wrap( ~ Time, ncol = 6)
+  ggsave(file.path(shrpoint_path, plot_dir, 'exploration/size_HD_fleetMDV', paste0('HD', '-', j, img_type)), plot = d0,
+         width = img_width, height = 200, units = 'mm', dpi = img_res)
+}
+
+
+
+

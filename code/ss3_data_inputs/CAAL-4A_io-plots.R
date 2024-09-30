@@ -38,3 +38,28 @@ p1 = ggplot(plot_data, aes(x = Age, y = LowBin, fill = fisherycode)) +
   facet_wrap( ~ fleet_name, ncol = 3)
 ggsave(file.path(shrpoint_path, plot_dir, paste0('caal', img_type)), plot = p1,
        width = img_width, height = 170, units = 'mm', dpi = img_res)
+
+
+# Samples per year and fishery --------------------------------------------
+
+caal_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'caal.csv'))
+
+# Make plot by fleet (aggregate over the years):
+plot_data = caal_dat
+plot_data = plot_data %>% dplyr::rename(fleet_number = ModelFleet)
+plot_data = left_join(plot_data, fleet_name_df)
+plot_data = plot_data %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2)) # for colors
+plot_data$Year = floor(qtr2yearqtr(plot_data$Yr, initial = 1950, base = 13))
+plot_data = plot_data %>% group_by(Year, fisherycode) %>% summarise(Nsamp = sum(Nsamp))
+
+p1 = ggplot(plot_data, aes(x = Year, y = Nsamp, fill = fisherycode)) + 
+  geom_col() +
+  ylab('Number of sampled fish') + xlab(NULL) +
+  scale_fill_manual(values = fleet_col) +
+  coord_cartesian(xlim = c(2009, 2022)) +
+  theme_classic() +
+  theme(legend.position = c(0.15, 0.75)) +
+  guides(fill = guide_legend(title = NULL)) 
+ggsave(file.path(shrpoint_path, plot_dir, paste0('caal_nsamp', img_type)), plot = p1,
+       width = img_width*0.5, height = 75, units = 'mm', dpi = img_res)
+

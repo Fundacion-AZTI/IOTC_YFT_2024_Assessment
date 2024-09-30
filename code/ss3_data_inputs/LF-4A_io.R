@@ -139,7 +139,6 @@ work = work %>%
 
 work = work %>%
   dplyr::mutate(sno=rowSums(dplyr::select(work,L010:L198))) %>%
-  dplyr::filter(sno >= 20) %>%	# Filter Nsamp >= 20
   dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0,Nsamp = 5) %>%
   dplyr::select(Yr,Seas,ModelFleet,Gender,Part,Nsamp,L010:L198) %>%
   dplyr::arrange(ModelFleet,Yr)

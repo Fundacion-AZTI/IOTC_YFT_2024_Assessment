@@ -11,7 +11,7 @@ source(here('code', 'auxiliary_functions.R'))
 # -------------------------------------------------------------------------
 # -------------------------------------------------------------------------
 
-Data = read.csv(file.path(shrpoint_path, 'data/raw', "IOTC-2024-WPTT26(AS) - YFT - Raised catches.csv"))
+Data = read.csv(file.path(shrpoint_path, 'data/raw', "IOTC-2024-WPTT26(AS) - YFT - Raised catches_Rev1.csv"))
 
 Data = Data %>% 
   transmute(YEAR,MONTH_START,FLEET_CODE,GEAR_CODE,FISHING_GROUND_CODE,CATCH_SCHOOL_TYPE_CODE,CATCH,CATCH_IN_NUMBERS) %>% 
@@ -25,7 +25,6 @@ dHelper = dHelper %>%
 
 Data = Data %>% 
   dplyr::left_join(dHelper,by=c("Gear"="Gear","Fleet"="Fleet","SchoolType"="SchoolType")) %>% 
-  mutate_cond(FisheryCode=='PS',FisheryCode=paste(SchoolType)) %>% 
   dplyr::mutate(Catch = NCmtFish,Grid=as.character(Grid),Quarter = floor((Month-1)/3) + 1)
 
 # Check:
