@@ -117,7 +117,7 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   # Last year = 2022:
   dat_1$endyr = 304
   
-  #update length
+  #update cpue
   cpue_df = read.csv(file.path(shrpoint_path, SS_data, 'scaled_cpue.csv'))
   
   dat_1$CPUE <- cpue_df
@@ -144,34 +144,31 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   dir.create(tmp_dir)
   
   # Temporary files:
+  SS_base = 'models/update/02_update_cpue'
   
-  dat_1 = dat_0
+  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+  base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+  base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+  base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+  
+  dat_1 = base_dat
   ctl_1 = base_ctl
   fore_1 = base_fore
   start_1 = base_start
   
+  
   # Updated length data frame:
-  catch_df = read.csv(file.path(shrpoint_path, SS_data, 'catch.csv'))
-  updated_catch = data.frame(year = catch_df[,'qtr'], seas = 1, fleet = catch_df[,'ModelFleet'], 
-                             catch = catch_df[,'Catch'], catch_se = 0.01)
-  updated_catch = updated_catch %>% add_row(data.frame(year = -999, seas = 1, fleet = 1, catch = 0, catch_se = 0.01), .before = 1) # shouldnt we also add for all fleets?
-  dat_1$catch = updated_catch
-  # Last year = 2022:
-  dat_1$endyr = 304
-  
-  #update cpue
-  cpue_df = read.csv(file.path(shrpoint_path, SS_data, 'scaled_cpue.csv'))
-  dat_1$CPUE <- cpue_df
-  
+
   #update length
   length_df = read.csv(file.path(shrpoint_path, SS_data, 'size-original.csv'))
   dat_1$lencomp <- length_df %>% subset(!is.na(ModelFleet )) #%>% subset(!(Yr<230 & ModelFleet==21))
   fleetNames <- read.csv(file=file.path("data","ss3_inputs","4A_io","FleetNames.csv"))
+  
   dat_1$fleetnames <- fleetNames$FleetNames
   # Read base SS inputs (from 2021 assessment)
 
   # Write SS files:
-dat_1$lencomp$Nsamp=5
+  dat_1$lencomp$Nsamp=5
   SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
      SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
   SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
@@ -956,6 +953,337 @@ ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY8(8)",1:3] <- c(0,2,2)
  #.......................................................................
  ### Remove some of the lenght frequency that were no considered in 2021 --------------------------------------------
  #.......................................................................
+ 
+ #.......................................................................
+ ### Modify boundaries --------------------------------------------
+ #.......................................................................
+ #remotes::install_github("r4ss/r4ss@signif") 
+ config_name = '09_boundaries'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/08_selectivity_PS'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ fleetNames <- read.csv(file=file.path("data","ss3_inputs","4A_io","FleetNames.csv"))
+ dat_1$fleetnames <- fleetNames$FleetNames
+ 
+ #ESTIMATE NEW SETTINGS FOR PURSE SEINERS
+ 
+ ctl_1$age_selex_parms["AgeSel_P_1_FISHERY13(13)",1] <- 3
+ ctl_1$age_selex_parms["AgeSel_P_2_FISHERY3(3)",1] <- 0
+ ctl_1$age_selex_parms["AgeSel_P_1_FISHERY5(5)",1] <- 0
+ ctl_1$age_selex_parms["AgeSel_P_2_FISHERY7(7)",1] <- 0 
+ ctl_1$age_selex_parms["AgeSel_P_2_FISHERY7(7)",2] <- 8 
+ ctl_1$age_selex_parms["AgeSel_P_2_FISHERY10(10)",2] <- 8 
+ ctl_1$age_selex_parms["AgeSel_P_1_FISHERY10(10)",1] <- 6 
+ ctl_1$age_selex_parms["AgeSel_P_1_FISHERY10(10)",2] <- 20 
+ ctl_1$age_selex_parms["AgeSel_P_1_FISHERY4(4)",1] <- -5 
+ ctl_1$age_selex_parms["AgeSel_P_1_FISHERY9(9)",1] <- 0 
+ ctl_1$age_selex_parms["AgeSel_P_1_FISHERY9(9)",1]  <- 0 
+ ctl_1$age_selex_parms["AgeSel_P_2_FISHERY10(10)",1] <- 0   
+ ctl_1$age_selex_parms["AgeSel_P_1_FISHERY11(11)",2] <- 20  
+ ctl_1$age_selex_parms["AgeSel_P_1_FISHERY12(12)",1] <- 0  
+ ctl_1$age_selex_parms["AgeSel_P_1_FISHERY12(12)",2] <- 14 
+ ctl_1$age_selex_parms["AgeSel_P_3_FISHERY12(12)",2] <- 8
+ ctl_1$age_selex_parms["AgeSel_P_1_FISHERY7(7)",2] <- 20
+ ctl_1$age_selex_parms["AgeSel_P_1_FISHERY13(13)",1:2] <- c(4,20)
+ ctl_1$age_selex_parms["AgeSel_P_2_FISHERY13(13)",1:2] <- c(0,8)
+ ctl_1$age_selex_parms["AgeSel_P_2_FISHERY21(21)",1] <- 0
+ ctl_1$age_selex_parms["AgeSel_P_1_FISHERY14(14)",1] <- -5 
+ ctl_1$age_selex_parms["AgeSel_P_1_FISHERY1(1)",1:2] <- c(0,16) 
+ ctl_1$age_selex_parms["AgeSel_P_2_FISHERY2(2)",1] <- 0
+ ctl_1$age_selex_parms["AgeSel_P_1_FISHERY3(3)",2] <- 20
+ ctl_1$age_selex_parms_tv["AgeSel_P_1_FISHERY1(1)_BLK1repl_213",1:2] <- c(-2,16)
+ ctl_1$age_selex_parms_tv["AgeSel_P_1_FISHERY1(1)_BLK1repl_261",1:2] <- c(-2,16)
+ # Read base SS inputs (from 2021 assessment)
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-maxfn 0 -phase 50 -nohess')
+ 
+ 
+ 
+ #.......................................................................
+ ### Modify boundaries --------------------------------------------
+ #.......................................................................
+ #remotes::install_github("r4ss/r4ss@signif") 
+ config_name = '10_recDevs'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/09_boundaries'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ fleetNames <- read.csv(file=file.path("data","ss3_inputs","4A_io","FleetNames.csv"))
+ dat_1$fleetnames <- fleetNames$FleetNames
+ 
+ #ESTIMATE NEW SETTINGS FOR PURSE SEINERS
+ 
+ ctl_1$MG_parms["RecrDist_GP_1_area_4_month_1",11] <- 296
+ ctl_1$MainRdevYrLast <- 296
+ ctl_1$last_yr_fullbias_adj <-299
+ ctl_1$first_recent_yr_nobias_adj <- 304
+ # Read base SS inputs (from 2021 assessment)
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-maxfn 0 -phase 50 -nohess')
+ 
+ 
+ 
+ #.......................................................................
+ ### Adding report quality --------------------------------------------
+ #.......................................................................
+ #remotes::install_github("r4ss/r4ss@signif") 
+ config_name = '11_RQ'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/10_recDevs'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ fleetNames <- read.csv(file=file.path("data","ss3_inputs","4A_io","FleetNames.csv"))
+ dat_1$fleetnames <- fleetNames$FleetNames
+ 
+ length_df = read.csv(file.path(shrpoint_path, SS_data, 'size-original.csv'))
+ dat_1$lencomp <- length_df #%>% mutate(Nsamp=-5/6*Nsamp+5) #%>% subset(!(Yr<230 & ModelFleet==21))
+ dat_1$lencomp$Nsamp <- ifelse(length_df$Nsamp<=2,5,2)
+ 
+ #ESTIMATE NEW SETTINGS FOR PURSE SEINERS
+ 
+
+ # Read base SS inputs (from 2021 assessment)
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-maxfn 0 -phase 50 -nohess')
+ 
+ 
+ ### Adding regular grig  --------------------------------------------
+ #.......................................................................
+ #remotes::install_github("r4ss/r4ss@signif") 
+ config_name = '12_cwp5x5'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/10_recDevs'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ fleetNames <- read.csv(file=file.path("data","ss3_inputs","4A_io","FleetNames.csv"))
+ dat_1$fleetnames <- fleetNames$FleetNames
+ 
+ length_df = read.csv(file.path(shrpoint_path, SS_data, 'size-cwp55.csv'))
+ dat_1$lencomp <- length_df #%>% mutate(Nsamp=-5/6*Nsamp+5) #%>% subset(!(Yr<230 & ModelFleet==21))
+ dat_1$lencomp$Nsamp <- 5
+ 
+ #ESTIMATE NEW SETTINGS FOR PURSE SEINERS
+ 
+ 
+ # Read base SS inputs (from 2021 assessment)
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-maxfn 0 -phase 50 -nohess')
+ 
+ 
+ 
+ ### Adding regular grig and report quality --------------------------------------------
+ #.......................................................................
+ #remotes::install_github("r4ss/r4ss@signif") 
+ config_name = '12_cwp5x5_RQ'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/10_recDevs'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ fleetNames <- read.csv(file=file.path("data","ss3_inputs","4A_io","FleetNames.csv"))
+ dat_1$fleetnames <- fleetNames$FleetNames
+ 
+ length_df = read.csv(file.path(shrpoint_path, SS_data, 'size-cwp55.csv'))
+ dat_1$lencomp <- length_df #%>% mutate(Nsamp=-5/6*Nsamp+5) #%>% subset(!(Yr<230 & ModelFleet==21))
+ dat_1$lencomp$Nsamp <- ifelse(length_df$Nsamp<=2,5,2)
+ 
+ #ESTIMATE NEW SETTINGS FOR PURSE SEINERS
+ 
+ 
+ # Read base SS inputs (from 2021 assessment)
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-maxfn 0 -phase 50 -nohess')
+ 
+ 
+ ### Adding regular grig and report quality --------------------------------------------
+ #.......................................................................
+ #remotes::install_github("r4ss/r4ss@signif") 
+ config_name = '12_cwp5x5_RQ'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/12_cwp5x5_RQ'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ fleetNames <- read.csv(file=file.path("data","ss3_inputs","4A_io","FleetNames.csv"))
+ dat_1$fleetnames <- fleetNames$FleetNames
+ 
+ length_df = read.csv(file.path(shrpoint_path, SS_data, 'size-cwp55.csv'))
+ dat_1$lencomp <- length_df #%>% mutate(Nsamp=-5/6*Nsamp+5) #%>% subset(!(Yr<230 & ModelFleet==21))
+ dat_1$lencomp$Nsamp <- ifelse(length_df$Nsamp<=2,5,2)
+ 
+ #ESTIMATE NEW SETTINGS FOR PURSE SEINERS
+ 
+ 
+ # Read base SS inputs (from 2021 assessment)
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-maxfn 0 -phase 50 -nohess')
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  
  #.......................................................................
  ### Update PS selectivity --------------------------------------------

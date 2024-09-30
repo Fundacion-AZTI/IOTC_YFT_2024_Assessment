@@ -17,7 +17,7 @@ source(here('code', 'auxiliary_functions.R'))
 source('sharepoint_path.R')
 setwd(shrpoint_path)
 
-dataRQ <- read.csv("data/ss3_inputs/4A_io/size-irregular-RQ.csv") 
+dataRQ <- read.csv("data/ss3_inputs/4A_io/size-original.csv") 
 dataRQ <- dataRQ %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))
 
 head(dataRQ)
@@ -26,6 +26,7 @@ ggplot(dataRQ, aes(x=yrqtr,y=ModelFleet,fill=Nsamp))+
   theme_fun()+xlab("Year") + ylab("Fleet")
 SavePlot('ReportQuality',15,10)
 
+dataRQ_v2 <- dataRQ
 dataRQ_v2$Nsamp <- ifelse(dataRQ$Nsamp<=3,0,1)
 
 ggplot(dataRQ_v2, aes(x=yrqtr,y=ModelFleet,fill=Nsamp))+
@@ -41,7 +42,7 @@ ggplot(dataRQ_v2, aes(x=yrqtr,y=ModelFleet,fill=Nsamp))+
   theme_fun()+xlab("Year") + ylab("Fleet")
 SavePlot('GOODReportQuality_smalEq2',15,10)
 
-write.csv(dataRQ_v2,file = file.path("data","ss3_inputs","4A_io","size_irregular-RQ-smalEq2.csv"),row.names=FALSE)
+write.csv(dataRQ_v2,file = file.path("data","ss3_inputs","4A_io","size_original-RQ-smalEq2.csv"),row.names=FALSE)
 
 
 #.............................................................#

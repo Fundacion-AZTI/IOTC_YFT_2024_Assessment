@@ -183,18 +183,19 @@ dir_table <- "output/tables/"
   
   scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings","05_update_M","06_update_Growth",
            "06b_update_GrowthTaggingData","07_update_Maturity",
-           "08_selectivity_PS","09_recdev")
+           "08_selectivity_PS","09_boundaries","10_recDevs","11_RQ","12_cwp5x5","12_cwp5x5_RQ")
            #"08_correctionLengthData","09_remove_LF_length_earlyPeriod")  
 
-  desc <- c("BaseCase", "update catch","update cpue","update warnings",
-            "update all-increase boundary OT region 4 (FL14) param1 and tother warnings","Natural mortality age 4.07 years M=0.467",
+  desc <- c("BaseCase", "update catch","update cpue","update length","update warnings",
+           "Natural mortality age 4.07 years M=0.467",
             "Farley 2023 growth","update_Growth Tagging Data",
-            "Maturity Zudaire et al. 2022","update PS selectivity","update recdev")
+            "Maturity Zudaire et al. 2022","update PS selectivity","update boundaries",
+           "update recruitment deviates","Adding report quality","Regular grid cwp5x5","Regular grid and cwp5x5 and report quality")
             #"r4ss write_ssdat function updated and length data corrected",
             #"length data LF<230 ignored")
   
-  scs <- scs[6:10]
-  desc <- "update recdev"
+  scs <- scs[13:15]
+  desc <- desc[13:15]
   scs_wd <-paste0("models/update/",scs)
   
   plot_ss3 <- TRUE
@@ -221,20 +222,8 @@ dir_table <- "output/tables/"
   #...................................................
   
   
-  
-  scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings","05_update_M","06_update_Growth",
-           "06b_update_GrowthTaggingData","07_update_Maturity",
-           "08_selectivity_PS")#,"09_remove_LF_length_earlyPeriod")  
-  
-  desc <- c("BaseCase", "update catch","update cpue","update warnings",
-            "update all-increase boundary OT region 4 (FL14) param1 and tother warnings","Natural mortality age 4.07 years M=0.467",
-            "Farley 2023 growth", "update_GrowthTaggingData",
-            "Maturity Zudaire et al. 2022",
-            "PS selectivity update")
-          #  "r4ss write_ssdat function updated and length data corrected",
-           # "length data LF<230 ignored")
-  
-  i <- 1:10
+
+  i <- 1:2
   sub_scs <- scs[i]
   sub_scs_wd <-paste0("models/update/",sub_scs)
   mod_sum <- aggregate.ssMod(sub_scs, sub_scs_wd)
