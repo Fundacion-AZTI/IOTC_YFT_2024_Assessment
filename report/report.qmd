@@ -225,13 +225,12 @@ First, we removed gear types with unclear classification (*HOOK*, *HATR*, *PSOB*
 * Fishery was assigned based on fishery group and region.
 * We converted the length bin width from 2 to 4 cm. To do so, we summed the number of sampled fish from pairs of length bins (e.g., 10 and 12 cm were summed and assigned to 10 cm, 14 and 16 cm were summed and assigned to 14 cm, and so on). After this conversion, we had a total of 48 length bins.
 
-Only for the size dataset with regular grids, we then assigned the catch (in numbers) that corresponded to every observation in the size data (i.e., year, quarter, grid, fleet, and gear type). We found a perfect match for $\sim$ 74% of cases but there were some size observations without catch. In order to fill in these catch gaps, we followed an imputation procedure with five levels:
+Only for the size dataset with regular grids, we then assigned the catch (in numbers) that corresponded to every observation in the size data (i.e., year, quarter, grid, fleet, and gear type). We found a perfect match for $\sim$ 76% of cases but there were some size observations without catch. In order to fill in these catch gaps, we followed an imputation procedure with four levels:
 
 -   *Level 1*: Fill in catch gaps with the average catch per grid for a given year, quarter, fleet, gear type, and fishery group.
 -   *Level 2*: Fill in catch gaps with the average catch per grid for a given year, fleet, gear type, and fishery group.
 -   *Level 3*: Fill in catch gaps with the average catch per grid for a given year, gear type, and fishery group.
 -   *Level 4*: Fill in catch gaps with the average catch per grid for a given gear type and fishery group.
--   *Level 5*: Fill in catch gaps with the average catch per grid for a given fishery group.
 
 @fig-imputation shows the percentage of size observations that needed each level of imputation.
 
@@ -327,7 +326,19 @@ The WCPFC assessments have often estimated substantial changes in PS FAD-associa
 
 ## Age data
 
-Describe age-length information, etc.
+Age and size information was available for fish sampled between 2009 and 2022 (@fig-caal-nsamp) from the *GERUNDIO* project that aimed the collection and analysis of biological samples of tropical tunas, swordfish, and blue sharks to improve age, growth, and reproduction data for the IOTC. In a first step, @farleyEstimatingAgeGrowth2021 presented this data that contained information from otoliths from 253 yellowfin tuna sampled mainly in the western IO. Then, @farleyUpdatingEstimationAge2023 presented an updated dataset with age and length information from additional 136 individuals. To calculate decimal age of sampled fish, daily and annual aging methods were used. Decimal age was calculated for each fish with an annual count based on the method developed for yellowfin and bigeye tuna (*Thunnus obesus*) in the western Pacific Ocean [@farleyAgeGrowthYellowfin2020]. To find more details on the ageing estimation method, see @farleyUpdatingEstimationAge2023.
+
+Age and fork length information from a total of 389 individuals was provided to be used in the current stock assessment. This source of information can be included in SS3 as conditional age-at-length data, which is important to inform growth and stock age structure [@leeUseConditionalAge2019]. We followed these steps to produce the input CAAL data for SS3:
+
+* We first removed observations with incomplete age and fleet data, retaining 375 observations.
+* Month information was used to assign quarters.
+* There was no discrimination between the set type for the purse seine fishery. So we assigned observations $\leq$ 80 cm as *LS* (log school) and > 80 cm as *FS* free school.
+* Fork length was grouped into the length bins used in the assessment model.
+* Fish older than 7 years was grouped into a single group (age 7).
+* Region was assigned based on geographical location.
+* There were several observations ( $\sim$ 37%) with no geographical location, which were assigned to region 1b.
+
+@fig-caal shows the CAAL information included in the assessment model per fishery. Adults were mostly sampled from the *LL*, *FS*, and *HD* fisheries. Conversely, juveniles were mainly present in the *LS* fishery. The lengths ranged from 18 to 182 cm and all the model ages (i.e., quarters) were sampled. The largest and oldest fish were observed in the *GI*, *LL*, and *FS* fisheries. We assumed no ageing error in the assessment model.
 
 ## Tagging
 
@@ -626,9 +637,27 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_size
 
 ```{r}
 #| label: fig-comp-mlen
-#| fig-cap: "Comparison between the mean length per quarter per fishery used in the 2021 and in the current (2024) assessment."
+#| fig-cap: "Comparison between the mean length per quarter per fishery group used in the 2021 and in the current (2024) assessment."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_mlen.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-caal-nsamp
+#| fig-cap: "Number of sampled fish per year and fishery group in the age-length dataset from the GERUNDIO project."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "caal_nsamp.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-caal
+#| fig-cap: "Conditional age-at-length (CAAL) data included in the assessment model. The bubble size represents the proportion of ages at a given length."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "caal.png"), rel_path = FALSE)
 ```
 
 {{< pagebreak >}}
