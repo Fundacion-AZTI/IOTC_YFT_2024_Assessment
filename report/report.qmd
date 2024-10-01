@@ -246,7 +246,7 @@ In order to remove inconsistent patterns in the length frequency data, we carrie
 
 - *LL* fishery: a review of the longline size data shows that the sampling behaviour of Taiwanese and Seychelles fleets (mostly reflagged Taiwanese vessels) have changed over time, with patterns in the logbook length data inconsistent with other fleet [@hoyleReviewSizeData2021], and as such the WPTT23 (Data Preparatory) recommended omitting all Taiwanese and Seychelles logbook length data from the 2021 assessment [@iotcReviewYellowfinTuna2021]. Following this advice, we removed length frequency data from the Taiwanese and Seychelles longline logbooks from the final length frequency data sets.
 
-- *LL* fishery: longline length frequency data during 1970-1995 and 2010-2020 in region 1a was removed.
+- *LL* fishery: longline length frequency data during 1970-1995 and 2010-2023 in region 1a was removed.
 
 - *LL* fishery: attempts to fit the size data of this fishery in past assessments suggested that the large decline in mean size observed before 1960 is inconsistent with the yellowfin population dynamics. @hoyleReviewSizeData2021 suggest that selectivity may have changed during this early period and recommend avoiding fitting to these data with the same selectivity. Therefore, we omitted longline size data before 1960 for regions 1b, 2, 3, and 4. 
 
@@ -256,7 +256,7 @@ In order to remove inconsistent patterns in the length frequency data, we carrie
 
 - *GI* fishery: we removed size data from the Sri Lankan fleet in 2021.
 
-- *HD* fishery: we removed size data from the Maldivian fleet in 2003.
+- *HD* fishery: we only retained size information from the Maldivian fleet. We also removed Maldivian size data in 2003 and 2015 (quarter 1).
 
 - *OT* fishery: we removed size data sampled during 2021-2022 in region 1a, and data sampled in 2016 in region 4.
 

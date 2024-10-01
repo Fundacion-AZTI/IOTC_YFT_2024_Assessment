@@ -67,6 +67,15 @@ which(is.na(data$ModelFishery))
 which(is.na(data$ModelFleet))
 
 # -------------------------------------------------------------------------
+# Aggregate data:
+# Remove Month, SchoolType, Grid:
+
+agg_data = data %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
+  summarise(NCmtFish = sum(NCmtFish)) 
+# Save for data exploration:
+write.csv(agg_data, file = file.path(shrpoint_path, 'data/processed', 'agg-catch.csv'), row.names = FALSE)
+
+# -------------------------------------------------------------------------
 # # Read spatially standardized data:
 # # You will need to run the make_grid.R script before running the following lines
 # load(file.path(shrpoint_path, 'data/processed', 'catchStd_5.RData'))

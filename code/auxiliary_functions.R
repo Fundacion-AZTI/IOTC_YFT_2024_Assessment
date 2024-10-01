@@ -277,7 +277,7 @@ filter_LF_4A_type2 = function(data) { # new filtering
   work = data %>% 
     # Filters reviewed by Simon and agreed by the team:
     dplyr::filter(!(Fleet %in% c('TWN','SYC') & Gear == 'LL')) %>%
-    dplyr::filter(!(ModelFishery == "LL 1a" & Year %in% c(1970:1995, 2010:2020))) %>% 
+    dplyr::filter(!(ModelFishery == "LL 1a" & Year %in% c(1970:1995, 2010:2023))) %>% 
     dplyr::filter(!(ModelFishery == "LL 1b" & Year %in% c(1950:1959))) %>%
     dplyr::filter(!(ModelFishery == "LL 2" & Year %in% c(1950:1959))) %>%
     dplyr::filter(!(ModelFishery == "LL 3" & Year %in% c(1950:1959))) %>%
@@ -288,7 +288,9 @@ filter_LF_4A_type2 = function(data) { # new filtering
     dplyr::filter(!(Nfish_samp < 100 & Quality > 0)) %>% # remove low sample size but only those rows not considered best quality
     # Remove weird patterns:
     dplyr::filter(!(ModelFishery == "GI 1a" & Fleet == 'LKA' & Year %in% c(2021))) %>%
-    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet == 'MDV' & Year %in% c(2003))) %>%
+    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet != 'MDV')) %>% # only use MDV for HD 1a, agreed with team
+    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet == 'MDV' & Year == 2003)) %>% # remove HD with noisy obs
+    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet == 'MDV' & Year == 2015 & Quarter == 1)) %>% # remove HD with noisy obs
     dplyr::filter(!(ModelFishery == "OT 1a" & Year %in% c(2021:2022))) %>%
     dplyr::filter(!(ModelFishery == "OT 4" & Year %in% c(2016))) %>%
     dplyr::filter(!(ModelFishery == "TR 4" & Year %in% c(2016:2019))) %>%
@@ -434,6 +436,28 @@ calculate_area_on_land = function(dat) {
 
   return(dat)
   
+}
+
+# -------------------------------------------------------------------------
+# Mean length at age (Jan-1st) by growth function (Fonteneau or Farley)
+# This should come from the SS3 model
+# Note that information from age 1 to 28 is provided:
+Len_font = c(23.821,34.9831,43.1626,46.936,49.9479,52.8725,58.2097,68.1843,77.6614,87.5578,98.6306,106.399,114.182,121.998,
+        125.114,127.895,130.377,132.592,134.569,136.334,137.908,139.314,140.568,141.688,142.687,143.578,144.374,146.017)
+Len_farl = c( 29.94634,  44.53486,  51.23907,  59.87039,  69.86614,  78.93331,  87.15816,  94.61894, 101.38664,
+         107.52563, 113.09432, 118.14569, 122.72780, 126.88425, 130.65457, 134.07464, 137.17699, 139.99114,
+         142.54386, 144.85944, 146.95991, 148.86525, 150.59359, 152.16137, 153.58350, 154.87352, 156.04371,
+         157.10518)
+
+# -------------------------------------------------------------------------
+# Age slicing for tagging data:
+age_slicing = function(len, mlen_at_age, mlen_at_age0 = 10) {
+    LenMid = c(mlen_at_age0, (mlen_at_age[-length(mlen_at_age)] + (mlen_at_age[-1] - mlen_at_age[-length(mlen_at_age)])/2))
+	l = len
+	age = 0
+	for(i in 1:(length(LenMid)-1)) age <- ifelse(l >= LenMid[i] & l < LenMid[i+1], i, age)
+	if(l >= LenMid[length(LenMid)]) age = length(LenMid) 
+	return(age)
 }
 
 
