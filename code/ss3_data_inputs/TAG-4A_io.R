@@ -27,7 +27,10 @@ dataC$rel_age = sapply(dataC$tag_length, age_slicing, mlen_at_age = Len_font)
 # Release data input
 work = data %>% 
   dplyr::filter(project=='RTTP')  %>%
-  mutate(rel_age = replace(rel_age,which(rel_age>15),15)) %>%
+  mutate(rel_age = replace(rel_age,which(rel_age>15),15)) # why should we do this?
+write.csv(work, file = file.path(shrpoint_path, 'data/processed', 'tag-filtered-release-fonteneau.csv'), row.names = FALSE)
+
+work = work %>%
   group_by(rel_assessment_area, rel_yrqtr,rel_year,rel_quarter,rel_age)  %>%
   summarise(number=n())  %>% 
   as.data.frame() %>%
@@ -45,7 +48,10 @@ write.csv(out_rel, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_confi
 # Produce recapture SS3 input
 workC = dataC %>% 
   dplyr::filter(project=='RTTP')  %>%
-  mutate(rel_age = replace(rel_age,which(rel_age>15),15)) %>%
+  mutate(rel_age = replace(rel_age,which(rel_age>15),15))
+write.csv(workC, file = file.path(shrpoint_path, 'data/processed', 'tag-filtered-recapture-fonteneau.csv'), row.names = FALSE)
+
+workC = workC %>%
   group_by(rel_assessment_area, rel_year,rel_quarter,rel_age, rec_year,rec_quarter,rec_model_fleet,rec_location)  %>%
   summarise(number=n(),number_prime=n())  %>% 
   as.data.frame() %>% 
@@ -82,7 +88,7 @@ write.csv(out_rec, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_confi
 
 # -------------------------------------------------------------------------
 # -------------------------------------------------------------------------
-# Produce release SS3 inputs: (Fonteneau)
+# Produce release SS3 inputs: (Farley)
 
 # Age slicing
 data$rel_age = sapply(data$tag_length, age_slicing, mlen_at_age = Len_farl)
@@ -91,7 +97,10 @@ dataC$rel_age = sapply(dataC$tag_length, age_slicing, mlen_at_age = Len_farl)
 # Release data input
 work = data %>% 
   dplyr::filter(project=='RTTP')  %>%
-  mutate(rel_age = replace(rel_age,which(rel_age>15),15)) %>%
+  mutate(rel_age = replace(rel_age,which(rel_age>15),15)) 
+write.csv(work, file = file.path(shrpoint_path, 'data/processed', 'tag-filtered-release-farley.csv'), row.names = FALSE)
+
+work = work %>%
   group_by(rel_assessment_area, rel_yrqtr,rel_year,rel_quarter,rel_age)  %>%
   summarise(number=n())  %>% 
   as.data.frame() %>%
@@ -109,7 +118,10 @@ write.csv(out_rel, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_confi
 # Produce recapture SS3 input
 workC = dataC %>% 
   dplyr::filter(project=='RTTP')  %>%
-  mutate(rel_age = replace(rel_age,which(rel_age>15),15)) %>%
+  mutate(rel_age = replace(rel_age,which(rel_age>15),15))
+write.csv(workC, file = file.path(shrpoint_path, 'data/processed', 'tag-filtered-recapture-farley.csv'), row.names = FALSE)
+
+workC = workC %>%
   group_by(rel_assessment_area, rel_year,rel_quarter,rel_age, rec_year,rec_quarter,rec_model_fleet,rec_location)  %>%
   summarise(number=n(),number_prime=n())  %>% 
   as.data.frame() %>% 
