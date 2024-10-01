@@ -20,7 +20,7 @@ setwd(shrpoint_path)
 # SS base files path (in Sharepoint):
 SS_base = 'models/base_win_vs_lin/4A_io_lin_v33022_FixedParam2_Fl11'
 base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
-SS_base = 'models/update/08_correctionLengthData'
+SS_base = 'models/update/10_recDevs'
 dat_2024 = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
 
 
@@ -49,6 +49,6 @@ LC_diff_AS2024_AS2021$total <- total
 LC_diff_AS2024_AS2021 <- as.data.frame(LC_diff_AS2024_AS2021)
 LC_diff_AS2024_AS2021 <- LC_diff_AS2024_AS2021 %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))
 
-write.csv(LC_diff_AS2024_AS2021, file=file.path("data","ss3_inputs","DifferencesLencomp_AS2021_AS2024.csv"))
+write.csv(LC_diff_AS2024_AS2021, file=file.path("data","ss3_inputs","DifferencesLencomp_AS2021_AS2024_v2.csv"))
 
           

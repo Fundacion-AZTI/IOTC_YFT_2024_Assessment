@@ -196,11 +196,13 @@ dir_table <- "output/tables/"
   
   scs <- scs[13:15]
   desc <- desc[13:15]
+  scs <- c("15_priors_uniform","15_priors_uniform_Linf","15_priors_uniform_M_03","16_LL_lengthSelex_uniform","14B_boudnaries_cv")
+  scs <- c("15_priors_uniform3")
   scs_wd <-paste0("models/update/",scs)
   
   plot_ss3 <- TRUE
-  add_perf_table <- TRUE
-  
+  add_perf_table <- FALSE
+  i<-1
   for(i in 1:length(scs)){
     sc_ss3 <- SS_output(dir=scs_wd[i],  repfile = "Report.sso",covar=F)
     if (plot_ss3) { SS_plots(sc_ss3,uncertainty=T,png=T,forecastplot=F, fitrange = TRUE, 
