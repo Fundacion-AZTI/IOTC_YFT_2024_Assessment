@@ -8,21 +8,27 @@ source(here('code', 'auxiliary_functions.R'))
 # Length bins
 L_labels  =  c(Paste("L0",seq(10,98,2)), Paste("L",seq(100,198,2))) 
 
-# Read data
+# Read size data
 size_dat = read_csv(file.path(shrpoint_path, 'data/processed', 'agg-size-original.csv'))
 size_dat = size_dat %>% mutate(Time = paste(Year, Quarter, sep = '-'), .after = 'Quarter')
+
+# Read data in:
+catch_dat = read_csv(file.path(shrpoint_path, 'data/processed', 'agg-catch.csv'))
+catch_dat = catch_dat %>% mutate(Time = paste(Year, Quarter, sep = '-'), .after = 'Quarter')
 
 # Create folder to save plots:
 dir.create(file.path(shrpoint_path, plot_dir, 'exploration'))
 n_fig_dim = 42 # 6 cols * 7 rows = 42
+
+
+# -------------------------------------------------------------------------
+# Plot Nsamp + size by CPC and year ---------------------------------------
 
 # Now create subfolders:
 dir.create(file.path(shrpoint_path, plot_dir, 'exploration/Nsamp_by_year_cpc'))
 dir.create(file.path(shrpoint_path, plot_dir, 'exploration/RQ_by_year_cpc'))
 dir.create(file.path(shrpoint_path, plot_dir, 'exploration/size_by_year'))
 dir.create(file.path(shrpoint_path, plot_dir, 'exploration/size_by_year_cpc'))
-
-# Plot Nsamp + size by CPC and year ---------------------------------------
 
 # Find SS fisheries:
 all_ss_fish = unique(size_dat$ModelFishery)
@@ -123,6 +129,47 @@ for(i in seq_along(all_ss_fish)) {
 }
 
 
+# -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# Plot catch per Fleet:
+
+# Create folder
+dir.create(file.path(shrpoint_path, plot_dir, 'exploration/catch_by_year_cpc'))
+
+# Find SS fisheries:
+all_ss_fish = unique(catch_dat$ModelFishery)
+
+for(i in seq_along(all_ss_fish)) {
+  
+  fsh_dat = catch_dat %>% dplyr::filter(ModelFishery %in% all_ss_fish[i])
+  tmp_dat2 = fsh_dat %>% group_by(Year, Fleet) %>% summarise(Catch = sum(NCmtFish))
+  n_fleets = length(unique(tmp_dat2$Fleet))
+
+  if(n_fleets > 8) {
+    summ_dat = tmp_dat2 %>% group_by(Fleet) %>% summarise(Catch = sum(Catch))
+    summ_dat = summ_dat[order(summ_dat$Catch, decreasing = TRUE), ]
+    summ_dat = summ_dat %>% mutate(Fleet_label = Fleet) %>% select(-Catch)
+    summ_dat$Fleet_label[8:nrow(summ_dat)] = 'Other fleets'
+    # Merge:
+    tmp_dat2 = left_join(tmp_dat2, summ_dat)
+    tmp_dat2 = tmp_dat2 %>% mutate(Fleet = Fleet_label)
+    tmp_dat2 = tmp_dat2 %>% group_by(Year, Fleet) %>% summarise(Catch = sum(Catch))
+  }
+  
+  d2 = ggplot(tmp_dat2, aes(x = Year, y = Catch, color = Fleet, fill = Fleet)) + 
+    geom_col() +
+    ylab('Catch (mt)') + xlab(NULL) +
+    scale_fill_brewer(palette = "Dark2") +
+    scale_color_brewer(palette = "Dark2") +
+    theme_classic() +
+    theme(legend.position = 'bottom',
+          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  ggsave(file.path(shrpoint_path, plot_dir, 'exploration/catch_by_year_cpc', paste0(all_ss_fish[i], img_type)), plot = d2,
+         width = img_width, height = 130, units = 'mm', dpi = img_res)
+
+}
+
+
 
 # -------------------------------------------------------------------------
 # -------------------------------------------------------------------------
@@ -167,7 +214,4 @@ for(j in 1:n_groups) {
   ggsave(file.path(shrpoint_path, plot_dir, 'exploration/size_HD_fleetMDV', paste0('HD', '-', j, img_type)), plot = d0,
          width = img_width, height = 200, units = 'mm', dpi = img_res)
 }
-
-
-
 
