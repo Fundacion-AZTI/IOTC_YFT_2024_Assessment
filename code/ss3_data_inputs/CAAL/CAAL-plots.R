@@ -57,9 +57,11 @@ p1 = ggplot(plot_data, aes(x = Year, y = Nsamp, fill = fisherycode)) +
   ylab('Number of sampled fish') + xlab(NULL) +
   scale_fill_manual(values = fleet_col) +
   coord_cartesian(xlim = c(2009, 2022)) +
+  scale_x_continuous(breaks = 2009:2022) +
   theme_classic() +
-  theme(legend.position = c(0.15, 0.75)) +
-  guides(fill = guide_legend(title = NULL)) 
+  theme(legend.position = c(0.15, 0.7),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  guides(fill = guide_legend(title = NULL))
 ggsave(file.path(shrpoint_path, plot_dir, paste0('caal_nsamp', img_type)), plot = p1,
        width = img_width*0.5, height = 75, units = 'mm', dpi = img_res)
 

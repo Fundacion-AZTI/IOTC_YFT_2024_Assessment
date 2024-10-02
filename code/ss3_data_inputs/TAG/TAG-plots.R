@@ -79,7 +79,7 @@ plot_rec = plot_rec %>% group_by(Time, fisherycode) %>% summarise(n_obs = n())
 
 p2 = ggplot(plot_rec, aes(x = Time, y = n_obs, color = fisherycode, fill = fisherycode)) + 
   geom_col() +
-  ylab('Number of fish recaptured') + xlab(NULL) +
+  ylab('Number of tags recovered') + xlab(NULL) +
   scale_fill_manual(values = fleet_col) +
   scale_color_manual(values = fleet_col) +
   theme_classic() +
@@ -101,7 +101,7 @@ plot_dat = plot_dat %>% mutate(rec_model_area = factor(rec_model_area))
 
 p1 = ggplot(plot_dat, aes(x = factor(rec_year), y = n_obs, color = rec_model_area, fill = rec_model_area)) + 
   geom_bar(stat = "identity", position =position_dodge(preserve = "single") ) +
-  ylab('Number of fish recaptured') + xlab(NULL) +
+  ylab('Number of tags recovered') + xlab(NULL) +
   theme_classic() +
   theme(legend.position = c(0.8, 0.25),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +

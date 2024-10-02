@@ -45,6 +45,7 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_catch_frac', img_type)), pl
 
 # Save legend for next plot:
 fish_legend <- get_legend(p2)    
+save(fish_legend, file = file.path(shrpoint_path, 'data/processed', 'fishery_legend.RData'))
 
 # Catch per fishery, year, and area as barplot ------------------------------
 
@@ -117,4 +118,40 @@ all_plot = p_map + inset_element(fish_legend, 0.15, 0.6, 0.1, 0.5, align_to = 'f
   inset_element(p_pie, 0.065, 0.05, 0.99, 0.99, align_to = 'full')
 ggsave(file.path(shrpoint_path, plot_dir, paste0('catch_grid', img_type)), plot = all_plot,
        width = img_width, height = 130, units = 'mm', dpi = img_res)
+
+# Compare catch information -----------------------------------------------
+# Read 2021 SS data inputs
+base_dat = SS_readdat(file = file.path(shrpoint_path, 'models/base', spat_config, 'data.ss'))
+
+# 2024 catch:
+catch_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'catch.csv'))
+fleet_name_df = catch_dat %>% group_by(ModelFleet) %>% summarise(fleet_name = unique(ModelFishery))
+colnames(fleet_name_df) = c('fleet_number', 'fleet_name')
+catch_dat = catch_dat[,c('qtr', 'ModelFleet', 'Catch')]
+colnames(catch_dat) = c('time', 'fleet_number', 'catch')
+catch_dat = catch_dat %>% mutate(type = '2024 assessment')
+
+# 2021 catch:
+old_catch_dat = base_dat$catch
+old_catch_dat = old_catch_dat[,c('year', 'fleet', 'catch')]
+colnames(old_catch_dat) = c('time', 'fleet_number', 'catch')
+old_catch_dat = old_catch_dat %>% mutate(type = '2021 assessment')
+
+# Merge datasets:
+merged_catch = rbind(catch_dat, old_catch_dat)
+merged_catch = merged_catch %>% dplyr::filter(time >= 13)
+merged_catch = left_join(merged_catch, fleet_name_df)
+merged_catch$time = ssts2yq(merged_catch$time) # transform to yr-qt
+
+# Make plot:
+p1 = ggplot(data = merged_catch, aes(x = time, y = catch*1e-03)) +
+  geom_line(aes(color = type), linewidth = 0.2) +
+  ylab("Catch (thousands of tons)") + xlab(NULL) +
+  theme(axis.text.y = element_text(angle = 90, vjust = 0.5, hjust=0.5),
+        legend.position = c(0.6, 0.05)) +
+  scale_y_continuous(breaks = breaks_extended(3)) +
+  guides(color = guide_legend(title = NULL)) +
+  facet_wrap( ~ fleet_name, scales = 'free_y', ncol = 4)
+ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_catch', img_type)), plot = p1,
+       width = img_width, height = 200, units = 'mm', dpi = img_res)
 
