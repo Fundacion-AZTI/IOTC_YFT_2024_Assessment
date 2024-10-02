@@ -91,3 +91,21 @@ p2 = ggplot(plot_rec, aes(x = Time, y = n_obs, color = fisherycode, fill = fishe
 p3 = grid.arrange(p1, p2, nrow = 2)
 ggsave(file.path(shrpoint_path, plot_dir, paste0('tag_nfish', img_type)), plot = p3,
        width = img_width*0.75, height = 180, units = 'mm', dpi = img_res)
+
+
+# -------------------------------------------------------------------------
+# Plot Nfish in release and recovery region:
+plot_dat = tag_rec %>% group_by(rec_year, rel_model_area, rec_model_area) %>% summarise(n_obs = n())
+plot_dat = plot_dat %>% mutate(rel_model_area = factor(rel_model_area, levels = 1:2, labels = c('Release region: 1', 'Release region: 2')))
+plot_dat = plot_dat %>% mutate(rec_model_area = factor(rec_model_area))
+
+p1 = ggplot(plot_dat, aes(x = factor(rec_year), y = n_obs, color = rec_model_area, fill = rec_model_area)) + 
+  geom_bar(stat = "identity", position =position_dodge(preserve = "single") ) +
+  ylab('Number of fish recaptured') + xlab(NULL) +
+  theme_classic() +
+  theme(legend.position = c(0.8, 0.25),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  guides(fill = guide_legend(title = 'Recovery region'), color = guide_legend(title = 'Recovery region')) +
+  facet_wrap(~ rel_model_area, nrow = 2, scales = 'free_y')
+ggsave(file.path(shrpoint_path, plot_dir, paste0('tag_nfish_area', img_type)), plot = p1,
+       width = img_width*0.75, height = 180, units = 'mm', dpi = img_res)
