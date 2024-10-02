@@ -196,8 +196,8 @@ dir_table <- "output/tables/"
   
   scs <- scs[13:15]
   desc <- desc[13:15]
-  scs <- c("15_priors_uniform","15_priors_uniform_Linf","15_priors_uniform_M_03","16_LL_lengthSelex_uniform","14B_boudnaries_cv")
-  scs <- c("15_priors_uniform3")
+  scs <- c("15_recDev2021","15_recDev2021_cv","15_recDev2021_Linf","15_recDev2021_M")
+  scs <- c("14B2_LL_lengthSelex_type6")
   scs_wd <-paste0("models/update/",scs)
   
   plot_ss3 <- TRUE
@@ -355,3 +355,18 @@ dir_table <- "output/tables/"
   #update CPUE -VAR?
   #biology
   
+  
+  
+  #...................................................
+  #### Analysis residuals by season ####
+  #...................................................
+  scs <- "13_correctSize"
+  scs_wd <-paste0("models/update/",scs)
+  
+  plot_ss3 <- TRUE
+  add_perf_table <- TRUE
+  
+    sc_ss3 <- SS_output(dir=scs_wd,  repfile = "Report.sso",covar=F)
+
+   sc_ss3$cpue 
+   
