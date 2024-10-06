@@ -37,7 +37,7 @@ source(here('code', 'auxiliary_functions.R'))
 # Fishery 15  Purse-seine - log schools (LS 2)            [region 3] 2
 # Fishery 16  Longline - fresh tuna (LF 2)                [region 3] 2
 
-fish_info = read.csv(file.path('code/ss3_data_inputs', paste0('FisheryDefinitions_', spat_config, '.csv')), sep = ';')
+fish_info = get_fisheries(spat_config)
 ModelFisheries = fish_info$fleet_name
 
 # -------------------------------------------------------------------------

@@ -12,7 +12,7 @@ spat_config = '4A_io'
 L_labels  =  c(Paste("L0",seq(10,98,2)), Paste("L",seq(100,198,2))) 
 
 #Fishery definiton
-fish_info = read.csv(file.path('code/ss3_data_inputs', paste0('FisheryDefinitions_', spat_config, '.csv')), sep = ';')
+fish_info = get_fisheries(spat_config)
 
 # -------------------------------------------------------------------------
 # Plot CAAL SS3 input -----------------------------------------------------

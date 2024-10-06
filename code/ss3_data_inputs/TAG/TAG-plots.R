@@ -9,13 +9,13 @@ source(here('code', 'auxiliary_functions.R'))
 spat_config = '4A_io'
 
 # Read fleet labels
-fleet_name_df = read.csv(file.path(shrpoint_path, tab_dir, paste0('fleet_label_', spat_config,'.csv')))
+fish_info = get_fisheries(spat_config)
 
 # Read data in:
 tag_rel = read_csv(file.path(shrpoint_path, 'data/processed', 'tag-filtered-release-farley.csv'))
 tag_rec = read_csv(file.path(shrpoint_path, 'data/processed', 'tag-filtered-recapture-farley.csv'))
 tag_rec = tag_rec %>% mutate(fleet_number = rec_model_fleet)
-tag_rec = left_join(tag_rec, fleet_name_df, by = 'fleet_number')
+tag_rec = left_join(tag_rec, fish_info, by = 'fleet_number')
 tag_rec = tag_rec %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2))
 
 # -------------------------------------------------------------------------

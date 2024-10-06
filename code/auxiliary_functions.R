@@ -494,6 +494,28 @@ apply_eff_creep = function(data, yr_col = 'yr', fleet_col = 'fleet',
   return(out_dat)
 }
 
+
+# -------------------------------------------------------------------------
+# Fishery definitions:
+get_fisheries = function(config = '4A_io') {
+  if(!(config %in% c('4A_io', '2A_io', '1A_io'))) stop('Spatial configuration is not properly defined.')
+  if(config == '4A_io') {
+    fish_df = data.frame(fleet_name = c('GI 1a','HD 1a','LL 1a','OT 1a','BB 1b','FS 1b','LL 1b','LS 1b','TR 1b',
+                'LL 2','LL 3','GI 4','LL 4','OT 4','TR 4','FS 2','LS 2','TR 2','FS 4','LS 4','LF 4'))
+  }
+  if(config == '2A_io') {
+    fish_df = data.frame(fleet_name = c('GI 1a','HD 1a','LL 1a','OT 1a','BB 1b','FS 1b','LL 1b','LS 1b','TR 1b',
+                                        'LL 2','GI 2','OT 2','TR 2','FS 2','LS 2','LF 2'))
+  }
+  if(config == '1A_io') {
+    fish_df = data.frame(fleet_name = c('GI 1a','HD 1a','LL 1a','OT 1a','BB 1b','FS 1b','LL 1b','LS 1b','TR 1b',
+                                        'GI 1b','OT 1b','LF 1b'))
+  }
+  fish_df = fish_df %>% mutate(fleet_number = 1:nrow(fish_df), .before = fleet_name)
+  return(fish_df)
+}
+
+
 # -------------------------------------------------------------------------
 # Several growth-related functions:
 
