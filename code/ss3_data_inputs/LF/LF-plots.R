@@ -11,8 +11,8 @@ spat_config = '4A_io'
 # Length bins
 L_labels  =  c(Paste("L0",seq(10,98,2)), Paste("L",seq(100,198,2))) 
 
-# Read fleet labels
-fleet_name_df = read.csv(file.path(shrpoint_path, tab_dir, paste0('fleet_label_', spat_config,'.csv')))
+#Fishery definiton
+fish_info = read.csv(file.path('code/ss3_data_inputs', paste0('FisheryDefinitions_', spat_config, '.csv')), sep = ';')
 
 # Read fishery legend in:
 load(file.path(shrpoint_path, 'data/processed', 'fishery_legend.RData'))
@@ -31,7 +31,7 @@ size_dat = size_dat %>% group_by(fleet_number) %>% summarise_at(.vars = colnames
 size_dat = size_dat %>% ungroup() %>% mutate(across(-1)/rowSums(across(-1)))
 size_dat = gather(size_dat, 'len_bin', 'prop', 2:ncol(size_dat))
 size_dat$len_bin = as.numeric(gsub(pattern = 'l', replacement = '', x = size_dat$len_bin))
-size_dat = left_join(size_dat, fleet_name_df)
+size_dat = left_join(size_dat, fish_info)
 size_dat = size_dat %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2)) # for colors
 size_dat = size_dat %>% mutate(type = 'Simple aggregation', .after = 'fleet_number')
 size_dat1 = size_dat
@@ -48,7 +48,7 @@ size_dat = size_dat %>% group_by(fleet_number) %>% summarise_at(.vars = colnames
 size_dat = size_dat %>% ungroup() %>% mutate(across(-1)/rowSums(across(-1)))
 size_dat = gather(size_dat, 'len_bin', 'prop', 2:ncol(size_dat))
 size_dat$len_bin = as.numeric(gsub(pattern = 'l', replacement = '', x = size_dat$len_bin))
-size_dat = left_join(size_dat, fleet_name_df)
+size_dat = left_join(size_dat, fish_info)
 size_dat = size_dat %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2)) # for colors
 size_dat = size_dat %>% mutate(type = 'Catch-raised aggregation', .after = 'fleet_number')
 size_dat2 = size_dat
@@ -78,7 +78,7 @@ size_dat = size_dat %>% select(Yr, ModelFleet, Nsamp)
 size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
 colnames(size_dat) = tolower(colnames(size_dat))
 # Merge
-size_dat = left_join(size_dat, fleet_name_df)
+size_dat = left_join(size_dat, fish_info)
 size_dat = size_dat %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2)) # for colors
 size_dat = size_dat %>% mutate(time2 = ssts2yq(time))
 
@@ -99,7 +99,7 @@ size_dat = size_dat %>% select(Yr, ModelFleet, Nsamp)
 size_dat = dplyr::rename(size_dat, c(time = 'Yr', fleet_number = 'ModelFleet'))
 colnames(size_dat) = tolower(colnames(size_dat))
 # Merge
-size_dat = left_join(size_dat, fleet_name_df)
+size_dat = left_join(size_dat, fish_info)
 size_dat = size_dat %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2)) # for colors
 size_dat = size_dat %>% mutate(time2 = ssts2yq(time))
 
@@ -156,7 +156,7 @@ merged_size$time = ssts2yq(merged_size$time)
 all_times_df = expand.grid(time = seq(from = min(merged_size$time), to = max(merged_size$time), by = 0.25),
                            fleet_number = unique(merged_size$fleet_number), type = unique(merged_size$type))
 plot_data_df = left_join(all_times_df, merged_size)
-plot_data_df = left_join(plot_data_df, fleet_name_df)
+plot_data_df = left_join(plot_data_df, fish_info)
 plot_data_df = plot_data_df %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2)) # for colors
 
 # Make plot:
@@ -258,7 +258,7 @@ colnames(old_size_dat)[3:ncol(old_size_dat)] = colnames(size_dat)[3:ncol(size_da
 merged_size = rbind(size_dat, old_size_dat)
 merged_size = gather(merged_size, 'len_bin', 'prop', 3:ncol(merged_size))
 merged_size$len_bin = as.numeric(gsub(pattern = 'l', replacement = '', x = merged_size$len_bin))
-merged_size = left_join(merged_size, fleet_name_df)
+merged_size = left_join(merged_size, fish_info)
 
 # Make plot:
 p2 = ggplot(data = merged_size, aes(x = len_bin, y = prop)) +
@@ -307,7 +307,7 @@ merged_size$time = ssts2yq(merged_size$time)
 all_times_df = expand.grid(time = seq(from = min(merged_size$time), to = max(merged_size$time), by = 0.25),
                            fleet_number = unique(merged_size$fleet_number), type = unique(merged_size$type))
 plot_data_df = left_join(all_times_df, merged_size)
-plot_data_df = left_join(plot_data_df, fleet_name_df)
+plot_data_df = left_join(plot_data_df, fish_info)
 
 # Make plot:
 p2 = ggplot(data = plot_data_df, aes(x = time, y = mean_len)) +

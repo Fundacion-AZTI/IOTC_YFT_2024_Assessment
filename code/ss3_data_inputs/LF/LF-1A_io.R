@@ -9,32 +9,9 @@ source('sharepoint_path.R')
 # Read auxiliary functions:
 source(here('code', 'auxiliary_functions.R'))
 
-# DEFINITION OF REGIONS 2010
-# Note that the boundaries of Area R3 and R4 were changed for the assessment in 2010, 
-# with part of Area R3 moved to Area R4
-# Region 1(1)   10N, 40E-75E - Arabian Sea
-# Region 1(2)   10S-10N, 40E-75E - western equatorial
-# Region 1(2)   15S-10S, 60E-75E - western equatorial
-# Region 1(2)   40S-10S, 35E-60E - Mzbqe Channel, excluding SE corner which is included in R4 (40S-30S, 40E-60E).
-# Region 1(2)   40S-15S, 60E-120E and 40S-30S, 40E-60E; - southern Indian Ocean
-# Region 1(2)   15S-20N, 75E-130E - eastern Indian Ocean, Bay of Bengal, Timor Sea 
-#
-# DEFINITION OF FISHERIES
-# Fishery 1   Gillnet (GI 1a)                              [region 1] 1
-# Fishery 2   Handline (HD 1a)                             [region 1] 1
-# Fishery 3   Longline (LL 1a)                             [region 1] 1 
-# Fishery 4   Other (OT 1a)                                [region 1] 1
-# Fishery 5   Baitboat (BB 1b)                             [region 2] 1
-# Fishery 6   Purse-seine - free schools (FS 1b)           [region 2] 1
-# Fishery 7   Longline (LL 1b)                             [region 2] 1
-# Fishery 8   Purse-seine - log schools (LS 1b)           [region 2] 1
-# Fishery 9   Troll (TR 1b)                               [region 2] 1 
-# Fishery 10  Gillnet (GI 1b)                              [region 2] 1
-# Fishery 11  Other (OT 1b)                                [region 2] 1
-# Fishery 12  Longline - fresh tuna (LF 1b)                [region 2] 1
-
-ModelFisheries <- c('GI 1a','HD 1a','LL 1a','OT 1a','BB 1b','FS 1b','LL 1b','LS 1b','TR 1b',
-                    'GI 1b','OT 1b','LF 1b')
+#Fishery definiton
+fish_info = read.csv(file.path('code/ss3_data_inputs', paste0('FisheryDefinitions_', spat_config, '.csv')), sep = ';')
+ModelFisheries = fish_info$fleet_name
 
 # Initial length bins (correct) in IOTC dataset:
 L_labels  =  c(Paste("L0",seq(10,98,2)), Paste("L",seq(100,198,2))) 
@@ -44,8 +21,8 @@ L_labels_SS  =  c(Paste("L0",seq(10,98,4)), Paste("L",seq(102,198,4)))
 
 
 # -------------------------------------------------------------------------
-# Read traditional LF data after preprocessing:
-data = read.csv(file.path(shrpoint_path, 'data/processed', 'size_grid.csv'))
+# Read original LF data after preprocessing:
+data = read.csv(file.path(shrpoint_path, 'data/processed', 'size_grid-original.csv'))
 
 # Get area information:
 data$Area = get_1Aarea_from_lonlat(data$Long, data$Lat)
@@ -87,148 +64,91 @@ which(is.na(data_std$ModelFishery))
 which(is.na(data_std$ModelFleet))
 
 # -------------------------------------------------------------------------
-# Get LF input without bug, without weighting and Nsamp 5 ------------------------------
+# Aggregate data (both, simple and std):
+# Remove Month, SchoolType, Grid:
 
-# Filter data based on some criteria:
-work = filter_LF_1A(data) 
-# Continue..
-work = work %>%
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>% 
-  dplyr::summarise_at(L_labels,list(Sum)) %>%
-  as.data.frame() %>%
-  tidyr::gather(length,total,L010:L198) %>%
-  dplyr::mutate(length=as.numeric(substr(length,2,4))) %>%
-  dplyr::mutate(length=length-(length-10) %% 4) %>%
-  dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>%
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter,length) %>% 
-  dplyr::summarise_at("total",list(Sum)) %>% 
-  tidyr::spread(length,total,fill=0) %>% 
-  as.data.frame()
+agg_data = data %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
+  summarise_at('Quality', list(mean)) %>%
+  inner_join(data %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
+               summarise_at(c('Nfish_samp', L_labels), list(sum)))
 
-work = work %>%
-  dplyr::mutate(sno=rowSums(dplyr::select(work,L010:L198))) %>%
-  dplyr::filter(sno >= 20) %>%	# Filter Nsamp >= 20
-  dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0,Nsamp = 5) %>%
-  dplyr::select(Yr,Seas,ModelFleet,Gender,Part,Nsamp,L010:L198) %>%
-  dplyr::arrange(ModelFleet,Yr)		
-work[,L_labels_SS] = round(work[,L_labels_SS],1)
-
-# Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size.csv'), row.names = FALSE)
+agg_data_std = data_std %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
+  summarise_at('Quality', list(mean)) %>%
+  inner_join(data_std %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
+               summarise_at(c('Nfish_samp', 'Ncnofish', L_labels), list(sum)))
 
 # -------------------------------------------------------------------------
-# Get LF input without bug, and Nsamp is Rep Quality without weighting ---------
+# Get LF input, simple aggregation, Nsamp is RQ ---------
 
 # Filter data based on some criteria:
-work = filter_LF_1A(data) 
+work = filter_LF_1A(agg_data) 
 # 1. Do the aggregation for length bins (traditional way):
 work1 = work %>%
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>% 
+  dplyr::group_by(ModelFleet,Year,Quarter) %>% 
   dplyr::summarise_at(L_labels,list(Sum)) %>%
   as.data.frame() %>%
   tidyr::gather(length,total,L010:L198) %>%
   dplyr::mutate(length=as.numeric(substr(length,2,4))) %>%
   dplyr::mutate(length=length-(length-10) %% 4) %>%
   dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>%
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter,length) %>% 
+  dplyr::group_by(ModelFleet,Year,Quarter,length) %>% 
   dplyr::summarise_at("total",list(Sum)) %>% 
   tidyr::spread(length,total,fill=0) %>% 
   as.data.frame()
 # 2. Do the aggregation for reporting quality (simple mean)
 work2 = work %>%
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>%
-  summarise(RepQual = mean(REPORTING_QUALITY))
+  dplyr::group_by(ModelFleet,Year,Quarter) %>%
+  summarise(RepQual = mean(Quality))
 # Merge both:
 work = left_join(work1, work2)
 work = work %>% relocate(RepQual, .after = Quarter) 
 
 work = work %>%
-  dplyr::mutate(sno=rowSums(dplyr::select(work,L010:L198))) %>%
-  dplyr::filter(sno >= 20) %>%	# Filter Nsamp >= 20
-  dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0,Nsamp = 5) %>%
+  dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0,Nsamp = RepQual) %>%
   dplyr::select(Yr,Seas,ModelFleet,Gender,Part,Nsamp,L010:L198) %>%
   dplyr::arrange(ModelFleet,Yr)		
 work[,L_labels_SS] = round(work[,L_labels_SS],1)
+dim(work)
 
 # Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size_RQ.csv'), row.names = FALSE)
+write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-original.csv'), row.names = FALSE)
 
 
 # -------------------------------------------------------------------------
-# Get LF input without bug, without weighting and Nsamp from catch-weighted Rep Quality ---------
+# Get LF input, weighting LF and Rep Quality ---------
 
 # Filter data based on some criteria:
-work = filter_LF_1A(data_std) 
-# 1. Do the aggregation for length bins (traditional way):
-work1 = work %>%
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>% 
-  dplyr::summarise_at(L_labels,list(Sum)) %>%
-  as.data.frame() %>%
-  tidyr::gather(length,total,L010:L198) %>%
-  dplyr::mutate(length=as.numeric(substr(length,2,4))) %>%
-  dplyr::mutate(length=length-(length-10) %% 4) %>%
-  dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>%
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter,length) %>% 
-  dplyr::summarise_at("total",list(Sum)) %>% 
-  tidyr::spread(length,total,fill=0) %>% 
-  as.data.frame()
-# 2. Do the aggregation for reporting quality (weighted mean)
-work2 = work %>%
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>%
-  summarise(RepQual = weighted.mean(Reporting_quality, Ncnofish))
-# Merge both:
-work = left_join(work1, work2)
-work = work %>% relocate(RepQual, .after = Quarter) 
-
-# Apply last filters to have the same data:
-work = work %>%
-  # dplyr::mutate(sno=rowSums(dplyr::select(work,L010:L198))) %>%
-  # dplyr::filter(sno >= 20) %>%	# do we need to apply this filter? We are now using RepQuality. Confirm with team
-  dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0) %>%
-  dplyr::select(Yr,Seas,ModelFleet,Gender,Part,RepQual,L010:L198) %>%
-  dplyr::arrange(ModelFleet,Yr)		
-work[,L_labels_SS] = round(work[,L_labels_SS],1)
-
-# Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size_RQ-w.csv'), row.names = FALSE)
-
-# -------------------------------------------------------------------------
-# Get LF input without bug, weighting LF and Rep Quality ---------
-
-# Filter data based on some criteria:
-work = filter_LF_1A(data_std) 
+work = filter_LF_1A(agg_data_std) 
 # 1. Do the aggregation for length bins (weighted by catch in numbers):
-work1 = work %>% ungroup() %>%
-  dplyr::mutate(Samp_sum = rowSums(across(all_of(L_labels)))) %>% # First calculate row sum 
-  dplyr::mutate(across(all_of(L_labels))/Samp_sum) %>% # then get proportions by row
+work1 = work %>% 
+  dplyr::mutate(across(all_of(L_labels))/Nfish_samp) %>% # then get proportions by row
   dplyr::mutate(across(all_of(L_labels), ~ .x*Ncnofish)) %>% # then weight by catch in numbers
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>% 
+  dplyr::group_by(ModelFleet,Year,Quarter) %>% 
   dplyr::summarise_at(L_labels,list(Sum)) %>%
   as.data.frame() %>%
   tidyr::gather(length,total,L010:L198) %>%
   dplyr::mutate(length=as.numeric(substr(length,2,4))) %>%
   dplyr::mutate(length=length-(length-10) %% 4) %>%
   dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>%
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter,length) %>% 
+  dplyr::group_by(ModelFleet,Year,Quarter,length) %>% 
   dplyr::summarise_at("total",list(Sum)) %>% 
   tidyr::spread(length,total,fill=0) %>% 
   as.data.frame()
 # 2. Do the aggregation for reporting quality (weighted mean)
 work2 = work %>%
-  dplyr::group_by(ModelArea,ModelFleet,Year,Quarter) %>%
-  summarise(RepQual = weighted.mean(Reporting_quality, Ncnofish))
+  dplyr::group_by(ModelFleet,Year,Quarter) %>%
+  summarise(RepQual = weighted.mean(Quality, Ncnofish))
 # Merge both:
 work = left_join(work1, work2)
 work = work %>% relocate(RepQual, .after = Quarter) 
 
 # Apply last filters to have the same data:
 work = work %>%
-  # dplyr::mutate(sno=rowSums(dplyr::select(work,L010:L198))) %>%
-  # dplyr::filter(sno >= 20) %>%	# do we need to apply this filter? We are now using RepQuality. Confirm with team
-  dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0) %>%
-  dplyr::select(Yr,Seas,ModelFleet,Gender,Part,RepQual,L010:L198) %>%
+  dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0,Nsamp = RepQual) %>%
+  dplyr::select(Yr,Seas,ModelFleet,Gender,Part,Nsamp,L010:L198) %>%
   dplyr::arrange(ModelFleet,Yr)		
 work[,L_labels_SS] = round(work[,L_labels_SS],1)
+dim(work)
 
 # Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-w_RQ-w.csv'), row.names = FALSE)
+write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-cwp55.csv'), row.names = FALSE)

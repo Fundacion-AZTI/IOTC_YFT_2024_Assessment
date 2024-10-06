@@ -11,8 +11,8 @@ spat_config = '4A_io'
 # Length bins
 L_labels  =  c(Paste("L0",seq(10,98,2)), Paste("L",seq(100,198,2))) 
 
-# Read fleet labels
-fleet_name_df = read.csv(file.path(shrpoint_path, tab_dir, paste0('fleet_label_', spat_config,'.csv')))
+#Fishery definiton
+fish_info = read.csv(file.path('code/ss3_data_inputs', paste0('FisheryDefinitions_', spat_config, '.csv')), sep = ';')
 
 # -------------------------------------------------------------------------
 # Plot 2024 SS inputs -----------------------------------------------------
@@ -125,8 +125,6 @@ base_dat = SS_readdat(file = file.path(shrpoint_path, 'models/base', spat_config
 
 # 2024 catch:
 catch_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'catch.csv'))
-fleet_name_df = catch_dat %>% group_by(ModelFleet) %>% summarise(fleet_name = unique(ModelFishery))
-colnames(fleet_name_df) = c('fleet_number', 'fleet_name')
 catch_dat = catch_dat[,c('qtr', 'ModelFleet', 'Catch')]
 colnames(catch_dat) = c('time', 'fleet_number', 'catch')
 catch_dat = catch_dat %>% mutate(type = '2024 assessment')
@@ -140,7 +138,7 @@ old_catch_dat = old_catch_dat %>% mutate(type = '2021 assessment')
 # Merge datasets:
 merged_catch = rbind(catch_dat, old_catch_dat)
 merged_catch = merged_catch %>% dplyr::filter(time >= 13)
-merged_catch = left_join(merged_catch, fleet_name_df)
+merged_catch = left_join(merged_catch, fish_info)
 merged_catch$time = ssts2yq(merged_catch$time) # transform to yr-qt
 
 # Make plot:

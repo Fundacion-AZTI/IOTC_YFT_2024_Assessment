@@ -11,10 +11,6 @@ spat_config = '4A_io'
 # Length bins
 L_labels  =  c(Paste("L0",seq(10,98,2)), Paste("L",seq(100,198,2))) 
 
-# Read fleet labels
-fleet_name_df = read.csv(file.path(shrpoint_path, tab_dir, paste0('fleet_label_', spat_config,'.csv')))
-
-
 # -------------------------------------------------------------------------
 # Scale LL CPUE per time step with CV -------------------------------------
 
@@ -111,4 +107,37 @@ p1 = ggplot(data = merged_cpue, aes(x = time, y = obs)) +
   guides(color = guide_legend(title = NULL)) +
   facet_wrap( ~ fleet_name, ncol = 2)
 ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_cpue', img_type)), plot = p1,
+       width = img_width, height = 170, units = 'mm', dpi = img_res)
+
+# Compare LL CPUE with effort creep ---------------------------------------------
+
+# 2024 CPUE:
+cpue_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'scaled_cpue.csv'))
+cpue_dat = cpue_dat[,c('qtr', 'fleet', 'pr_7994_m8', 'cv')]
+colnames(cpue_dat) = c('time', 'fleet_number', 'obs', 'cv')
+cpue_dat = cpue_dat %>% mutate(type = 'No effort creep')
+
+# effort creep applied:
+cpue_dat_effcreep = apply_eff_creep(df_data, yr_col = 'time', fleet_col = 'fleet_number',
+                                    cpue_col = 'obs', cv_col = 'cv', rate = 0.01)
+cpue_dat_effcreep = cpue_dat_effcreep %>% mutate(type = 'Effort creep: 1%')
+
+# Merge datasets:
+merged_cpue = rbind(cpue_dat, cpue_dat_effcreep)
+merged_cpue = merged_cpue %>% mutate(fleet_name = if_else(fleet_number == 22, 'LL 1b', 
+                                                          if_else(fleet_number == 23, 'LL 2', 
+                                                                  if_else(fleet_number == 24, 'LL 3', 'LL 4'))))
+merged_cpue$fleet_name = factor(merged_cpue$fleet_name, levels = c('LL 1b', 'LL 4', 'LL 2', 'LL 3'))
+merged_cpue$time = ssts2yq(merged_cpue$time) # transform to yr-qt
+
+# Make plot:
+p1 = ggplot(data = merged_cpue, aes(x = time, y = obs)) +
+  geom_line(aes(color = type)) +
+  ylab("Scaled CPUE") + xlab(NULL) +
+  theme(axis.text.y = element_text(angle = 90, vjust = 0.5, hjust=0.5),
+        legend.position = 'bottom') +
+  scale_y_continuous(breaks = breaks_extended(3)) +
+  guides(color = guide_legend(title = NULL)) +
+  facet_wrap( ~ fleet_name, ncol = 2)
+ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_cpue_effcreep_1prc', img_type)), plot = p1,
        width = img_width, height = 170, units = 'mm', dpi = img_res)

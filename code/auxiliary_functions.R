@@ -165,18 +165,13 @@ create_2Aarea_cols = function(Data) {
   Data = plyr::ddply(Data,c("Area","FisheryCode"),.fun = function(d) {
     d$AssessmentArea = d$Area
     d = mutate_cond(d,FisheryCode=='FS' & Area ==1, AssessmentArea = 2)
-    d = mutate_cond(d,FisheryCode=='FS' & Area ==3, AssessmentArea = 3)
     d = mutate_cond(d,FisheryCode=='LS' & Area ==1, AssessmentArea = 2)
-    d = mutate_cond(d,FisheryCode=='LS' & Area ==3, AssessmentArea = 3)
     d = mutate_cond(d,FisheryCode=='LF', AssessmentArea = 3)
     d = mutate_cond(d,FisheryCode=='BB', AssessmentArea = 2)
-    d = mutate_cond(d,FisheryCode=='GI' & (Area == 2), AssessmentArea = 1)
-    d = mutate_cond(d,FisheryCode=='GI' & Area == 3, AssessmentArea = 3)
+    d = mutate_cond(d,FisheryCode=='GI' & Area == 2, AssessmentArea = 1)
     d = mutate_cond(d,FisheryCode=='HD', AssessmentArea = 1)
     d = mutate_cond(d,FisheryCode=='TR' & Area == 1, AssessmentArea = 2)
-    d = mutate_cond(d,FisheryCode=='TR' & Area == 3, AssessmentArea = 3)
     d = mutate_cond(d,FisheryCode=='OT' & (Area == 2), AssessmentArea = 1)
-    d = mutate_cond(d,FisheryCode=='OT' & Area == 3, AssessmentArea = 3)
     return(d)})	
   
   Data = plyr::ddply(Data,c("Area","FisheryCode"),.fun = function(d) {
@@ -308,16 +303,22 @@ filter_LF_2A = function(data) {
   
   work = data %>% 
     dplyr::filter(!(Fleet %in% c('TWN','SYC') & Gear == 'LL')) %>%
-    dplyr::filter(!(ModelFishery == "LL 1a" & Year %in% c(1970:1995, 2010:2020))) %>% # please check if 2020-2022 data needs to be excluded
+    dplyr::filter(!(ModelFishery == "LL 1a" & Year %in% c(1970:1995, 2010:2023))) %>% # please check if 2020-2022 data needs to be excluded
     dplyr::filter(!(ModelFishery == "LL 1b" & Year %in% c(1950:1959))) %>%
     dplyr::filter(!(ModelFishery == "LL 2" & Year %in% c(1950:1959))) %>%
-    # dplyr::filter(!(ModelFishery == "LL 4" & Year %in% c(1950:1959,2001:2005,2015,2019))) %>%  # please check if 2020-2022 data needs to be excluded
-    # dplyr::filter(!(ModelFishery == "GI 4" & Year %in% c(1975:1987))) %>%
-    dplyr::filter(!(ModelFishery == "HD 1a" & Year %in% c(1950:2007)))
-    # dplyr::filter(!(ModelFishery == "OT 4" & Year %in% c(1983,2016))) %>%
-    # dplyr::filter(!(ModelFishery == "TR 4" & Year %in% c(2016:2019))) %>%  # please check if 2020-2022 data needs to be excluded
-    # dplyr::filter(!(ModelFishery == "TR 1b")) %>%
-    # dplyr::filter(!(ModelFishery == "TR 2")) 
+    dplyr::filter(!(ModelFishery == "LF 2" & Year < 2005)) %>% # confirmed by Agurtzane
+    dplyr::filter(!(Fleet %in% c('SYC') & Gear == 'ELL' & Year %in% 2003:2019)) %>% # temporarily, Manu will fix this in the raw data
+    # Remove rows with less than 100 Nfish sampled:
+    dplyr::filter(!(Nfish_samp < 100 & Quality > 0)) %>% # remove low sample size but only those rows not considered best quality
+    # Remove weird patterns:
+    dplyr::filter(!(ModelFishery == "GI 1a" & Fleet == 'LKA' & Year %in% c(2021))) %>%    
+    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet != 'MDV')) %>% # only use MDV for HD 1a, agreed with team
+    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet == 'MDV' & Year == 2003)) %>% # remove HD with noisy obs
+    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet == 'MDV' & Year == 2015 & Quarter == 1)) %>% # remove HD with noisy obs
+    dplyr::filter(!(ModelFishery == "OT 1a" & Year %in% c(2021:2022))) %>%
+    dplyr::filter(!(ModelFishery == "OT 2" & Year %in% c(2016))) %>%
+    dplyr::filter(!(ModelFishery == "TR 2" & Year %in% c(2016:2019))) %>%
+    dplyr::filter(!(ModelFishery == "TR 1b")) 
   
   return(work)
   
@@ -329,17 +330,22 @@ filter_LF_2A = function(data) {
 filter_LF_1A = function(data) {
   
   work = data %>% 
+    # Filters reviewed by Simon and agreed by the team:
     dplyr::filter(!(Fleet %in% c('TWN','SYC') & Gear == 'LL')) %>%
-    dplyr::filter(!(ModelFishery == "LL 1a" & Year %in% c(1970:1995, 2010:2020))) %>% # please check if 2020-2022 data needs to be excluded
+    dplyr::filter(!(ModelFishery == "LL 1a" & Year %in% c(1970:1995, 2010:2023))) %>% 
     dplyr::filter(!(ModelFishery == "LL 1b" & Year %in% c(1950:1959))) %>%
-    # dplyr::filter(!(ModelFishery == "LL 2" & Year %in% c(1950:1959))) %>%
-    # dplyr::filter(!(ModelFishery == "LL 4" & Year %in% c(1950:1959,2001:2005,2015,2019))) %>%  # please check if 2020-2022 data needs to be excluded
-    # dplyr::filter(!(ModelFishery == "GI 4" & Year %in% c(1975:1987))) %>%
-    dplyr::filter(!(ModelFishery == "HD 1a" & Year %in% c(1950:2007)))
-  # dplyr::filter(!(ModelFishery == "OT 4" & Year %in% c(1983,2016))) %>%
-  # dplyr::filter(!(ModelFishery == "TR 4" & Year %in% c(2016:2019))) %>%  # please check if 2020-2022 data needs to be excluded
-  # dplyr::filter(!(ModelFishery == "TR 1b")) %>%
-  # dplyr::filter(!(ModelFishery == "TR 2")) 
+    dplyr::filter(!(ModelFishery == "LF 1b" & Year < 2005)) %>% # confirmed by Agurtzane
+    dplyr::filter(!(Fleet %in% c('SYC') & Gear == 'ELL' & Year %in% 2003:2019)) %>% # temporarily, Manu will fix this in the raw data
+    # Remove rows with less than 100 Nfish sampled:
+    dplyr::filter(!(Nfish_samp < 100 & Quality > 0)) %>% # remove low sample size but only those rows not considered best quality
+    # Remove weird patterns:
+    dplyr::filter(!(ModelFishery == "GI 1a" & Fleet == 'LKA' & Year %in% c(2021))) %>%
+    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet != 'MDV')) %>% # only use MDV for HD 1a, agreed with team
+    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet == 'MDV' & Year == 2003)) %>% # remove HD with noisy obs
+    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet == 'MDV' & Year == 2015 & Quarter == 1)) %>% # remove HD with noisy obs
+    dplyr::filter(!(ModelFishery == "OT 1a" & Year %in% c(2021:2022))) %>%
+    dplyr::filter(!(ModelFishery == "OT 1b" & Year %in% c(2016))) %>%
+    dplyr::filter(!(ModelFishery == "TR 1b" & Year %in% c(2016:2019)))
   
   return(work)
   
@@ -440,14 +446,21 @@ calculate_area_on_land = function(dat) {
 
 # -------------------------------------------------------------------------
 # Mean length at age (Jan-1st) by growth function (Fonteneau or Farley)
-# This should come from the SS3 model
+# This should come from the SS3 model, and are used in the tagging data ss3 input
 # Note that information from age 1 to 28 is provided:
 Len_font = c(23.821,34.9831,43.1626,46.936,49.9479,52.8725,58.2097,68.1843,77.6614,87.5578,98.6306,106.399,114.182,121.998,
         125.114,127.895,130.377,132.592,134.569,136.334,137.908,139.314,140.568,141.688,142.687,143.578,144.374,146.017)
-Len_farl = c( 29.94634,  44.53486,  51.23907,  59.87039,  69.86614,  78.93331,  87.15816,  94.61894, 101.38664,
+Len_farl = c(29.94634,  44.53486,  51.23907,  59.87039,  69.86614,  78.93331,  87.15816,  94.61894, 101.38664,
          107.52563, 113.09432, 118.14569, 122.72780, 126.88425, 130.65457, 134.07464, 137.17699, 139.99114,
          142.54386, 144.85944, 146.95991, 148.86525, 150.59359, 152.16137, 153.58350, 154.87352, 156.04371,
          157.10518)
+
+
+# -------------------------------------------------------------------------
+# Specify scaling factors for LL CPUE scaling (see Hoyle and Langley 2020, 10.1016/j.fishres.2020.105586)
+yftwts = list('7994 m8' = c(0.175+0.983+0.516, 0.623, 0.455, 1.000))
+names(yftwts[['7994 m8']]) = c('1', '2', '3', '4')
+
 
 # -------------------------------------------------------------------------
 # Age slicing for tagging data:
@@ -460,6 +473,26 @@ age_slicing = function(len, mlen_at_age, mlen_at_age0 = 10) {
 	return(age)
 }
 
+# -------------------------------------------------------------------------
+# Correct CPUE: effort creep
+apply_eff_creep = function(data, yr_col = 'yr', fleet_col = 'fleet', 
+                           cpue_col = 'col', cv_col = 'cv', rate = 0.01) { # annual rate
+  tmp_dat <- as.data.frame(data)
+  tmp_dat = tmp_dat[,c(yr_col, fleet_col, cpue_col, cv_col)]
+  tmp_dat = tmp_dat[order(tmp_dat[,2], tmp_dat[,1]), ]
+  out_dat = by(tmp_dat, tmp_dat[,2], function(x) {
+    xb = numeric(nrow(x))
+    xb[1] = x[1,3]
+    for(i in 2:nrow(x)) {
+      xb[i] = x[i,3]*(1-rate)^((i-1)/4)
+    }
+    x[,3] = xb
+    return(x)
+  })
+  out_dat = do.call(rbind, out_dat)
+  rownames(out_dat) = 1:nrow(out_dat)
+  return(out_dat)
+}
 
 # -------------------------------------------------------------------------
 # Several growth-related functions:

@@ -11,9 +11,8 @@ spat_config = '4A_io'
 # Length bins
 L_labels  =  c(Paste("L0",seq(10,98,2)), Paste("L",seq(100,198,2))) 
 
-# Read fleet labels
-fleet_name_df = read.csv(file.path(shrpoint_path, tab_dir, paste0('fleet_label_', spat_config,'.csv')))
-
+#Fishery definiton
+fish_info = read.csv(file.path('code/ss3_data_inputs', paste0('FisheryDefinitions_', spat_config, '.csv')), sep = ';')
 
 # -------------------------------------------------------------------------
 # Plot CAAL SS3 input -----------------------------------------------------
@@ -24,7 +23,7 @@ caal_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'ca
 plot_data = caal_dat %>% ungroup() %>% mutate(across(-c(1:5))/rowSums(across(-c(1:5))))
 plot_data = plot_data %>% gather('Age', 'Prop', `0`:`28`) %>% mutate(Age = as.numeric(Age))
 plot_data = plot_data %>% dplyr::rename(fleet_number = ModelFleet)
-plot_data = left_join(plot_data, fleet_name_df)
+plot_data = left_join(plot_data, fish_info)
 plot_data = plot_data %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2)) # for colors
 # plot_data = plot_data %>% dplyr::filter(!(Prop == 0))
 
@@ -47,7 +46,7 @@ caal_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'ca
 # Make plot by fleet (aggregate over the years):
 plot_data = caal_dat
 plot_data = plot_data %>% dplyr::rename(fleet_number = ModelFleet)
-plot_data = left_join(plot_data, fleet_name_df)
+plot_data = left_join(plot_data, fish_info)
 plot_data = plot_data %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2)) # for colors
 plot_data$Year = floor(qtr2yearqtr(plot_data$Yr, initial = 1950, base = 13))
 plot_data = plot_data %>% group_by(Year, fisherycode) %>% summarise(Nsamp = sum(Nsamp))
