@@ -196,8 +196,8 @@ dir_table <- "output/tables/"
   
   scs <- scs[13:15]
   desc <- desc[13:15]
-  scs <- c("15_recDev2021","15_recDev2021_cv","15_recDev2021_Linf","15_recDev2021_M")
-  scs <- c("14B2_LL_lengthSelex_type6")
+  scs <- c("sensitivities_15/15_catchUpdate2023_MoldHigh3")
+ # scs <- c("14B2_LL_lengthSelex_type6")
   scs_wd <-paste0("models/update/",scs)
   
   plot_ss3 <- TRUE
@@ -360,7 +360,7 @@ dir_table <- "output/tables/"
   #...................................................
   #### Analysis residuals by season ####
   #...................................................
-  scs <- "13_correctSize"
+  scs <- "15_recDev2021"
   scs_wd <-paste0("models/update/",scs)
   
   plot_ss3 <- TRUE
@@ -368,5 +368,18 @@ dir_table <- "output/tables/"
   
     sc_ss3 <- SS_output(dir=scs_wd,  repfile = "Report.sso",covar=F)
 
-   sc_ss3$cpue 
-   
+   CPUE <- sc_ss3$cpue %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))
+   CPUE$seas <- ifelse(CPUE$yrqtr - floor(CPUE$yrqtr) <0.2,1,
+                  ifelse(CPUE$yrqtr - floor(CPUE$yrqtr) <0.4,2,
+                         ifelse(CPUE$yrqtr - floor(CPUE$yrqtr) <0.7,3,4)))
+   CPUE$Residuals <- CPUE$Obs-CPUE$Exp
+   CPUE$Area <- as.factor(CPUE$Area)
+  ggplot(CPUE, aes(x=yrqtr,y=Residuals)) +
+    geom_line(aes(color = Area),size=1) + labs(x="Year", y="Residuals:OBS-EXP") + 
+    theme(axis.text.y = element_text(angle = 90, vjust = 0.5, hjust=0.5),
+          legend.position = 'bottom') +
+    scale_y_continuous(breaks = breaks_extended(3)) +
+    guides(color = guide_legend(title = "CPUE REGION"))+
+    facet_wrap( ~ seas, ncol = 2)+theme_fun()
+  SavePlot('Comparison_residuals_by_season',15,10)
+  
