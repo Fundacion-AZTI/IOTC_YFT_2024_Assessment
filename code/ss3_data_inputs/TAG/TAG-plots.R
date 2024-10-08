@@ -109,3 +109,26 @@ p1 = ggplot(plot_dat, aes(x = factor(rec_year), y = n_obs, color = rec_model_are
   facet_wrap(~ rel_model_area, nrow = 2, scales = 'free_y')
 ggsave(file.path(shrpoint_path, plot_dir, paste0('tag_nfish_area', img_type)), plot = p1,
        width = img_width*0.75, height = 180, units = 'mm', dpi = img_res)
+
+
+# -------------------------------------------------------------------------
+# Compare number of fish release and recaptured by age by growth function
+
+tag_rel_farl = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'tag-release-farley.csv'))
+tag_rel_font = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'tag-release-fonteneau.csv'))
+
+# Plot release:
+tag_rel_farl = tag_rel_farl %>% mutate(type = 'Farley')
+tag_rel_font = tag_rel_font %>% mutate(type = 'Fonteneau')
+plot_dat = bind_rows(tag_rel_farl, tag_rel_font)
+plot_dat = plot_dat %>% group_by(rel_age, type) %>% summarise(N_fish = sum(number_prime))
+plot_dat = plot_dat %>% mutate(rel_age = factor(rel_age))
+
+p1 = ggplot(data = plot_dat, aes(x = rel_age, y = N_fish)) + 
+  geom_bar(aes(fill = type), position =position_dodge(preserve = "single"), stat="identity")+
+  xlab("Age") + ylab("Number of fish realeased") +
+  theme(legend.position = c(0.8, 0.75)) +
+  guides(fill = guide_legend(title = NULL))
+ggsave(file.path(shrpoint_path, plot_dir, paste0('tag_age_nfish_growth', img_type)), plot = p1,
+       width = img_width*0.75, height = 80, units = 'mm', dpi = img_res)
+

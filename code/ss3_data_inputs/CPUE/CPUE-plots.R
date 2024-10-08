@@ -35,7 +35,6 @@ p1 = ggplot(data = plot_data, aes(x = time, y = obs)) +
 ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_cpue_area', img_type)), plot = p1,
        width = img_width, height = 130, units = 'mm', dpi = img_res)
 
-
 # Free school and FOB PS CPUE --------------------------------------------------
 
 # Free school CPUE:
@@ -48,9 +47,10 @@ plot_data = cpue_dat
 p1 = ggplot(data = plot_data, aes(x = time, y = obs)) +
   geom_ribbon(aes(ymin = obs - sd, ymax = obs + sd), fill = 'grey70') +
   geom_line(aes(y = obs)) +
-  coord_cartesian(ylim = c(0, NA), expand = FALSE) + 
+  coord_cartesian(ylim = c(0, NA), xlim = c(1991, 2023), expand = FALSE) + 
   scale_y_continuous(n.breaks = 3) +
-  xlab(NULL) + ylab("Scaled free school PS CPUE")
+  scale_x_continuous(breaks = seq(from = 1990, to = 2020, by= 5)) +
+  xlab(NULL) + ylab("FS CPUE")
 
 # FOB CPUE:
 cpue_dat = read.csv(file.path(shrpoint_path, 'data/raw/indices/PSLS/st-GLMM_FOB.csv'))
@@ -62,16 +62,45 @@ plot_data = cpue_dat
 p2 = ggplot(data = plot_data, aes(x = time, y = obs)) +
   geom_ribbon(aes(ymin = obs - sd, ymax = obs + sd), fill = 'grey70') +
   geom_line(aes(y = obs)) +
-  coord_cartesian(ylim = c(0, NA), expand = FALSE) + 
+  coord_cartesian(ylim = c(0, NA), xlim = c(1991, 2023), expand = FALSE) + 
   scale_y_continuous(n.breaks = 3) +
-  scale_x_continuous(breaks = seq(from = 2010, to = 2022, by= 2)) +
-  xlab(NULL) + ylab("Scaled FOB PS CPUE")
+  scale_x_continuous(breaks = seq(from = 1990, to = 2020, by= 5)) +
+  xlab(NULL) + ylab("LS CPUE")
 
 # Merge plots:
 p3 = grid.arrange(p1, p2, nrow =2)
 
 ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_ps_cpue', img_type)), plot = p3,
        width = img_width*0.5, height = 130, units = 'mm', dpi = img_res)
+
+
+# Compare Free school and LL CPUE --------------------------------------------------
+
+# LL CPUE:
+cpue_ll = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'scaled_cpue_Meancv_02.csv'))
+cpue_ll = cpue_ll %>% dplyr::filter(fleet == 22) %>% mutate(area = '1b') %>% mutate(time = ssts2yq(qtr)) %>% 
+              dplyr::rename(obs = pr_7994_m8) %>% mutate(sd = obs*cv, type = 'LL CPUE')
+cpue_ll$obs = cpue_ll$obs/mean(cpue_ll$obs) # rescale
+
+# Free school CPUE:
+cpue_fs = read.csv(file.path(shrpoint_path, 'data/raw/indices/PS FSC/2024-cpue-standardization-iotc-yft-fsc.quarter-indices.just-essentials.csv'), sep = ';')
+cpue_fs = cpue_fs %>% mutate(time = year + (quarter-1)/4) %>% dplyr::rename(obs = yft_adult_rate_Mean) %>% 
+                mutate(sd = obs*yft_adult_rate_cv, type = 'FS CPUE')
+cpue_fs$obs = cpue_fs$obs/mean(cpue_fs$obs) # rescale
+
+# Merge:
+plot_data = rbind(cpue_ll[,c('time', 'obs', 'sd', 'type')], cpue_fs[,c('time', 'obs', 'sd', 'type')])
+
+p1 = ggplot(data = plot_data, aes(x = time, y = obs)) +
+  geom_line(aes(color = type)) +
+  coord_cartesian(ylim = c(0, 4), expand = FALSE) + 
+  scale_y_continuous(n.breaks = 3) +
+  xlab(NULL) + ylab("Scaled CPUE") +
+  theme(legend.position = c(0.8, 0.85)) +
+  guides(color = guide_legend(title = NULL)) 
+
+ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_llfs_cpue', img_type)), plot = p1,
+       width = img_width*0.5, height = 80, units = 'mm', dpi = img_res)
 
 # Compare LL CPUE information ---------------------------------------------
 # Read 2021 SS data inputs
