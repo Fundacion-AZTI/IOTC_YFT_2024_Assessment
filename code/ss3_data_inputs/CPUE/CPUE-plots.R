@@ -118,9 +118,9 @@ colnames(cpue_dat) = c('time', 'fleet_number', 'obs', 'cv')
 cpue_dat = cpue_dat %>% mutate(type = 'No effort creep')
 
 # effort creep applied:
-cpue_dat_effcreep = apply_eff_creep(df_data, yr_col = 'time', fleet_col = 'fleet_number',
-                                    cpue_col = 'obs', cv_col = 'cv', rate = 0.01)
-cpue_dat_effcreep = cpue_dat_effcreep %>% mutate(type = 'Effort creep: 1%')
+cpue_dat_effcreep = apply_eff_creep(cpue_dat, yr_col = 'time', fleet_col = 'fleet_number',
+                                    cpue_col = 'obs', cv_col = 'cv', rate = 0.005)
+cpue_dat_effcreep = cpue_dat_effcreep %>% mutate(type = 'Effort creep: 0.5%')
 
 # Merge datasets:
 merged_cpue = rbind(cpue_dat, cpue_dat_effcreep)
