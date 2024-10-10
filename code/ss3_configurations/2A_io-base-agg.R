@@ -6,16 +6,14 @@ source('code/auxiliary_functions.R')
 
 # Spatial configuration:
 spat_config = '2A_io'
+spat_subconfig = 'agg'
 
 # SS base files path (in Sharepoint):
 # Make sure to use some updated 4A model using Farley's growth:
 SS_base = 'models/update/sensitivities_15/15_recDev2021_cv_CAAL_growth'
 
-# SS configuration path (in Sharepoint):
-SS_config = paste0('models/configurations/', spat_config)
-
 # SS input data path (in Sharepoint):
-SS_data = paste0('data/ss3_inputs/', spat_config)
+SS_data = file.path('data/ss3_inputs', spat_config, spat_subconfig)
 
 
 # -------------------------------------------------------------------------
@@ -41,35 +39,34 @@ catch_df = bind_rows(tibble::tibble(year = -999, seas = 1, fleet = sort(unique(c
 cpue_df = read_csv(file.path(shrpoint_path, SS_data, 'scaled_cpue_Meancv_02.csv'))
 cpue_df = cpue_df %>% select(qtr, season, fleet, pr7994_m8_2R, cv)
 cpue_df = cpue_df %>% dplyr::rename(year = qtr, seas = season, index = fleet, obs = pr7994_m8_2R, se_log = cv)
-cpue_df$seas = 7
+cpue_df$seas = 1
 
 # Size:
 size_df = read_csv(file.path(shrpoint_path, SS_data, 'size-original.csv'))
 size_df = size_df %>% dplyr::rename(FltSvy = ModelFleet)
-size_df$Seas = 7
+size_df$Seas = 1
 
 # CAAL:
 caal_df = read_csv(file.path(shrpoint_path, SS_data, 'caal.csv'))
 caal_df = caal_df %>% dplyr::rename(FltSvy = ModelFleet, Lbin_lo = LowBin, Lbin_hi = HighBin)
-caal_df = caal_df %>% mutate(Seas = 7, .after = Yr)
+caal_df = caal_df %>% mutate(Seas = 1, .after = Yr)
 caal_df = caal_df %>% mutate(Gender = 0, Part = 0, Ageerr = 1, .after = FltSvy)
 
 # Tagging:
-tagrel_df = read_csv(file.path(shrpoint_path, SS_data, 'tag-release-farley.csv'))
+tagrel_df = read_csv(file.path(shrpoint_path, SS_data, 'tag-release.csv'))
 tagrel_df = tagrel_df %>% dplyr::rename(area = rel_assessment_area, yr = rel_yr, 
                                         sex = gender, age = rel_age, Nrel = number_prime)
-tagrec_df = read_csv(file.path(shrpoint_path, SS_data, 'tag-recapture-farley.csv'))
+tagrec_df = read_csv(file.path(shrpoint_path, SS_data, 'tag-recapture-agg.csv'))
 tagrec_df = tagrec_df %>% dplyr::rename(yr = rec_yr, fleet = rec_model_fleet, number = number_prime)
 
 
 # -------------------------------------------------------------------------
-# Adapt from 4A to 2A:
+# Adapt from 4A to 2A global:
 
 # Data file:
 new_dat = base_dat
 # Get fishery names:
 fish_names = get_fisheries(spat_config)$fleet_name
-fish_names = gsub(pattern = ' ', replacement = '_', x = fish_names)
 # Basic info:
 new_dat$endyr = 308
 new_dat$Nfleet = length(fish_names) # fisheries
@@ -117,7 +114,6 @@ new_ctl$N_areas = 2
 new_ctl$N_moveDef = 2
 new_ctl$moveDef = base_ctl$moveDef[c(1, 3), ]
 new_ctl$MG_parms = new_ctl$MG_parms %>% dplyr::filter(!row_number() %in% c(30:31,34:39))
-# new_ctl$MG_parms[,6] = 0 # no priors 
 # change F_method later
 # Q params:
 tmp_ctl = base_ctl$Q_options
@@ -143,14 +139,13 @@ new_ctl$TG_Report_fleet = base_ctl$TG_Report_fleet[c(1:10,12,14,15,19:21),]
 new_ctl$TG_Report_fleet_decay = base_ctl$TG_Report_fleet_decay[c(1:10,12,14,15,19:21),]
 
 # Remove priors in MG parameters:
-new_ctl$MG_parms[,6] = 0
+# new_ctl$MG_parms[,6] = 0
 # Fix growth:
-new_ctl$MG_parms[c(3:4, 17:18),7] = abs(new_ctl$MG_parms[c(3:4, 17:18),7])*-1
+# new_ctl$MG_parms[c(3:4, 17:18),7] = abs(new_ctl$MG_parms[c(3:4, 17:18),7])*-1
 
 # -------------------------------------------------------------------------
 # Write adapted files:
-SS_writestarter(mylist = base_start, dir = file.path(shrpoint_path, 'models/base', spat_config), overwrite = TRUE)
-SS_writeforecast(mylist = base_fore, dir = file.path(shrpoint_path, 'models/base', spat_config), overwrite = TRUE)
-SS_writedat(datlist = new_dat, outfile = file.path(shrpoint_path, 'models/base', spat_config, 'data.ss'), overwrite = TRUE)
-SS_writectl(ctllist = new_ctl, outfile = file.path(shrpoint_path, 'models/base', spat_config, 'control.ss'), overwrite = TRUE)
-
+SS_writestarter(mylist = base_start, dir = file.path(shrpoint_path, 'models/base', spat_config, spat_subconfig), overwrite = TRUE)
+SS_writeforecast(mylist = base_fore, dir = file.path(shrpoint_path, 'models/base', spat_config, spat_subconfig), overwrite = TRUE)
+SS_writedat(datlist = new_dat, outfile = file.path(shrpoint_path, 'models/base', spat_config, spat_subconfig, 'data.ss'), overwrite = TRUE)
+SS_writectl(ctllist = new_ctl, outfile = file.path(shrpoint_path, 'models/base', spat_config, spat_subconfig, 'control.ss'), overwrite = TRUE)

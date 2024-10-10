@@ -2,6 +2,7 @@ rm(list = ls())
 
 # Spatial configuration:
 spat_config = '2A_io'
+spat_subconfig = 'agg'
 
 # Sharepoint path:
 source('sharepoint_path.R')
@@ -32,7 +33,7 @@ data = create_2Aarea_cols(data)
 table(data$ModelArea)
 # Create model fleet column:
 data = data %>%
-  dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName)) %>%
+  dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName, sep = '_')) %>%
   dplyr::mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries)))
 # Table modelfleet:
 table(data$ModelFleet)
@@ -55,7 +56,7 @@ data_std = create_2Aarea_cols(data_std)
 table(data_std$ModelArea)
 # Create ModelFleet column again:
 data_std = data_std %>% 
-  dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName)) %>% 
+  dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName, sep = '_')) %>% 
   dplyr::mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries)))
 # Table modelfleet:
 table(data_std$ModelFleet)
@@ -108,10 +109,12 @@ work = work %>%
   dplyr::select(Yr,Seas,ModelFleet,Gender,Part,Nsamp,L010:L198) %>%
   dplyr::arrange(ModelFleet,Yr)		
 work[,L_labels_SS] = round(work[,L_labels_SS],1)
-dim(work)
+
+#Format for ss3:
+size_df = work %>% dplyr::rename(FltSvy = ModelFleet)
 
 # Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-original.csv'), row.names = FALSE)
+write.csv(size_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'size-original.csv'), row.names = FALSE)
 
 
 # -------------------------------------------------------------------------
@@ -148,7 +151,9 @@ work = work %>%
   dplyr::select(Yr,Seas,ModelFleet,Gender,Part,Nsamp,L010:L198) %>%
   dplyr::arrange(ModelFleet,Yr)		
 work[,L_labels_SS] = round(work[,L_labels_SS],1)
-dim(work)
+
+#Format for ss3:
+size_df = work %>% dplyr::rename(FltSvy = ModelFleet)
 
 # Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-cwp55.csv'), row.names = FALSE)
+write.csv(size_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'size-cwp55.csv'), row.names = FALSE)

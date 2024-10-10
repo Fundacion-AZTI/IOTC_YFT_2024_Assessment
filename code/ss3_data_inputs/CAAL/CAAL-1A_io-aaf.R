@@ -1,7 +1,8 @@
 rm(list = ls())
 
 # Spatial configuration:
-spat_config = '4A_io'
+spat_config = '1A_io'
+spat_subconfig = 'aaf'
 
 # Sharepoint path:
 source('sharepoint_path.R')
@@ -9,8 +10,8 @@ source('sharepoint_path.R')
 # Read auxiliary functions:
 source(here('code', 'auxiliary_functions.R'))
 
-#Fishery definiton
-fish_info = get_fisheries(spat_config)
+# Use 4A fishery definition
+fish_info = get_fisheries('4A_io')
 ModelFisheries = fish_info$fleet_name
 
 # -------------------------------------------------------------------------
@@ -20,10 +21,10 @@ data = read.csv(file.path(shrpoint_path, 'data/processed', 'agesize_grid.csv'))
 # Get area information:
 data$Area = get_4Aarea_from_lonlat(data$Lon, data$Lat)
 table(data$Area)
-# Assign Area==0 to == 3
+# Same as in 4A
 data = data %>% mutate(Area = if_else(Area == 0, 3, Area))
 table(data$Area)
-# Assign NAs to model area == 2 (check with team)
+# Same as in 4A
 sum(is.na(data$Area))
 data = data %>% mutate(Area = if_else(is.na(Area), 2, Area))
 table(data$Area)
@@ -53,5 +54,10 @@ work = data	%>%
   select(-c('Year', 'Quarter')) %>% mutate(HighBin = LowBin, .after = 'LowBin') %>%
   mutate(Nsamp = rowSums(across(`0`:`28`)), .before = `0`)
 
+# Format for ss3:
+caal_df = work %>% dplyr::rename(FltSvy = ModelFleet, Lbin_lo = LowBin, Lbin_hi = HighBin)
+caal_df = caal_df %>% mutate(Seas = 1, .after = Yr)
+caal_df = caal_df %>% mutate(Gender = 0, Part = 0, Ageerr = 1, .after = FltSvy)
+
 # Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'caal.csv'), row.names = FALSE)
+write.csv(caal_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'caal.csv'), row.names = FALSE)

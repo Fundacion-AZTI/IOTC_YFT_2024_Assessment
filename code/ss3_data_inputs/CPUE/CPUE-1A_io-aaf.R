@@ -2,6 +2,7 @@ rm(list = ls())
 
 # Spatial configuration:
 spat_config = '1A_io'
+spat_subconfig = 'aaf'
 
 # Sharepoint path:
 source('sharepoint_path.R')
@@ -10,7 +11,8 @@ source('sharepoint_path.R')
 source(here('code', 'auxiliary_functions.R'))
 
 # Read fishery definitions
-fish_info = get_fisheries(spat_config)
+# Max number of fisheries from 4A config
+fish_info = get_fisheries('4A_io')
 n_fisheries = max(fish_info$fleet_number)
 
 # -------------------------------------------------------------------------
@@ -59,5 +61,10 @@ data <- data %>% group_by(NewAssessmentAreaName) %>% mutate(stdcv02=std/mean(std
   mutate(fleet = n_fisheries+1) %>% 
   select(qtr,season,fleet,pr7994_m8_2R,cv) # confirm fleet number 
 
+# Format for ss3:
+cpue_df = data %>% ungroup() %>% select(qtr, season, fleet, pr7994_m8_2R, cv)
+cpue_df = cpue_df %>% dplyr::rename(year = qtr, seas = season, index = fleet, obs = pr7994_m8_2R, se_log = cv)
+cpue_df$seas = 1
+
 # Save data:
-write.csv(data, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'scaled_cpue_Meancv_02.csv'), row.names = FALSE)
+write.csv(cpue_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'cpue.csv'), row.names = FALSE)

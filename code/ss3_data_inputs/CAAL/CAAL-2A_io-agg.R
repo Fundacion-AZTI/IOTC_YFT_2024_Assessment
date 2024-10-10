@@ -1,7 +1,8 @@
 rm(list = ls())
 
 # Spatial configuration:
-spat_config = '1A_io'
+spat_config = '2A_io'
+spat_subconfig = 'agg'
 
 # Sharepoint path:
 source('sharepoint_path.R')
@@ -18,7 +19,7 @@ ModelFisheries = fish_info$fleet_name
 data = read.csv(file.path(shrpoint_path, 'data/processed', 'agesize_grid.csv'))
 
 # Get area information:
-data$Area = get_1Aarea_from_lonlat(data$Lon, data$Lat)
+data$Area = get_2Aarea_from_lonlat(data$Lon, data$Lat)
 table(data$Area)
 # Assign Area==0 to == 2
 data = data %>% mutate(Area = if_else(Area == 0, 2, Area))
@@ -29,11 +30,11 @@ data = data %>% mutate(Area = if_else(is.na(Area), 2, Area))
 table(data$Area)
 
 # Create area and fishery columns:
-data = create_1Aarea_cols(data)
+data = create_2Aarea_cols(data)
 table(data$ModelArea)
 # Create model fleet column:
 data = data %>% 
-  dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName)) %>% 
+  dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName, sep = '_')) %>% 
   dplyr::mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries)))
 # Table modelfleet:
 table(data$ModelFleet)
@@ -53,5 +54,10 @@ work = data	%>%
   select(-c('Year', 'Quarter')) %>% mutate(HighBin = LowBin, .after = 'LowBin') %>%
   mutate(Nsamp = rowSums(across(`0`:`28`)), .before = `0`)
 
+# Format for ss3:
+caal_df = work %>% dplyr::rename(FltSvy = ModelFleet, Lbin_lo = LowBin, Lbin_hi = HighBin)
+caal_df = caal_df %>% mutate(Seas = 1, .after = Yr)
+caal_df = caal_df %>% mutate(Gender = 0, Part = 0, Ageerr = 1, .after = FltSvy)
+
 # Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'caal.csv'), row.names = FALSE)
+write.csv(caal_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'caal.csv'), row.names = FALSE)

@@ -58,7 +58,7 @@ data = create_4Aarea_cols(data)
 table(data$ModelArea)
 # Create model fleet column:
 data = data %>% 
-  dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName)) %>% 
+  dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName, sep = '_')) %>% 
   dplyr::mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries)))
 # Table modelfleet:
 table(data$ModelFleet)

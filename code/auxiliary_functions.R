@@ -250,18 +250,18 @@ filter_LF_4A_type1 = function(data) { # used in 2021 assessment
 
   work = data %>%
     dplyr::filter(!(Fleet %in% c('TWN','SYC') & Gear == 'LL')) %>%
-    dplyr::filter(!(ModelFishery == "LL 1a" & Year %in% c(1970:1995, 2010:2020))) %>% # please check if 2020-2022 data needs to be excluded
-    dplyr::filter(!(ModelFishery == "LL 1b" & Year %in% c(1950:1959))) %>%
-    dplyr::filter(!(ModelFishery == "LL 2" & Year %in% c(1950:1959))) %>%
-    dplyr::filter(!(ModelFishery == "LL 3" & Year %in% c(1950:1959))) %>%
-    dplyr::filter(!(ModelFishery == "LL 4" & Year %in% c(1950:1959,2001:2005,2015,2019))) %>%  # please check if 2020-2022 data needs to be excluded
-    dplyr::filter(!(ModelFishery == "LF 4" & Year < 2005)) %>% # confirmed by Agurtzane
-    dplyr::filter(!(ModelFishery == "GI 4" & Year %in% c(1975:1987))) %>%
-    dplyr::filter(!(ModelFishery == "HD 1a" & Year %in% c(1950:2007))) %>%
-    dplyr::filter(!(ModelFishery == "OT 4" & Year %in% c(1983,2016))) %>%
-    dplyr::filter(!(ModelFishery == "TR 4" & Year %in% c(2016:2019))) %>%  # please check if 2020-2022 data needs to be excluded
-    dplyr::filter(!(ModelFishery == "TR 1b")) %>%
-    dplyr::filter(!(ModelFishery == "TR 2"))
+    dplyr::filter(!(ModelFishery == "LL_1a" & Year %in% c(1970:1995, 2010:2020))) %>% # please check if 2020-2022 data needs to be excluded
+    dplyr::filter(!(ModelFishery == "LL_1b" & Year %in% c(1950:1959))) %>%
+    dplyr::filter(!(ModelFishery == "LL_2" & Year %in% c(1950:1959))) %>%
+    dplyr::filter(!(ModelFishery == "LL_3" & Year %in% c(1950:1959))) %>%
+    dplyr::filter(!(ModelFishery == "LL_4" & Year %in% c(1950:1959,2001:2005,2015,2019))) %>%  # please check if 2020-2022 data needs to be excluded
+    dplyr::filter(!(ModelFishery == "LF_4" & Year < 2005)) %>% # confirmed by Agurtzane
+    dplyr::filter(!(ModelFishery == "GI_4" & Year %in% c(1975:1987))) %>%
+    dplyr::filter(!(ModelFishery == "HD_1a" & Year %in% c(1950:2007))) %>%
+    dplyr::filter(!(ModelFishery == "OT_4" & Year %in% c(1983,2016))) %>%
+    dplyr::filter(!(ModelFishery == "TR_4" & Year %in% c(2016:2019))) %>%  # please check if 2020-2022 data needs to be excluded
+    dplyr::filter(!(ModelFishery == "TR_1b")) %>%
+    dplyr::filter(!(ModelFishery == "TR_2"))
 
   return(work)
 
@@ -272,23 +272,23 @@ filter_LF_4A_type2 = function(data, filter_nsamp = TRUE) { # new filtering
   work = data %>% 
     # Filters reviewed by Simon and agreed by the team:
     dplyr::filter(!(Fleet %in% c('TWN','SYC') & Gear == 'LL')) %>%
-    dplyr::filter(!(ModelFishery == "LL 1a" & Year %in% c(1970:1995, 2010:2023))) %>% 
-    dplyr::filter(!(ModelFishery == "LL 1b" & Year %in% c(1950:1959))) %>%
-    dplyr::filter(!(ModelFishery == "LL 2" & Year %in% c(1950:1959))) %>%
-    dplyr::filter(!(ModelFishery == "LL 3" & Year %in% c(1950:1959))) %>%
-    dplyr::filter(!(ModelFishery == "LL 4" & Year %in% c(1950:1959,2001:2005,2015,2019))) %>%
-    dplyr::filter(!(ModelFishery == "LF 4" & Year < 2005)) %>% # confirmed by Agurtzane
+    dplyr::filter(!(ModelFishery == "LL_1a" & Year %in% c(1970:1995, 2010:2023))) %>% 
+    dplyr::filter(!(ModelFishery == "LL_1b" & Year %in% c(1950:1959))) %>%
+    dplyr::filter(!(ModelFishery == "LL_2" & Year %in% c(1950:1959))) %>%
+    dplyr::filter(!(ModelFishery == "LL_3" & Year %in% c(1950:1959))) %>%
+    dplyr::filter(!(ModelFishery == "LL_4" & Year %in% c(1950:1959,2001:2005,2015,2019))) %>%
+    dplyr::filter(!(ModelFishery == "LF_4" & Year < 2005)) %>% # confirmed by Agurtzane
     dplyr::filter(!(Fleet %in% c('SYC') & Gear == 'ELL' & Year %in% 2003:2019)) %>% # temporarily, Manu will fix this in the raw data
     # Remove weird patterns:
-    dplyr::filter(!(ModelFishery == "GI 1a" & Fleet == 'LKA' & Year %in% c(2021))) %>%
-    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet != 'MDV')) %>% # only use MDV for HD 1a, agreed with team
-    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet == 'MDV' & Year == 2003)) %>% # remove HD with noisy obs
-    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet == 'MDV' & Year == 2015 & Quarter == 1)) %>% # remove HD with noisy obs
-    dplyr::filter(!(ModelFishery == "OT 1a" & Year %in% c(2021:2022))) %>%
-    dplyr::filter(!(ModelFishery == "OT 4" & Year %in% c(2016))) %>%
-    dplyr::filter(!(ModelFishery == "TR 4" & Year %in% c(2016:2019))) %>%
-    dplyr::filter(!(ModelFishery == "TR 1b")) %>%
-    dplyr::filter(!(ModelFishery == "TR 2"))
+    dplyr::filter(!(ModelFishery == "GI_1a" & Fleet == 'LKA' & Year %in% c(2021))) %>%
+    dplyr::filter(!(ModelFishery == "HD_1a" & Fleet != 'MDV')) %>% # only use MDV for HD 1a, agreed with team
+    dplyr::filter(!(ModelFishery == "HD_1a" & Fleet == 'MDV' & Year == 2003)) %>% # remove HD with noisy obs
+    dplyr::filter(!(ModelFishery == "HD_1a" & Fleet == 'MDV' & Year == 2015 & Quarter == 1)) %>% # remove HD with noisy obs
+    dplyr::filter(!(ModelFishery == "OT_1a" & Year %in% c(2021:2022))) %>%
+    dplyr::filter(!(ModelFishery == "OT_4" & Year %in% c(2016))) %>%
+    dplyr::filter(!(ModelFishery == "TR_4" & Year %in% c(2016:2019))) %>%
+    dplyr::filter(!(ModelFishery == "TR_1b")) %>%
+    dplyr::filter(!(ModelFishery == "TR_2"))
     # Remove rows with less than 100 Nfish sampled:
     if(filter_nsamp) work = work %>% dplyr::filter(!(Nfish_samp < 100 & Quality > 0)) # remove low sample size but only those rows not considered best quality
 
@@ -303,22 +303,22 @@ filter_LF_2A = function(data) {
   
   work = data %>% 
     dplyr::filter(!(Fleet %in% c('TWN','SYC') & Gear == 'LL')) %>%
-    dplyr::filter(!(ModelFishery == "LL 1a" & Year %in% c(1970:1995, 2010:2023))) %>% # please check if 2020-2022 data needs to be excluded
-    dplyr::filter(!(ModelFishery == "LL 1b" & Year %in% c(1950:1959))) %>%
-    dplyr::filter(!(ModelFishery == "LL 2" & Year %in% c(1950:1959))) %>%
-    dplyr::filter(!(ModelFishery == "LF 2" & Year < 2005)) %>% # confirmed by Agurtzane
+    dplyr::filter(!(ModelFishery == "LL_1a" & Year %in% c(1970:1995, 2010:2023))) %>% # please check if 2020-2022 data needs to be excluded
+    dplyr::filter(!(ModelFishery == "LL_1b" & Year %in% c(1950:1959))) %>%
+    dplyr::filter(!(ModelFishery == "LL_2" & Year %in% c(1950:1959))) %>%
+    dplyr::filter(!(ModelFishery == "LF_2" & Year < 2005)) %>% # confirmed by Agurtzane
     dplyr::filter(!(Fleet %in% c('SYC') & Gear == 'ELL' & Year %in% 2003:2019)) %>% # temporarily, Manu will fix this in the raw data
     # Remove rows with less than 100 Nfish sampled:
     dplyr::filter(!(Nfish_samp < 100 & Quality > 0)) %>% # remove low sample size but only those rows not considered best quality
     # Remove weird patterns:
-    dplyr::filter(!(ModelFishery == "GI 1a" & Fleet == 'LKA' & Year %in% c(2021))) %>%    
-    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet != 'MDV')) %>% # only use MDV for HD 1a, agreed with team
-    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet == 'MDV' & Year == 2003)) %>% # remove HD with noisy obs
-    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet == 'MDV' & Year == 2015 & Quarter == 1)) %>% # remove HD with noisy obs
-    dplyr::filter(!(ModelFishery == "OT 1a" & Year %in% c(2021:2022))) %>%
-    dplyr::filter(!(ModelFishery == "OT 2" & Year %in% c(2016))) %>%
-    dplyr::filter(!(ModelFishery == "TR 2" & Year %in% c(2016:2019))) %>%
-    dplyr::filter(!(ModelFishery == "TR 1b")) 
+    dplyr::filter(!(ModelFishery == "GI_1a" & Fleet == 'LKA' & Year %in% c(2021))) %>%    
+    dplyr::filter(!(ModelFishery == "HD_1a" & Fleet != 'MDV')) %>% # only use MDV for HD 1a, agreed with team
+    dplyr::filter(!(ModelFishery == "HD_1a" & Fleet == 'MDV' & Year == 2003)) %>% # remove HD with noisy obs
+    dplyr::filter(!(ModelFishery == "HD_1a" & Fleet == 'MDV' & Year == 2015 & Quarter == 1)) %>% # remove HD with noisy obs
+    dplyr::filter(!(ModelFishery == "OT_1a" & Year %in% c(2021:2022))) %>%
+    dplyr::filter(!(ModelFishery == "OT_2" & Year %in% c(2016))) %>%
+    dplyr::filter(!(ModelFishery == "TR_2" & Year %in% c(2016:2019))) %>%
+    dplyr::filter(!(ModelFishery == "TR_1b")) 
   
   return(work)
   
@@ -332,20 +332,20 @@ filter_LF_1A = function(data) {
   work = data %>% 
     # Filters reviewed by Simon and agreed by the team:
     dplyr::filter(!(Fleet %in% c('TWN','SYC') & Gear == 'LL')) %>%
-    dplyr::filter(!(ModelFishery == "LL 1a" & Year %in% c(1970:1995, 2010:2023))) %>% 
-    dplyr::filter(!(ModelFishery == "LL 1b" & Year %in% c(1950:1959))) %>%
-    dplyr::filter(!(ModelFishery == "LF 1b" & Year < 2005)) %>% # confirmed by Agurtzane
+    dplyr::filter(!(ModelFishery == "LL_1a" & Year %in% c(1970:1995, 2010:2023))) %>% 
+    dplyr::filter(!(ModelFishery == "LL_1b" & Year %in% c(1950:1959))) %>%
+    dplyr::filter(!(ModelFishery == "LF_1b" & Year < 2005)) %>% # confirmed by Agurtzane
     dplyr::filter(!(Fleet %in% c('SYC') & Gear == 'ELL' & Year %in% 2003:2019)) %>% # temporarily, Manu will fix this in the raw data
     # Remove rows with less than 100 Nfish sampled:
     dplyr::filter(!(Nfish_samp < 100 & Quality > 0)) %>% # remove low sample size but only those rows not considered best quality
     # Remove weird patterns:
-    dplyr::filter(!(ModelFishery == "GI 1a" & Fleet == 'LKA' & Year %in% c(2021))) %>%
-    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet != 'MDV')) %>% # only use MDV for HD 1a, agreed with team
-    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet == 'MDV' & Year == 2003)) %>% # remove HD with noisy obs
-    dplyr::filter(!(ModelFishery == "HD 1a" & Fleet == 'MDV' & Year == 2015 & Quarter == 1)) %>% # remove HD with noisy obs
-    dplyr::filter(!(ModelFishery == "OT 1a" & Year %in% c(2021:2022))) %>%
-    dplyr::filter(!(ModelFishery == "OT 1b" & Year %in% c(2016))) %>%
-    dplyr::filter(!(ModelFishery == "TR 1b" & Year %in% c(2016:2019)))
+    dplyr::filter(!(ModelFishery == "GI_1a" & Fleet == 'LKA' & Year %in% c(2021))) %>%
+    dplyr::filter(!(ModelFishery == "HD_1a" & Fleet != 'MDV')) %>% # only use MDV for HD 1a, agreed with team
+    dplyr::filter(!(ModelFishery == "HD_1a" & Fleet == 'MDV' & Year == 2003)) %>% # remove HD with noisy obs
+    dplyr::filter(!(ModelFishery == "HD_1a" & Fleet == 'MDV' & Year == 2015 & Quarter == 1)) %>% # remove HD with noisy obs
+    dplyr::filter(!(ModelFishery == "OT_1a" & Year %in% c(2021:2022))) %>%
+    dplyr::filter(!(ModelFishery == "OT_1b" & Year %in% c(2016))) %>%
+    dplyr::filter(!(ModelFishery == "TR_1b" & Year %in% c(2016:2019)))
   
   return(work)
   
@@ -500,16 +500,16 @@ apply_eff_creep = function(data, yr_col = 'yr', fleet_col = 'fleet',
 get_fisheries = function(config = '4A_io') {
   if(!(config %in% c('4A_io', '2A_io', '1A_io'))) stop('Spatial configuration is not properly defined.')
   if(config == '4A_io') {
-    fish_df = data.frame(fleet_name = c('GI 1a','HD 1a','LL 1a','OT 1a','BB 1b','FS 1b','LL 1b','LS 1b','TR 1b','LL 2',
-                                        'LL 3','GI 4','LL 4','OT 4','TR 4','FS 2','LS 2','TR 2','FS 4','LS 4','LF 4'))
+    fish_df = data.frame(fleet_name = c('GI_1a','HD_1a','LL_1a','OT_1a','BB_1b','FS_1b','LL_1b','LS_1b','TR_1b','LL_2',
+                                        'LL_3','GI_4','LL_4','OT_4','TR_4','FS_2','LS_2','TR_2','FS_4','LS_4','LF_4'))
   }
   if(config == '2A_io') {
-    fish_df = data.frame(fleet_name = c('GI 1a','HD 1a','LL 1a','OT 1a','BB 1b','FS 1b','LL 1b','LS 1b','TR 1b','LL 2',
-                                        'GI 2','OT 2','TR 2','FS 2','LS 2','LF 2'))
+    fish_df = data.frame(fleet_name = c('GI_1a','HD_1a','LL_1a','OT_1a','BB_1b','FS_1b','LL_1b','LS_1b','TR_1b','LL_2',
+                                        'GI_2','OT_2','TR_2','FS_2','LS_2','LF_2'))
   }
   if(config == '1A_io') {
-    fish_df = data.frame(fleet_name = c('GI 1a','HD 1a','LL 1a','OT 1a','BB 1b','FS 1b','LL 1b','LS 1b','TR 1b',
-                                        'GI 1b','OT 1b','LF 1b'))
+    fish_df = data.frame(fleet_name = c('GI_1a','HD_1a','LL_1a','OT_1a','BB_1b','FS_1b','LL_1b','LS_1b','TR_1b',
+                                        'GI_1b','OT_1b','LF_1b'))
   }
   fish_df = fish_df %>% mutate(fleet_number = 1:nrow(fish_df), .before = fleet_name)
   return(fish_df)

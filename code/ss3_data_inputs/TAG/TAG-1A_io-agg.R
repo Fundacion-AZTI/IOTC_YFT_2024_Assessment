@@ -2,6 +2,7 @@ rm(list = ls())
 
 # Spatial configuration:
 spat_config = '1A_io'
+spat_subconfig = 'agg'
 
 # Sharepoint path:
 source('sharepoint_path.R')
@@ -14,13 +15,13 @@ source(here('code', 'auxiliary_functions.R'))
 data = read.csv(file.path(shrpoint_path, 'data/processed', 'tag_release.csv'))
 dataC = read.csv(file.path(shrpoint_path, 'data/processed', 'tag_recapture.csv'))
 
-# -------------------------------------------------------------------------
-# -------------------------------------------------------------------------
-# Produce release SS3 inputs: (Farley)
-
-# Age slicing
+# Age slicing (using Farley growth)
 data$rel_age = sapply(data$tag_length, age_slicing, mlen_at_age = Len_farl)
 dataC$rel_age = sapply(dataC$tag_length, age_slicing, mlen_at_age = Len_farl)
+
+# -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# Produce release SS3 inputs: 
 
 # Reassign areas:
 data = data %>% mutate(rel_model_area = 1)
@@ -32,7 +33,6 @@ table(data$rel_model_area)
 table(data$rel_assessment_area)
 table(data$rel_assessment_area_name)
 
-# -------------------------------------------------------------------------
 # Release data input
 work = data %>% 
   dplyr::filter(project=='RTTP')  %>%
@@ -47,13 +47,18 @@ work = work %>% mutate(number_prime = round(number * 0.725,1))
 out_rel = work %>% select(tag,rel_assessment_area,rel_yr,season, tfill,gender,rel_age,number_prime) 
 
 # Adapt release area to model area in SS:
-out_rel$rel_assessment_area <- 1
+out_rel$rel_assessment_area = 1
+
+# Format for ss3
+out_rel = out_rel %>% dplyr::rename(area = rel_assessment_area, yr = rel_yr, sex = gender, age = rel_age, Nrel = number_prime)
 
 # Save:
-write.csv(out_rel, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'tag-release-farley.csv'), row.names = FALSE)
+write.csv(out_rel, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'tag-release.csv'), row.names = FALSE)
 
 
 # -------------------------------------------------------------------------
+# Produce recapture SS3 inputs: 
+
 # Reassign areas:
 dataC = dataC %>% mutate(rel_model_area = 1)
 dataC = dataC %>% mutate(rel_assessment_area = if_else(rel_assessment_area %in% c(2,3,5), 2, 1))
@@ -64,8 +69,9 @@ table(dataC$rel_model_area)
 table(dataC$rel_assessment_area)
 table(dataC$rel_assessment_area_name)
 
-# Reassign fleets:
-dataC = dataC %>% mutate(rec_model_fleet = if_else(rec_model_fleet %in% c(10,11,13), 7, # LL2 LL3 LL4 to LL1b
+# -------------
+# Reassign fleets (agg config):
+recap_df = dataC %>% mutate(rec_model_fleet = if_else(rec_model_fleet %in% c(10,11,13), 7, # LL2 LL3 LL4 to LL1b
                                                    if_else(rec_model_fleet %in% c(12), 10, #GI4 to GI1b
                                                            if_else(rec_model_fleet %in% 14, 11, #OT4 to OT1b
                                                                    if_else(rec_model_fleet %in% c(15,18), 9, #TR4 TR2 to TR1b
@@ -73,10 +79,10 @@ dataC = dataC %>% mutate(rec_model_fleet = if_else(rec_model_fleet %in% c(10,11,
                                                                                    if_else(rec_model_fleet %in% c(17,20), 8, #LS2 LS4 to LS1b
                                                                                            if_else(rec_model_fleet %in% 21, 12, rec_model_fleet)#LF4 to LF1b
                                                                                                                            )))))))
-table(dataC$rec_model_fleet)
+table(recap_df$rec_model_fleet)
 
 # Produce recapture SS3 input
-workC = dataC %>% 
+workC = recap_df %>% 
   dplyr::filter(project=='RTTP')  %>%
   mutate(rel_age = replace(rel_age,which(rel_age>15),15))
 
@@ -112,5 +118,9 @@ workC = workC %>%
   mutate(rec_yr=yearqtr2qtr(rec_year,rec_quarter,1950,13),season=1) %>% 
   left_join(select(work,c(rel_assessment_area,rel_year,rel_quarter,rel_age,tag)),by=c('rel_assessment_area','rel_year','rel_quarter','rel_age')) 
 out_rec = workC %>% select(tag,rec_yr,season,rec_model_fleet,number_prime)
+
+# Format for ss3
+out_rec = out_rec %>% dplyr::rename(yr = rec_yr, fleet = rec_model_fleet, number = number_prime)
+
 # Save:
-write.csv(out_rec, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'tag-recapture-farley.csv'), row.names = FALSE)
+write.csv(out_rec, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'tag-recapture.csv'), row.names = FALSE)

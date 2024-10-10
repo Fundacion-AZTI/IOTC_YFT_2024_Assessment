@@ -1,7 +1,8 @@
 rm(list = ls())
 
 # Spatial configuration:
-spat_config = '4A_io'
+spat_config = '2A_io'
+spat_subconfig = 'aaf'
 
 # Sharepoint path:
 source('sharepoint_path.R')
@@ -10,12 +11,9 @@ source('sharepoint_path.R')
 source(here('code', 'auxiliary_functions.R'))
 
 #Fishery definiton
-fish_info = get_fisheries(spat_config)
+# Use 4A definition
+fish_info = get_fisheries('4A_io')
 ModelFisheries = fish_info$fleet_name
-
-# Initial length bins (with bug) in IOTC dataset:
-# This was an error in the 2021, which did not include half of the length bins. Confirmed by Dan
-L_labels_wrong  =  c(Paste("L0",seq(10,98,4)), Paste("L",seq(102,198,4)))
 
 # Initial length bins (correct) in IOTC dataset:
 L_labels  =  c(Paste("L0",seq(10,98,2)), Paste("L",seq(100,198,2))) 
@@ -67,7 +65,6 @@ table(data_std$ModelFleet)
 which(is.na(data_std$ModelFishery))
 which(is.na(data_std$ModelFleet))
 
-
 # -------------------------------------------------------------------------
 # Aggregate data (both, simple and std):
 # Remove Month, SchoolType, Grid:
@@ -76,47 +73,11 @@ agg_data = data %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFisher
   summarise_at('Quality', list(mean)) %>%
   inner_join(data %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
                summarise_at(c('Nfish_samp', L_labels), list(sum)))
-# Save for data exploration:
-write.csv(agg_data, file = file.path(shrpoint_path, 'data/processed', 'agg-size-original.csv'), row.names = FALSE)
 
 agg_data_std = data_std %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
   summarise_at('Quality', list(mean)) %>%
   inner_join(data_std %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
                summarise_at(c('Nfish_samp', 'Ncnofish', L_labels), list(sum)))
-# Save for data exploration:
-write.csv(agg_data_std, file = file.path(shrpoint_path, 'data/processed', 'agg-size-cwp55.csv'), row.names = FALSE)
-
-
-# -------------------------------------------------------------------------
-# Get LF input with bug, simple aggregation and Nsamp 5 ------------------------------
-
-# # Filter data based on criterium type 1 (used in 2021 assessment):
-# work = filter_LF_4A_type1(agg_data)
-# # Continue..
-# work = work %>%
-#   dplyr::group_by(ModelFleet,Year,Quarter) %>%
-#   dplyr::summarise_at(L_labels_wrong,list(Sum)) %>%
-#   as.data.frame() %>%
-#   tidyr::gather(length,total,L010:L198) %>%
-#   dplyr::mutate(length=as.numeric(substr(length,2,4))) %>%
-#   dplyr::mutate(length=length-(length-10) %% 4) %>%
-#   dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>%
-#   dplyr::group_by(ModelFleet,Year,Quarter,length) %>%
-#   dplyr::summarise_at("total",list(Sum)) %>%
-#   tidyr::spread(length,total,fill=0) %>%
-#   as.data.frame()
-# 
-# work = work %>%
-#   dplyr::mutate(sno=rowSums(dplyr::select(work,L010:L198))) %>%
-#   dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0,Nsamp = 5) %>%
-#   dplyr::select(Yr,Seas,ModelFleet,Gender,Part,Nsamp,L010:L198) %>%
-#   dplyr::arrange(ModelFleet,Yr)
-# work[,L_labels_SS] = round(work[,L_labels_SS],1)
-# dim(work)
-# 
-# # Save SS catch input
-# write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-original-bug.csv'), row.names = FALSE)
-
 
 # -------------------------------------------------------------------------
 # Get LF input, simple aggregation, Nsamp is RQ ---------
@@ -149,10 +110,12 @@ work = work %>%
   dplyr::select(Yr,Seas,ModelFleet,Gender,Part,Nsamp,L010:L198) %>%
   dplyr::arrange(ModelFleet,Yr)		
 work[,L_labels_SS] = round(work[,L_labels_SS],1)
-dim(work)
+
+#Format for ss3:
+size_df = work %>% dplyr::rename(FltSvy = ModelFleet)
 
 # Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-original.csv'), row.names = FALSE)
+write.csv(size_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'size-original.csv'), row.names = FALSE)
 
 
 # -------------------------------------------------------------------------
@@ -189,7 +152,9 @@ work = work %>%
   dplyr::select(Yr,Seas,ModelFleet,Gender,Part,Nsamp,L010:L198) %>%
   dplyr::arrange(ModelFleet,Yr)		
 work[,L_labels_SS] = round(work[,L_labels_SS],1)
-dim(work)
+
+#Format for ss3:
+size_df = work %>% dplyr::rename(FltSvy = ModelFleet)
 
 # Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-cwp55.csv'), row.names = FALSE)
+write.csv(size_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'size-cwp55.csv'), row.names = FALSE)
