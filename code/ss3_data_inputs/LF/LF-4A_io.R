@@ -90,32 +90,32 @@ write.csv(agg_data_std, file = file.path(shrpoint_path, 'data/processed', 'agg-s
 # -------------------------------------------------------------------------
 # Get LF input with bug, simple aggregation and Nsamp 5 ------------------------------
 
-# Filter data based on criterium type 1 (used in 2021 assessment):
-work = filter_LF_4A_type1(agg_data)
-# Continue..
-work = work %>%
-  dplyr::group_by(ModelFleet,Year,Quarter) %>%
-  dplyr::summarise_at(L_labels_wrong,list(Sum)) %>%
-  as.data.frame() %>%
-  tidyr::gather(length,total,L010:L198) %>%
-  dplyr::mutate(length=as.numeric(substr(length,2,4))) %>%
-  dplyr::mutate(length=length-(length-10) %% 4) %>%
-  dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>%
-  dplyr::group_by(ModelFleet,Year,Quarter,length) %>%
-  dplyr::summarise_at("total",list(Sum)) %>%
-  tidyr::spread(length,total,fill=0) %>%
-  as.data.frame()
-
-work = work %>%
-  dplyr::mutate(sno=rowSums(dplyr::select(work,L010:L198))) %>%
-  dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0,Nsamp = 5) %>%
-  dplyr::select(Yr,Seas,ModelFleet,Gender,Part,Nsamp,L010:L198) %>%
-  dplyr::arrange(ModelFleet,Yr)
-work[,L_labels_SS] = round(work[,L_labels_SS],1)
-dim(work)
-
-# Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-original-bug.csv'), row.names = FALSE)
+# # Filter data based on criterium type 1 (used in 2021 assessment):
+# work = filter_LF_4A_type1(agg_data)
+# # Continue..
+# work = work %>%
+#   dplyr::group_by(ModelFleet,Year,Quarter) %>%
+#   dplyr::summarise_at(L_labels_wrong,list(Sum)) %>%
+#   as.data.frame() %>%
+#   tidyr::gather(length,total,L010:L198) %>%
+#   dplyr::mutate(length=as.numeric(substr(length,2,4))) %>%
+#   dplyr::mutate(length=length-(length-10) %% 4) %>%
+#   dplyr::mutate(length=ifelse(length<100,Paste("L0",length),Paste("L",length))) %>%
+#   dplyr::group_by(ModelFleet,Year,Quarter,length) %>%
+#   dplyr::summarise_at("total",list(Sum)) %>%
+#   tidyr::spread(length,total,fill=0) %>%
+#   as.data.frame()
+# 
+# work = work %>%
+#   dplyr::mutate(sno=rowSums(dplyr::select(work,L010:L198))) %>%
+#   dplyr::mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), Seas = 1,Gender=0,Part=0,Nsamp = 5) %>%
+#   dplyr::select(Yr,Seas,ModelFleet,Gender,Part,Nsamp,L010:L198) %>%
+#   dplyr::arrange(ModelFleet,Yr)
+# work[,L_labels_SS] = round(work[,L_labels_SS],1)
+# dim(work)
+# 
+# # Save SS catch input
+# write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-original-bug.csv'), row.names = FALSE)
 
 
 # -------------------------------------------------------------------------

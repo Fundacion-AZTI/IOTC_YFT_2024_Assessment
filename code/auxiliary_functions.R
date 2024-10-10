@@ -267,7 +267,7 @@ filter_LF_4A_type1 = function(data) { # used in 2021 assessment
 
 }
 
-filter_LF_4A_type2 = function(data) { # new filtering
+filter_LF_4A_type2 = function(data, filter_nsamp = TRUE) { # new filtering
   
   work = data %>% 
     # Filters reviewed by Simon and agreed by the team:
@@ -279,8 +279,6 @@ filter_LF_4A_type2 = function(data) { # new filtering
     dplyr::filter(!(ModelFishery == "LL 4" & Year %in% c(1950:1959,2001:2005,2015,2019))) %>%
     dplyr::filter(!(ModelFishery == "LF 4" & Year < 2005)) %>% # confirmed by Agurtzane
     dplyr::filter(!(Fleet %in% c('SYC') & Gear == 'ELL' & Year %in% 2003:2019)) %>% # temporarily, Manu will fix this in the raw data
-    # Remove rows with less than 100 Nfish sampled:
-    dplyr::filter(!(Nfish_samp < 100 & Quality > 0)) %>% # remove low sample size but only those rows not considered best quality
     # Remove weird patterns:
     dplyr::filter(!(ModelFishery == "GI 1a" & Fleet == 'LKA' & Year %in% c(2021))) %>%
     dplyr::filter(!(ModelFishery == "HD 1a" & Fleet != 'MDV')) %>% # only use MDV for HD 1a, agreed with team
@@ -291,6 +289,8 @@ filter_LF_4A_type2 = function(data) { # new filtering
     dplyr::filter(!(ModelFishery == "TR 4" & Year %in% c(2016:2019))) %>%
     dplyr::filter(!(ModelFishery == "TR 1b")) %>%
     dplyr::filter(!(ModelFishery == "TR 2"))
+    # Remove rows with less than 100 Nfish sampled:
+    if(filter_nsamp) work = work %>% dplyr::filter(!(Nfish_samp < 100 & Quality > 0)) # remove low sample size but only those rows not considered best quality
 
   return(work)
   

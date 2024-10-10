@@ -9,7 +9,7 @@ spat_config = '2A_io'
 
 # SS base files path (in Sharepoint):
 # Make sure to use some updated 4A model using Farley's growth:
-SS_base = 'models/update/15_recDev2021_cv_CAAL_growth'
+SS_base = 'models/update/sensitivities_15/15_recDev2021_cv_CAAL_growth'
 
 # SS configuration path (in Sharepoint):
 SS_config = paste0('models/configurations/', spat_config)
