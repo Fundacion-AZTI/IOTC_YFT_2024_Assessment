@@ -2,23 +2,17 @@ rm(list = ls())
 
 # Spatial configuration:
 spat_config = '1A_io'
-spat_subconfig = 'aaf'
 
 # Sharepoint path:
 source('sharepoint_path.R')
 
 # Read auxiliary functions:
-source(here('code', 'auxiliary_functions.R'))
+source('code/auxiliary_functions.R')
 
-# Read fishery definitions
-# Max number of fisheries from 4A config
-fish_info = get_fisheries('4A_io')
-n_fisheries = max(fish_info$fleet_number)
-
-# -------------------------------------------------------------------------
 # Read unscaled CPUE data
 Data79 = read.csv(file.path(shrpoint_path, 'data/processed', 'cpue_unscaled.csv'))
 
+# -------------------------------------------------------------------------
 # Assign new assessment area:
 Data79 = Data79 %>% mutate(NewAssessmentAreaName = '1234')
 
@@ -56,13 +50,44 @@ data79[index,]=work
 data <- data79 %>% group_by(yq,yr,qtr,NewAssessmentAreaName) %>% summarize(pr7994_m8_2R=sum(pr_7994_m8),std=sqrt(sum(var)))
 # mean(data$pr7994_m8_2R[data$yr>=1979 & data$yr<= 1994 & data$NewAssessmentAreaName==1234])
 
+# -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# Aggregated subconfiguration
+spat_subconfig = 'agg'
+
+# Read fishery definitions
+fish_info = get_fisheries(spat_config)
+n_fisheries = max(fish_info$fleet_number)
+
 # Mean CV of 0.2 again:
-data <- data %>% group_by(NewAssessmentAreaName) %>% mutate(stdcv02=std/mean(std)*0.2) %>% mutate(season=1,cv=stdcv02) %>% 
+data_agg <- data %>% group_by(NewAssessmentAreaName) %>% mutate(stdcv02=std/mean(std)*0.2) %>% mutate(season=1,cv=stdcv02) %>% 
   mutate(fleet = n_fisheries+1) %>% 
   select(qtr,season,fleet,pr7994_m8_2R,cv) # confirm fleet number 
 
 # Format for ss3:
-cpue_df = data %>% ungroup() %>% select(qtr, season, fleet, pr7994_m8_2R, cv)
+cpue_df = data_agg %>% ungroup() %>% select(qtr, season, fleet, pr7994_m8_2R, cv)
+cpue_df = cpue_df %>% dplyr::rename(year = qtr, seas = season, index = fleet, obs = pr7994_m8_2R, se_log = cv)
+cpue_df$seas = 1
+
+# Save data:
+write.csv(cpue_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'cpue.csv'), row.names = FALSE)
+
+# -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# Areas-as-fleets subconfiguration
+spat_subconfig = 'aaf'
+
+# Read fishery definitions
+fish_info = get_fisheries('4A_io')
+n_fisheries = max(fish_info$fleet_number)
+
+# Mean CV of 0.2 again:
+data_agg <- data %>% group_by(NewAssessmentAreaName) %>% mutate(stdcv02=std/mean(std)*0.2) %>% mutate(season=1,cv=stdcv02) %>% 
+  mutate(fleet = n_fisheries+1) %>% 
+  select(qtr,season,fleet,pr7994_m8_2R,cv) # confirm fleet number 
+
+# Format for ss3:
+cpue_df = data_agg %>% ungroup() %>% select(qtr, season, fleet, pr7994_m8_2R, cv)
 cpue_df = cpue_df %>% dplyr::rename(year = qtr, seas = season, index = fleet, obs = pr7994_m8_2R, se_log = cv)
 cpue_df$seas = 1
 

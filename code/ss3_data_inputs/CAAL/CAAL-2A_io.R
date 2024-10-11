@@ -2,21 +2,23 @@ rm(list = ls())
 
 # Spatial configuration:
 spat_config = '2A_io'
-spat_subconfig = 'agg'
 
 # Sharepoint path:
 source('sharepoint_path.R')
 
 # Read auxiliary functions:
-source(here('code', 'auxiliary_functions.R'))
+source('code/auxiliary_functions.R')
+
+# Read agesize data after preprocessing
+data = read.csv(file.path(shrpoint_path, 'data/processed', 'agesize_grid.csv'))
+
+# -------------------------------------------------------------------------
+# Aggregated subconfig:
+spat_subconfig = 'agg'
 
 #Fishery definiton
 fish_info = get_fisheries(spat_config)
 ModelFisheries = fish_info$fleet_name
-
-# -------------------------------------------------------------------------
-# Read traditional LF data after preprocessing:
-data = read.csv(file.path(shrpoint_path, 'data/processed', 'agesize_grid.csv'))
 
 # Get area information:
 data$Area = get_2Aarea_from_lonlat(data$Lon, data$Lat)
@@ -42,10 +44,7 @@ table(data$ModelFleet)
 which(is.na(data$ModelFishery))
 which(is.na(data$ModelFleet))
 
-# -------------------------------------------------------------------------
-# -------------------------------------------------------------------------
 # CAAL for SS3
-
 work = data	%>% 
   group_by(Year,Quarter,ModelFleet,LowBin,Age_int) %>% 
   summarise(n_fish = n()) %>% 
@@ -61,3 +60,13 @@ caal_df = caal_df %>% mutate(Gender = 0, Part = 0, Ageerr = 1, .after = FltSvy)
 
 # Save SS catch input
 write.csv(caal_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'caal.csv'), row.names = FALSE)
+
+# -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# Areas-as-fleet subconfig:
+spat_subconfig = 'aaf'
+
+# No need to produce the ss3 inputs again, just use the 4A inputs
+# Remember to produce the 4A inputs beforehand
+file.copy(from = file.path(shrpoint_path, 'data/ss3_inputs/4A_io', 'caal.csv'),
+          to = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'caal.csv'))

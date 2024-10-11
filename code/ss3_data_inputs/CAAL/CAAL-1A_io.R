@@ -1,36 +1,38 @@
 rm(list = ls())
 
 # Spatial configuration:
-spat_config = '2A_io'
-spat_subconfig = 'aaf'
+spat_config = '1A_io'
 
 # Sharepoint path:
 source('sharepoint_path.R')
 
 # Read auxiliary functions:
-source(here('code', 'auxiliary_functions.R'))
+source('code/auxiliary_functions.R')
 
-# Use 4A fishery definition
-fish_info = get_fisheries('4A_io')
-ModelFisheries = fish_info$fleet_name
-
-# -------------------------------------------------------------------------
-# Read traditional LF data after preprocessing:
+# Read agesize data after preprocessing
 data = read.csv(file.path(shrpoint_path, 'data/processed', 'agesize_grid.csv'))
 
+# -------------------------------------------------------------------------
+# Aggregated subconfig:
+spat_subconfig = 'agg'
+
+#Fishery definiton
+fish_info = get_fisheries(spat_config)
+ModelFisheries = fish_info$fleet_name
+
 # Get area information:
-data$Area = get_4Aarea_from_lonlat(data$Lon, data$Lat)
+data$Area = get_1Aarea_from_lonlat(data$Lon, data$Lat)
 table(data$Area)
-# Same as in 4A
-data = data %>% mutate(Area = if_else(Area == 0, 3, Area))
+# Assign Area==0 to == 2
+data = data %>% mutate(Area = if_else(Area == 0, 2, Area))
 table(data$Area)
-# Same as in 4A
+# Assign NAs to model area == 2 (check with team)
 sum(is.na(data$Area))
 data = data %>% mutate(Area = if_else(is.na(Area), 2, Area))
 table(data$Area)
 
 # Create area and fishery columns:
-data = create_4Aarea_cols(data)
+data = create_1Aarea_cols(data)
 table(data$ModelArea)
 # Create model fleet column:
 data = data %>% 
@@ -42,10 +44,7 @@ table(data$ModelFleet)
 which(is.na(data$ModelFishery))
 which(is.na(data$ModelFleet))
 
-# -------------------------------------------------------------------------
-# -------------------------------------------------------------------------
 # CAAL for SS3
-
 work = data	%>% 
   group_by(Year,Quarter,ModelFleet,LowBin,Age_int) %>% 
   summarise(n_fish = n()) %>% 
@@ -61,3 +60,13 @@ caal_df = caal_df %>% mutate(Gender = 0, Part = 0, Ageerr = 1, .after = FltSvy)
 
 # Save SS catch input
 write.csv(caal_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'caal.csv'), row.names = FALSE)
+
+# -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# Areas-as-fleet subconfig:
+spat_subconfig = 'aaf'
+
+# No need to produce the ss3 inputs again, just use the 4A inputs
+# Remember to produce the 4A inputs beforehand
+file.copy(from = file.path(shrpoint_path, 'data/ss3_inputs/4A_io', 'caal.csv'),
+          to = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'caal.csv'))

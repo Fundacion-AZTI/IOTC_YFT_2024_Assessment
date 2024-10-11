@@ -11,12 +11,13 @@ make_plot = TRUE
 
 # Spatial configuration:
 spat_config = '1A_io'
+spat_subconfig = 'aaf'
 
 # SS base files path (in Sharepoint):
-SS_base = paste0('models/base/', spat_config)
+SS_base = file.path('models/base', spat_config, spat_subconfig)
 
 # SS configuration path (in Sharepoint):
-SS_config = paste0('models/configurations/', spat_config)
+SS_config = file.path('models/configurations', spat_config, spat_subconfig)
 
 # -------------------------------------------------------------------------
 
@@ -43,7 +44,7 @@ fore_1 = base_fore
 start_1 = base_start
 
 # Turn off age and tag:
-ctl_1$lambdas = rbind(data.frame(like_comp = 5, fleet = 1:16, phase = 2, value = 0, sizefreq_method = 1), # age
+ctl_1$lambdas = rbind(#data.frame(like_comp = 5, fleet = 1:16, phase = 2, value = 0, sizefreq_method = 1), # age
                       data.frame(like_comp = 15, fleet = 1:dat_1$N_tag_groups, phase = 2, value = 0, sizefreq_method = 1), # tag
                       data.frame(like_comp = 16, fleet = 1:dat_1$N_tag_groups, phase = 2, value = 0, sizefreq_method = 1), # tag negative binom
                       ctl_1$lambdas)

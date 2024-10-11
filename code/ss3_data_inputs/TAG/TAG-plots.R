@@ -12,8 +12,8 @@ spat_config = '4A_io'
 fish_info = get_fisheries(spat_config)
 
 # Read data in:
-tag_rel = read_csv(file.path(shrpoint_path, 'data/processed', 'tag-filtered-release-farley.csv'))
-tag_rec = read_csv(file.path(shrpoint_path, 'data/processed', 'tag-filtered-recapture-farley.csv'))
+tag_rel = read_csv(file.path(shrpoint_path, 'data/processed', 'tag-filtered-release.csv'))
+tag_rec = read_csv(file.path(shrpoint_path, 'data/processed', 'tag-filtered-recapture.csv'))
 tag_rec = tag_rec %>% mutate(fleet_number = rec_model_fleet)
 tag_rec = left_join(tag_rec, fish_info, by = 'fleet_number')
 tag_rec = tag_rec %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2))
@@ -114,7 +114,7 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('tag_nfish_area', img_type)), p
 # -------------------------------------------------------------------------
 # Compare number of fish release and recaptured by age by growth function
 
-tag_rel_farl = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'tag-release-farley.csv'))
+tag_rel_farl = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'tag-release.csv'))
 tag_rel_font = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'tag-release-fonteneau.csv'))
 
 # Plot release:

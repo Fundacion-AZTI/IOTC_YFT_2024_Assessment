@@ -2,7 +2,10 @@
 source('sharepoint_path.R')
 source(here('code', 'parameters_for_plots.R'))
 source(here('code', 'auxiliary_functions.R'))
+
 theme_set(theme_classic())
+
+# Folder where data is located:
 data_folder = 'data/processed'
 
 
@@ -20,27 +23,86 @@ p1 = add_sf_map(p1)
 ggsave(file.path(shrpoint_path, plot_dir, paste0('map_IO_4ARegions', img_type)), plot = p1,
        width = img_width, height = 130, units = 'mm', dpi = img_res)
 
-# Make IO map with 2A model areas -----------------------------------------
+# Make IO map with 4A model areas + movement -----------------------------------------
+
+p1 = ggplot() +
+  geom_segment(data = reg_lines_4A, aes(x = lon1, y = lat1, xend = lon2, yend = lat2)) +
+  geom_segment(data = reg_lines_1ab, aes(x = lon1, y = lat1, xend = lon2, yend = lat2), linetype = 2) +
+  geom_segment(aes(x = 70, y = 0, xend = 80, yend = 0), arrow = arrow(length = unit(0.25, "cm"))) + # arrow movement 1b to 4
+  geom_segment(aes(x = 80, y = -3, xend = 70, yend = -3), arrow = arrow(length = unit(0.25, "cm"))) + # arrow movement 4 to 1b
+  geom_segment(aes(x = 53, y = -5, xend = 53, yend = -15), arrow = arrow(length = unit(0.25, "cm"))) + # arrow movement 1b to 2
+  geom_segment(aes(x = 56, y = -15, xend = 56, yend = -5), arrow = arrow(length = unit(0.25, "cm"))) + # arrow movement 2 to 1b
+  geom_segment(aes(x = 95, y = -10, xend = 95, yend = -20), arrow = arrow(length = unit(0.25, "cm"))) + # arrow movement 4 to 3
+  geom_segment(aes(x = 98, y = -20, xend = 98, yend = -10), arrow = arrow(length = unit(0.25, "cm"))) + # arrow movement 3 to 4
+  annotate('text', x = 63, y = 18, label = '1a', size = 7) +
+  annotate('text', x = 60, y = 0, label = '1b', size = 7) +
+  annotate('text', x = 90, y = 0, label = '4', size = 7) +
+  annotate('text', x = 85, y = -25, label = '3', size = 7) +
+  annotate('text', x = 38, y = -25, label = '2', size = 7) 
+p1 = add_sf_map(p1)
+ggsave(file.path(shrpoint_path, plot_dir, paste0('map_IO_4ARegions_mov', img_type)), plot = p1,
+       width = img_width, height = 130, units = 'mm', dpi = img_res)
+
+
+# Make IO map with 2A model areas + mov-----------------------------------------
+# agg and aaf configs:
 
 p1 = ggplot() +
   geom_segment(data = reg_lines_2A, aes(x = lon1, y = lat1, xend = lon2, yend = lat2)) +
   geom_segment(data = reg_lines_1ab, aes(x = lon1, y = lat1, xend = lon2, yend = lat2), linetype = 2) +
+  geom_segment(aes(x = 70, y = 0, xend = 80, yend = 0), arrow = arrow(length = unit(0.25, "cm"))) + # arrow movement 1b to 4
+  geom_segment(aes(x = 80, y = -3, xend = 70, yend = -3), arrow = arrow(length = unit(0.25, "cm"))) + # arrow movement 4 to 1b
   annotate('text', x = 63, y = 18, label = '1a', size = 7) +
   annotate('text', x = 50, y = -10, label = '1b', size = 7) +
-  annotate('text', x = 90, y = -10, label = '2', size = 7) 
+  annotate('text', x = 90, y = -10, label = '2', size = 7) +
+  ggtitle(label = 'Aggregated (agg)')
 p1 = add_sf_map(p1)
-ggsave(file.path(shrpoint_path, plot_dir, paste0('map_IO_2ARegions', img_type)), plot = p1,
-       width = img_width, height = 130, units = 'mm', dpi = img_res)
+
+p2 = ggplot() +
+  geom_segment(data = reg_lines_4A, aes(x = lon1, y = lat1, xend = lon2, yend = lat2), linetype = 2) +
+  geom_segment(data = reg_lines_2A, aes(x = lon1, y = lat1, xend = lon2, yend = lat2)) +
+  geom_segment(data = reg_lines_1ab, aes(x = lon1, y = lat1, xend = lon2, yend = lat2), linetype = 2) +
+  geom_segment(aes(x = 70, y = 0, xend = 80, yend = 0), arrow = arrow(length = unit(0.25, "cm"))) + # arrow movement 1b to 4
+  geom_segment(aes(x = 80, y = -3, xend = 70, yend = -3), arrow = arrow(length = unit(0.25, "cm"))) + # arrow movement 4 to 1b
+  annotate('text', x = 63, y = 18, label = '1a', size = 7) +
+  annotate('text', x = 60, y = 0, label = '1b', size = 7) +
+  annotate('text', x = 90, y = 0, label = '4', size = 7) +
+  annotate('text', x = 85, y = -25, label = '3', size = 7) +
+  annotate('text', x = 38, y = -25, label = '2', size = 7) +
+  ggtitle(label = 'Areas-as-fleets (aaf)')
+p2 = add_sf_map(p2)
+
+# Merge:
+p3 = grid.arrange(p1, p2, ncol = 1)
+
+ggsave(file.path(shrpoint_path, plot_dir, paste0('map_IO_2ARegions', img_type)), plot = p3,
+       width = img_width, height = 220, units = 'mm', dpi = img_res)
 
 # Make IO map with 1A model areas -----------------------------------------
 
 p1 = ggplot() +
   geom_segment(data = reg_lines_1ab, aes(x = lon1, y = lat1, xend = lon2, yend = lat2), linetype = 2) +
   annotate('text', x = 63, y = 18, label = '1a', size = 7) +
-  annotate('text', x = 75, y = -10, label = '1b', size = 7) 
+  annotate('text', x = 75, y = -10, label = '1b', size = 7) +
+  ggtitle(label = 'Aggregated (agg)')
 p1 = add_sf_map(p1)
-ggsave(file.path(shrpoint_path, plot_dir, paste0('map_IO_1ARegions', img_type)), plot = p1,
-       width = img_width, height = 130, units = 'mm', dpi = img_res)
+
+p2 = ggplot() +
+  geom_segment(data = reg_lines_4A, aes(x = lon1, y = lat1, xend = lon2, yend = lat2), linetype = 2) +
+  geom_segment(data = reg_lines_1ab, aes(x = lon1, y = lat1, xend = lon2, yend = lat2), linetype = 2) +
+  annotate('text', x = 63, y = 18, label = '1a', size = 7) +
+  annotate('text', x = 60, y = 0, label = '1b', size = 7) +
+  annotate('text', x = 90, y = 0, label = '4', size = 7) +
+  annotate('text', x = 85, y = -25, label = '3', size = 7) +
+  annotate('text', x = 38, y = -25, label = '2', size = 7) +
+  ggtitle(label = 'Areas-as-fleets (aaf)')
+p2 = add_sf_map(p2)
+
+# Merge:
+p3 = grid.arrange(p1, p2, ncol = 1)
+
+ggsave(file.path(shrpoint_path, plot_dir, paste0('map_IO_1ARegions', img_type)), plot = p3,
+       width = img_width, height = 220, units = 'mm', dpi = img_res)
 
 
 # Make IO map with size grid types ----------------------------------------
@@ -168,30 +230,3 @@ p4 = ggplot() +
 ggsave(file.path(shrpoint_path, plot_dir, paste0('map_size_grid_std_4A', img_type)), plot = p4,
        width = img_width, height = 130, units = 'mm', dpi = img_res)
 
-
-# Make IO map with catch grid types ----------------------------------------
-
-# Grid type = 6:
-grid_type = 6
-grid_size_lon = get_grid_lon_dim(grid_type)
-grid_size_lat = get_grid_lat_dim(grid_type)
-center_df = data.frame(lat = c(-17.5, 2.5, -7.5), long = c(77.5, 62.5, 47.5)) %>% 
-              st_as_sf(coords = c("long", "lat"), crs = 4326, remove = FALSE)
-grid_borders = st_make_grid(center_df, cellsize = c(grid_size_lon, grid_size_lat), 
-                            offset = c(min(center_df$long) - grid_size_lon*0.5, min(center_df$lat) - grid_size_lat*0.5)) %>%
-               st_set_crs(4326) %>% st_sf() %>% dplyr::mutate(grid_ID = 1:n())
-# Filter intersect grids:
-grid_borders = grid_borders[unlist(st_intersects(center_df, grid_borders)), ]
-# Get centroid:
-grid_centers = st_centroid(grid_borders)
-
-# Make plot:
-p4 = ggplot(data = worldmap) +
-  geom_sf(fill = "gray60", color = "gray60") +
-  geom_sf(data = grid_borders, fill = 'blue', color = 'white', alpha = 0.3) +
-  geom_sf(data = grid_centers, color = 'red', shape = 4, size = 2) +
-  coord_sf(expand = FALSE, xlim = xLim, ylim = yLim) +
-  xlab(NULL) + ylab(NULL) +
-  scale_y_continuous(breaks = yBreaks) + scale_x_continuous(breaks = xBreaks)
-ggsave(file.path(shrpoint_path, plot_dir, paste0('map_catch_grid', img_type)), plot = p4,
-       width = img_width, height = 130, units = 'mm', dpi = img_res)

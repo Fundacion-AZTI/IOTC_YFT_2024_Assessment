@@ -2,17 +2,12 @@ rm(list = ls())
 
 # Spatial configuration:
 spat_config = '1A_io'
-spat_subconfig = 'agg'
 
 # Sharepoint path:
 source('sharepoint_path.R')
 
 # Read auxiliary functions:
-source(here('code', 'auxiliary_functions.R'))
-
-#Fishery definiton
-fish_info = get_fisheries(spat_config)
-ModelFisheries = fish_info$fleet_name
+source('code/auxiliary_functions.R')
 
 # Initial length bins (correct) in IOTC dataset:
 L_labels  =  c(Paste("L0",seq(10,98,2)), Paste("L",seq(100,198,2))) 
@@ -20,11 +15,28 @@ L_labels  =  c(Paste("L0",seq(10,98,2)), Paste("L",seq(100,198,2)))
 # Length bins in the SS model:
 L_labels_SS  =  c(Paste("L0",seq(10,98,4)), Paste("L",seq(102,198,4)))
 
-
-# -------------------------------------------------------------------------
 # Read original LF data after preprocessing:
 data = read.csv(file.path(shrpoint_path, 'data/processed', 'size_grid-original.csv'))
 
+# Read cwp55 LF data after preprocessing:
+# You will need to run the LF-CE-cwp55-merge.R script before running the following lines
+load(file.path(shrpoint_path, 'data/processed', 'mergedStd_5.RData'))
+data_std = mergedStd
+# Change columns names to make it work:
+colnames(data_std) = str_to_title(colnames(data_std))
+colnames(data_std)[c(6)] = c('FisheryCode')
+
+# -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# Aggregated subconfig:
+spat_subconfig = 'agg'
+
+#Fishery definiton
+fish_info = get_fisheries(spat_config)
+ModelFisheries = fish_info$fleet_name
+
+
+# Original dataset --------------------------------------------------------
 # Get area information:
 data$Area = get_1Aarea_from_lonlat(data$Long, data$Lat)
 table(data$Area)
@@ -41,47 +53,14 @@ table(data$ModelFleet)
 which(is.na(data$ModelFishery))
 which(is.na(data$ModelFleet))
 
-# -------------------------------------------------------------------------
-# Read spatially standardized data:
-# You will need to run the make_grid.R script before running the following lines
-load(file.path(shrpoint_path, 'data/processed', 'mergedStd_5.RData'))
-data_std = mergedStd
-# Change columns names to make it work:
-colnames(data_std) = str_to_title(colnames(data_std))
-colnames(data_std)[c(6)] = c('FisheryCode')
-# Update area information since grids info has changed:
-data_std$Area = get_1Aarea_from_lonlat(data_std$Lon, data_std$Lat)
-table(data_std$Area)
-data_std = create_1Aarea_cols(data_std)
-table(data_std$ModelArea)
-# Create ModelFleet column again:
-data_std = data_std %>% 
-  dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName, sep = '_')) %>% 
-  dplyr::mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries)))
-# Table modelfleet:
-table(data_std$ModelFleet)
-# Make sure no NAs:
-which(is.na(data_std$ModelFishery))
-which(is.na(data_std$ModelFleet))
-
-# -------------------------------------------------------------------------
 # Aggregate data (both, simple and std):
 # Remove Month, SchoolType, Grid:
-
 agg_data = data %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
   summarise_at('Quality', list(mean)) %>%
   inner_join(data %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
                summarise_at(c('Nfish_samp', L_labels), list(sum)))
 
-agg_data_std = data_std %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
-  summarise_at('Quality', list(mean)) %>%
-  inner_join(data_std %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
-               summarise_at(c('Nfish_samp', 'Ncnofish', L_labels), list(sum)))
-
-# -------------------------------------------------------------------------
-# Get LF input, simple aggregation, Nsamp is RQ ---------
-
-# Filter data based on some criteria:
+# Filter data based on some criteria (original dataset):
 work = filter_LF_1A(agg_data) 
 # 1. Do the aggregation for length bins (traditional way):
 work1 = work %>%
@@ -117,10 +96,30 @@ size_df = work %>% dplyr::rename(FltSvy = ModelFleet)
 write.csv(size_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'size-original.csv'), row.names = FALSE)
 
 
-# -------------------------------------------------------------------------
-# Get LF input, weighting LF and Rep Quality ---------
+# cwp55 dataset -----------------------------------------------------------
+# Get area information:
+data_std$Area = get_1Aarea_from_lonlat(data_std$Lon, data_std$Lat)
+table(data_std$Area)
+data_std = create_1Aarea_cols(data_std)
+table(data_std$ModelArea)
+# Create ModelFleet column again:
+data_std = data_std %>% 
+  dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName, sep = '_')) %>% 
+  dplyr::mutate(ModelFleet = as.numeric(factor(ModelFishery,levels=ModelFisheries)))
+# Table modelfleet:
+table(data_std$ModelFleet)
+# Make sure no NAs:
+which(is.na(data_std$ModelFishery))
+which(is.na(data_std$ModelFleet))
 
-# Filter data based on some criteria:
+# Aggregate data (both, simple and std):
+# Remove Month, SchoolType, Grid:
+agg_data_std = data_std %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
+  summarise_at('Quality', list(mean)) %>%
+  inner_join(data_std %>% group_by(Year, Quarter, Fleet, Gear, ModelFleet, ModelFishery) %>%
+               summarise_at(c('Nfish_samp', 'Ncnofish', L_labels), list(sum)))
+
+# Filter data based on some criteria (cwp55 dataset):
 work = filter_LF_1A(agg_data_std) 
 # 1. Do the aggregation for length bins (weighted by catch in numbers):
 work1 = work %>% 
@@ -157,3 +156,16 @@ size_df = work %>% dplyr::rename(FltSvy = ModelFleet)
 
 # Save SS catch input
 write.csv(size_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'size-cwp55.csv'), row.names = FALSE)
+
+
+# -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# Areas-as-fleets subconfig:
+spat_subconfig = 'aaf'
+
+# No need to produce the ss3 inputs again, just use the 4A inputs
+# Remember to produce the 4A inputs beforehand
+file.copy(from = file.path(shrpoint_path, 'data/ss3_inputs/4A_io', 'size-original.csv'),
+          to = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'size-original.csv'))
+file.copy(from = file.path(shrpoint_path, 'data/ss3_inputs/4A_io', 'size-cwp55.csv'),
+          to = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'size-cwp55.csv'))

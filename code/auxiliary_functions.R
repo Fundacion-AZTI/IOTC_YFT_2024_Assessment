@@ -500,14 +500,63 @@ apply_eff_creep = function(data, yr_col = 'yr', fleet_col = 'fleet',
 get_fisheries = function(config = '4A_io') {
   if(!(config %in% c('4A_io', '2A_io', '1A_io'))) stop('Spatial configuration is not properly defined.')
   if(config == '4A_io') {
+    # Fishery 1   Gillnet (GI 1a)                              [region 1] 1
+    # Fishery 2   Handline (HD 1a)                             [region 1] 1
+    # Fishery 3   Longline (LL 1a)                             [region 1] 1 
+    # Fishery 4   Other (OT 1a)                                [region 1] 1
+    # Fishery 5   Baitboat (BB 1b)                             [region 2] 1
+    # Fishery 6   Purse-seine - free schools (FS 1b)           [region 2] 1
+    # Fishery 7   Longline (LL 1b)                             [region 2] 1
+    # Fishery 8   Purse-seine - log schools (LS 1b)           [region 2] 1
+    # Fishery 9   Troll (TR 1b)                               [region 2] 1 
+    # Fishery 10  Longline (LL 2)                             [region 3] 2 
+    # Fishery 11  Longline (LL 3)                             [region 4] 3
+    # Fishery 12  Gillnet (GI 4)                              [region 5] 4
+    # Fishery 13  Longline (LL 4)                             [region 5] 4
+    # Fishery 14  Other (OT 4)                                [region 5] 4
+    # Fishery 15  Troll (TR 4)                                [region 5] 4
+    # Fishery 16  Purse-seine - free schools (FS 2)           [region 3] 2
+    # Fishery 17  Purse-seine - log schools (LS 2)            [region 3] 2
+    # Fishery 18  Troll (TR 2)                                [region 3] 2
+    # Fishery 19  Purse-seine - free schools (FS 4)           [region 5] 4
+    # Fishery 20  Purse-seine - log schools (LS 4)            [region 5] 4
+    # Fishery 21  Longline - fresh tuna (FL 4)                [region 5] 4
     fish_df = data.frame(fleet_name = c('GI_1a','HD_1a','LL_1a','OT_1a','BB_1b','FS_1b','LL_1b','LS_1b','TR_1b','LL_2',
                                         'LL_3','GI_4','LL_4','OT_4','TR_4','FS_2','LS_2','TR_2','FS_4','LS_4','LF_4'))
   }
   if(config == '2A_io') {
+    # Fishery 1   Gillnet (GI 1a)                              [region 1] 1
+    # Fishery 2   Handline (HD 1a)                             [region 1] 1
+    # Fishery 3   Longline (LL 1a)                             [region 1] 1 
+    # Fishery 4   Other (OT 1a)                                [region 1] 1
+    # Fishery 5   Baitboat (BB 1b)                             [region 2] 1
+    # Fishery 6   Purse-seine - free schools (FS 1b)           [region 2] 1
+    # Fishery 7   Longline (LL 1b)                             [region 2] 1
+    # Fishery 8   Purse-seine - log schools (LS 1b)           [region 2] 1
+    # Fishery 9   Troll (TR 1b)                               [region 2] 1 
+    # Fishery 10  Longline (LL 2)                             [region 3] 2
+    # Fishery 11  Gillnet (GI 2)                              [region 3] 2
+    # Fishery 12  Other (OT 2)                                [region 3] 2
+    # Fishery 13  Troll (TR 2)                                [region 3] 2
+    # Fishery 14  Purse-seine - free schools (FS 2)           [region 3] 2
+    # Fishery 15  Purse-seine - log schools (LS 2)            [region 3] 2
+    # Fishery 16  Longline - fresh tuna (LF 2)                [region 3] 2
     fish_df = data.frame(fleet_name = c('GI_1a','HD_1a','LL_1a','OT_1a','BB_1b','FS_1b','LL_1b','LS_1b','TR_1b','LL_2',
                                         'GI_2','OT_2','TR_2','FS_2','LS_2','LF_2'))
   }
   if(config == '1A_io') {
+    # Fishery 1   Gillnet (GI 1a)                              [region 1] 1
+    # Fishery 2   Handline (HD 1a)                             [region 1] 1
+    # Fishery 3   Longline (LL 1a)                             [region 1] 1 
+    # Fishery 4   Other (OT 1a)                                [region 1] 1
+    # Fishery 5   Baitboat (BB 1b)                             [region 2] 1
+    # Fishery 6   Purse-seine - free schools (FS 1b)           [region 2] 1
+    # Fishery 7   Longline (LL 1b)                             [region 2] 1
+    # Fishery 8   Purse-seine - log schools (LS 1b)           [region 2] 1
+    # Fishery 9   Troll (TR 1b)                               [region 2] 1 
+    # Fishery 10  Gillnet (GI 1b)                              [region 2] 1
+    # Fishery 11  Other (OT 1b)                                [region 2] 1
+    # Fishery 12  Longline - fresh tuna (LF 1b)                [region 2] 1
     fish_df = data.frame(fleet_name = c('GI_1a','HD_1a','LL_1a','OT_1a','BB_1b','FS_1b','LL_1b','LS_1b','TR_1b',
                                         'GI_1b','OT_1b','LF_1b'))
   }
