@@ -3,7 +3,8 @@
 #       start- 00_BC -4A_io_lin_v33022_FixedParam2_Fl11
 #
 #............................................................
-
+#remotes::install_github("r4ss/r4ss@signif") 
+remotes::install_github("r4ss/r4ss",force=TRUE)
 library(dplyr)
 library(r4ss)
 library(here)
@@ -17,6 +18,9 @@ source("code/auxiliary_functions.R")
 source('sharepoint_path.R')
 setwd(shrpoint_path)
 
+
+
+spat_config = '4A_io'
 # SS base files path (in Sharepoint):
 SS_base = 'models/base_win_vs_lin/4A_io_lin_v33022_FixedParam2_Fl11'
 
@@ -69,11 +73,23 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   dir.create(tmp_dir)
   
   # Temporary files:
-  dat_1 = dat_0
+  
+  # Read base SS inputs (from 2021 assessment)
+  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+  base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
+  base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+  base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+  
+  dat_1 = base_dat
   ctl_1 = base_ctl
   fore_1 = base_fore
   start_1 = base_start
   
+  # #fleet names   NOT WORKING
+   fish_names = get_fisheries(spat_config)$fleet_name
+   fish_names = gsub(pattern = ' ', replacement = '_', x = fish_names)
+   dat_1$fleetinfo$fleetname <- paste0(1:25,"_",c(fish_names,c(fish_names[c(7,10,11,13)])))
+
   # Updated catch data frame:
   catch_df = read.csv(file.path(shrpoint_path, SS_data, 'catch.csv'))
   updated_catch = data.frame(year = catch_df[,'qtr'], seas = 1, fleet = catch_df[,'ModelFleet'], 
@@ -81,7 +97,20 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   updated_catch = updated_catch %>% add_row(data.frame(year = -999, seas = 1, fleet = 1, catch = 0, catch_se = 0.01), .before = 1) # shouldnt we also add for all fleets?
   dat_1$catch = updated_catch
   # Last year = 2022:
-  dat_1$endyr = 304
+  dat_1$endyr = 308
+  
+  #FORECAST
+  #_Bmark_years: beg_bio, end_bio, beg_selex, end_selex, beg_relF, end_relF,
+  #beg_recr_dist, end_recr_dist, beg_SRparm, end_SRparm (enter actual year, or values of 0 or -integer to be rel. endyr
+  fore_1$Bmark_years<- c(308,308,301,308,301,308,296,308,13,308)
+  
+  #_Fcast_years for averaging:  beg_selex, end_selex, beg_relF, end_relF, beg_mean recruits,
+  #end_recruits  (enter actual year, or values of 0 or -integer to be rel. endyr)
+  
+  fore_1$Fcast_years <- c(308,308,308,308,13,308) 
+  fore_1$FirstYear_for_caps_and_allocations <- 309
+  fore_1$Ydecl <- 308
+  fore_1$Yinit <- 308
   
   # Write SS files:
   SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
@@ -102,20 +131,20 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   dir.create(tmp_dir)
   
   # Temporary files:
+  SS_base = 'models/update/01_update_catch'
   
-  dat_1 = dat_0
+  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+  base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+  base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+  base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+  
+  # Updated catch data frame:
+    
+  dat_1 = base_dat
   ctl_1 = base_ctl
   fore_1 = base_fore
   start_1 = base_start
-  
-  # Updated catch data frame:
-  catch_df = read.csv(file.path(shrpoint_path, SS_data, 'catch.csv'))
-  updated_catch = data.frame(year = catch_df[,'qtr'], seas = 1, fleet = catch_df[,'ModelFleet'], 
-                             catch = catch_df[,'Catch'], catch_se = 0.01)
-  updated_catch = updated_catch %>% add_row(data.frame(year = -999, seas = 1, fleet = 1, catch = 0, catch_se = 0.01), .before = 1) # shouldnt we also add for all fleets?
-  dat_1$catch = updated_catch
-  # Last year = 2022:
-  dat_1$endyr = 304
+
   
   #update cpue
   cpue_df = read.csv(file.path(shrpoint_path, SS_data, 'scaled_cpue.csv'))
@@ -138,7 +167,7 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
 #.......................................................................
 ### Update length data until 2022 --------------------------------------------
   #.......................................................................
-  remotes::install_github("r4ss/r4ss@signif") 
+
   config_name = '03_update_length'
   tmp_dir = file.path(shrpoint_path, SS_config, config_name)
   dir.create(tmp_dir)
@@ -162,9 +191,8 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   #update length
   length_df = read.csv(file.path(shrpoint_path, SS_data, 'size-original.csv'))
   dat_1$lencomp <- length_df %>% subset(!is.na(ModelFleet )) #%>% subset(!(Yr<230 & ModelFleet==21))
-  fleetNames <- read.csv(file=file.path("data","ss3_inputs","4A_io","FleetNames.csv"))
-  
-  dat_1$fleetnames <- fleetNames$FleetNames
+
+
   # Read base SS inputs (from 2021 assessment)
 
   # Write SS files:
@@ -185,7 +213,7 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   ### Update ONLY length data until  --------------------------------------------
   #.......................................................................
   
-  config_name = '03_update_only_length_until_296'
+  config_name = '03_update_only_length_until_308'
   tmp_dir = file.path(shrpoint_path, SS_config, config_name)
   dir.create(tmp_dir)
   
@@ -215,7 +243,7 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   #.......................................................................
     ### Update ONLY length LL --------------------------------------------
   #.......................................................................
-  config_name = '03_update_cpue_updateLC_LL'
+  config_name = 'sensitivites_LengthData/03_update_cpue_updateLC_LL'
   tmp_dir = file.path(shrpoint_path, SS_config, config_name)
   dir.create(tmp_dir)
   
@@ -666,7 +694,7 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   ctl_1$SR_parms["SR_LN(R0)","INIT"] <- 12 
   #wanning:Note 2 Information:  N parameters that are on or within 1% of min-max bound: 1; check results, variance may be suspect
   
-  ctl_1$age_selex_parms["AgeSel_P_1_FISHERY14(14)","LO"] <- 0
+  ctl_1$age_selex_parms["AgeSel_P_1_14_OT_4(14)","LO"] <- 0
   # Write SS files:
   
   SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
@@ -710,7 +738,7 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   ctl_1$Lorenzen_refage <- 4.07*4 #fully mature
   ctl_1$natM <- NULL
   ctl_1$MG_parms <- ctl_1$MG_parms %>% add_row(  ctl_1$MG_parms[1,],.before=1)
-   
+  row.names(ctl_1$MG_parms[1,]) <-c("NatM_Lorenzen_Fem_GP_1")
   #row.names(ctl_1$MG_parms )[1] <- "NatM_p_1_Fem_GP_1"
   ctl_1$MG_parms[1,1:7] <- c(0.1,0.6,0.462,0.462,0,0,-2)
   
@@ -744,6 +772,15 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   ctl_1 = base_ctl
   fore_1 = base_fore
   start_1 = base_start
+  
+  dat_1$Nages <- 40
+  start_1$F_age_range[2] <- 40-2
+  #extendeing maturity at age until age 40
+    
+  extMat<- c(base_ctl$Age_Maturity,rep(1,40-28))
+  names(extMat) <- paste0("Age_",0:40)
+  extMat <- as.data.frame(extMat)
+  ctl_1$Age_Maturity <- extMat
   
   ctl_1$Growth_Age_for_L2 <- 999
   
@@ -876,7 +913,7 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
   base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
   
-  base_dat$lencomp <- base_dat$lencomp %>% subset(!(fleet==21 & year<240))
+  base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
   
   dat_1 = base_dat
   ctl_1 = base_ctl
@@ -887,8 +924,8 @@ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras 
   
   #ESTIMATE NEW SETTINGS FOR PURSE SEINERS
   
-ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY6(6)",1:3] <- c(0,2,2)
-ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY8(8)",1:3] <- c(0,2,2)
+ctl_1$size_selex_parms["SizeSel_Spline_Code_6_FS_1b(6)",1:3] <- c(0,2,2)
+ctl_1$size_selex_parms["SizeSel_Spline_Code_8_LS_1b(8)",1:3] <- c(0,2,2)
   # Read base SS inputs (from 2021 assessment)
   
   # Write SS files:
@@ -907,37 +944,34 @@ ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY8(8)",1:3] <- c(0,2,2)
    new_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
   
   
-  ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY6(6)",1:3] <- c(0,2,0)
-  ctl_1$size_selex_parms["SizeSel_Spline_GradLo_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_GradLo_FISHERY6(6)",]
-  ctl_1$size_selex_parms["SizeSel_Spline_GradHi_FISHERY6(6)",] <-  new_ctl$size_selex_parms["SizeSel_Spline_GradHi_FISHERY6(6)",]
-  ctl_1$size_selex_parms["SizeSel_Spline_Knot_1_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_1_FISHERY6(6)",]
-  ctl_1$size_selex_parms["SizeSel_Spline_Knot_2_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_2_FISHERY6(6)",]
-  ctl_1$size_selex_parms["SizeSel_Spline_Knot_3_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_3_FISHERY6(6)",]
-  ctl_1$size_selex_parms["SizeSel_Spline_Knot_4_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_4_FISHERY6(6)",]
- ctl_1$size_selex_parms["SizeSel_Spline_Knot_5_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_5_FISHERY6(6)",]
- ctl_1$size_selex_parms["SizeSel_Spine_Val_1_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_1_FISHERY6(6)",] 
- ctl_1$size_selex_parms["SizeSel_Spine_Val_2_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_2_FISHERY6(6)",] 
- ctl_1$size_selex_parms["SizeSel_Spine_Val_3_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_3_FISHERY6(6)",] 
- ctl_1$size_selex_parms["SizeSel_Spine_Val_4_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_4_FISHERY6(6)",] 
- ctl_1$size_selex_parms["SizeSel_Spine_Val_5_FISHERY6(6)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_5_FISHERY6(6)",]
+  ctl_1$size_selex_parms["SizeSel_Spline_Code_6_FS_1b(6)",1:3] <- c(0,2,0)
+  ctl_1$size_selex_parms["SizeSel_Spline_GradLo_6_FS_1b(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_GradLo_6_FS_1b(6)",]
+  ctl_1$size_selex_parms["SizeSel_Spline_GradHi_6_FS_1b(6)",] <-  new_ctl$size_selex_parms["SizeSel_Spline_GradHi_6_FS_1b(6)",]
+  ctl_1$size_selex_parms["SizeSel_Spline_Knot_1_6_FS_1b(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_1_6_FS_1b(6)",]
+  ctl_1$size_selex_parms["SizeSel_Spline_Knot_2_6_FS_1b(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_2_6_FS_1b(6)",]
+  ctl_1$size_selex_parms["SizeSel_Spline_Knot_3_6_FS_1b(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_3_6_FS_1b(6)",]
+  ctl_1$size_selex_parms["SizeSel_Spline_Knot_4_6_FS_1b(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_4_6_FS_1b(6)",]
+ ctl_1$size_selex_parms["SizeSel_Spline_Knot_5_6_FS_1b(6)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_5_6_FS_1b(6)",]
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_1_6_FS_1b(6)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_1_6_FS_1b(6)",] 
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_2_6_FS_1b(6)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_2_6_FS_1b(6)",] 
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_3_6_FS_1b(6)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_3_6_FS_1b(6)",] 
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_4_6_FS_1b(6)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_4_6_FS_1b(6)",] 
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_5_6_FS_1b(6)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_5_6_FS_1b(6)",]
   
- ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY8(8)",1:3] <- c(0,2,0)
- ctl_1$size_selex_parms["SizeSel_Spline_GradLo_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_GradLo_FISHERY8(8)",]
- ctl_1$size_selex_parms["SizeSel_Spline_GradHi_FISHERY8(8)",] <-  new_ctl$size_selex_parms["SizeSel_Spline_GradHi_FISHERY8(8)",]
- ctl_1$size_selex_parms["SizeSel_Spline_Knot_1_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_1_FISHERY8(8)",]
- ctl_1$size_selex_parms["SizeSel_Spline_Knot_2_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_2_FISHERY8(8)",]
- ctl_1$size_selex_parms["SizeSel_Spline_Knot_3_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_3_FISHERY8(8)",]
- ctl_1$size_selex_parms["SizeSel_Spline_Knot_4_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_4_FISHERY8(8)",]
- ctl_1$size_selex_parms["SizeSel_Spline_Knot_5_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_5_FISHERY8(8)",]
- ctl_1$size_selex_parms["SizeSel_Spine_Val_1_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_1_FISHERY8(8)",] 
- ctl_1$size_selex_parms["SizeSel_Spine_Val_2_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_2_FISHERY8(8)",] 
- ctl_1$size_selex_parms["SizeSel_Spine_Val_3_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_3_FISHERY8(8)",] 
- ctl_1$size_selex_parms["SizeSel_Spine_Val_4_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_4_FISHERY8(8)",] 
- ctl_1$size_selex_parms["SizeSel_Spine_Val_5_FISHERY8(8)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_5_FISHERY8(8)",]
+ ctl_1$size_selex_parms["SizeSel_Spline_Code_8_LS_1b(8)",1:3] <- c(0,2,0)
+ ctl_1$size_selex_parms["SizeSel_Spline_GradLo_8_LS_1b(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_GradLo_8_LS_1b(8)",]
+ ctl_1$size_selex_parms["SizeSel_Spline_GradHi_8_LS_1b(8)",] <-  new_ctl$size_selex_parms["SizeSel_Spline_GradHi_8_LS_1b(8)",]
+ ctl_1$size_selex_parms["SizeSel_Spline_Knot_1_8_LS_1b(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_1_8_LS_1b(8)",]
+ ctl_1$size_selex_parms["SizeSel_Spline_Knot_2_8_LS_1b(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_2_8_LS_1b(8)",]
+ ctl_1$size_selex_parms["SizeSel_Spline_Knot_3_8_LS_1b(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_3_8_LS_1b(8)",]
+ ctl_1$size_selex_parms["SizeSel_Spline_Knot_4_8_LS_1b(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_4_8_LS_1b(8)",]
+ ctl_1$size_selex_parms["SizeSel_Spline_Knot_5_8_LS_1b(8)",] <- new_ctl$size_selex_parms["SizeSel_Spline_Knot_5_8_LS_1b(8)",]
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_1_8_LS_1b(8)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_1_8_LS_1b(8)",] 
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_2_8_LS_1b(8)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_2_8_LS_1b(8)",] 
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_3_8_LS_1b(8)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_3_8_LS_1b(8)",] 
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_4_8_LS_1b(8)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_4_8_LS_1b(8)",] 
+ ctl_1$size_selex_parms["SizeSel_Spine_Val_5_8_LS_1b(8)",] <- new_ctl$size_selex_parms["SizeSel_Spine_Val_5_8_LS_1b(8)",]
  
- 
- #### end ####
-  
  
  # Write SS files:
  
@@ -968,7 +1002,7 @@ ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY8(8)",1:3] <- c(0,2,2)
  # Temporary files:
  
  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
- base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
  base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
  base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
  
@@ -979,38 +1013,47 @@ ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY8(8)",1:3] <- c(0,2,2)
  fore_1 = base_fore
  start_1 = base_start
  
- fleetNames <- read.csv(file=file.path("data","ss3_inputs","4A_io","FleetNames.csv"))
- dat_1$fleetnames <- fleetNames$FleetNames
- 
  #ESTIMATE NEW SETTINGS FOR PURSE SEINERS
- 
- ctl_1$age_selex_parms["AgeSel_P_1_FISHERY13(13)",1] <- 3
- ctl_1$age_selex_parms["AgeSel_P_2_FISHERY3(3)",1] <- 0
- ctl_1$age_selex_parms["AgeSel_P_1_FISHERY5(5)",1] <- 0
- ctl_1$age_selex_parms["AgeSel_P_2_FISHERY7(7)",1] <- 0 
- ctl_1$age_selex_parms["AgeSel_P_2_FISHERY7(7)",2] <- 8 
- ctl_1$age_selex_parms["AgeSel_P_2_FISHERY10(10)",2] <- 8 
- ctl_1$age_selex_parms["AgeSel_P_1_FISHERY10(10)",1] <- 6 
- ctl_1$age_selex_parms["AgeSel_P_1_FISHERY10(10)",2] <- 20 
- ctl_1$age_selex_parms["AgeSel_P_1_FISHERY4(4)",1] <- -5 
- ctl_1$age_selex_parms["AgeSel_P_1_FISHERY9(9)",1] <- 0 
- ctl_1$age_selex_parms["AgeSel_P_1_FISHERY9(9)",1]  <- 0 
- ctl_1$age_selex_parms["AgeSel_P_2_FISHERY10(10)",1] <- 0   
- ctl_1$age_selex_parms["AgeSel_P_1_FISHERY11(11)",2] <- 20  
- ctl_1$age_selex_parms["AgeSel_P_1_FISHERY12(12)",1] <- 0  
- ctl_1$age_selex_parms["AgeSel_P_1_FISHERY12(12)",2] <- 14 
- ctl_1$age_selex_parms["AgeSel_P_3_FISHERY12(12)",2] <- 8
- ctl_1$age_selex_parms["AgeSel_P_1_FISHERY7(7)",2] <- 20
- ctl_1$age_selex_parms["AgeSel_P_1_FISHERY13(13)",1:2] <- c(4,20)
- ctl_1$age_selex_parms["AgeSel_P_2_FISHERY13(13)",1:2] <- c(0,8)
- ctl_1$age_selex_parms["AgeSel_P_2_FISHERY21(21)",1] <- 0
- ctl_1$age_selex_parms["AgeSel_P_1_FISHERY14(14)",1] <- -5 
- ctl_1$age_selex_parms["AgeSel_P_1_FISHERY1(1)",1:2] <- c(0,16) 
- ctl_1$age_selex_parms["AgeSel_P_2_FISHERY2(2)",1] <- 0
- ctl_1$age_selex_parms["AgeSel_P_1_FISHERY3(3)",2] <- 20
- ctl_1$age_selex_parms_tv["AgeSel_P_1_FISHERY1(1)_BLK1repl_213",1:2] <- c(-2,16)
- ctl_1$age_selex_parms_tv["AgeSel_P_1_FISHERY1(1)_BLK1repl_261",1:2] <- c(-2,16)
+ # ctl_1$age_selex_parms["AgeSel_P_1_13_LL_4(13)",1] <- 3
+ # ctl_1$age_selex_parms["AgeSel_P_2_3_LL_1a(3)",1] <- 0
+ # ctl_1$age_selex_parms["AgeSel_P_1_5_BB_1b(5)",1] <- 0
+ # ctl_1$age_selex_parms["AgeSel_P_2_7_LL_1b(7)",1] <- 0 
+ # ctl_1$age_selex_parms["AgeSel_P_2_7_LL_1b(7)",2] <- 8 
+ # ctl_1$age_selex_parms["AgeSel_P_2_10_LL_2(10)",2] <- 8 
+ # ctl_1$age_selex_parms["AgeSel_P_1_10_LL_2(10)",1] <- 6 
+ # ctl_1$age_selex_parms["AgeSel_P_1_10_LL_2(10)",2] <- 20 
+ # ctl_1$age_selex_parms["AgeSel_P_1_4_OT_1a(4)",1] <- -5 
+ # ctl_1$age_selex_parms["AgeSel_P_1_9_TR_1b(9)",1] <- 0 
+ # ctl_1$age_selex_parms["AgeSel_P_1_9_TR_1b(9)",1]  <- 0 
+ # ctl_1$age_selex_parms["AgeSel_P_2_10_LL_2(10)",1] <- 0   
+ # ctl_1$age_selex_parms["AgeSel_P_1_10_LL_3(11)",2] <- 20  
+ # ctl_1$age_selex_parms["AgeSel_P_1_12_GI_4(12)",1] <- 0  
+ # ctl_1$age_selex_parms["AgeSel_P_1_12_GI_4(12)",2] <- 14 
+ # ctl_1$age_selex_parms["AgeSel_P_3_12_GI_4(12)",2] <- 8
+ # ctl_1$age_selex_parms["AgeSel_P_1_7_LL_1b(7)",2] <- 20
+ # ctl_1$age_selex_parms["AgeSel_P_1_13_LL_4(13)",1:2] <- c(4,20)
+ # ctl_1$age_selex_parms["AgeSel_P_2_13_LL_4(13)",1:2] <- c(0,8)
+ # ctl_1$age_selex_parms["AgeSel_P_2_21_LF_4(21)",1] <- 0
+ # ctl_1$age_selex_parms["AgeSel_P_1_14_OT_4(14)",1] <- -5 
+ # ctl_1$age_selex_parms["AgeSel_P_1_1_GI_1a(1)",1:2] <- c(0,16) 
+ # ctl_1$age_selex_parms["AgeSel_P_2_2_HD_1a(2)",1] <- 0
+ # ctl_1$age_selex_parms["AgeSel_P_1_3_LL_1a(3)",2] <- 20
+ # ctl_1$age_selex_parms_tv["AgeSel_P_1_1_GI_1a(1)_BLK1repl_213",1:2] <- c(-2,16)
+ # ctl_1$age_selex_parms_tv["AgeSel_P_1_1_GI_1a(1)_BLK1repl_261",1:2] <- c(-2,16)
  # Read base SS inputs (from 2021 assessment)
+ 
+ idx <- 1:length(ctl_1$age_selex_parms$LO)
+ for(i in idx){
+     pr <- base_ctl$age_selex_parms[i,3]
+     sd <- abs(0.2*pr)
+     ctl_1$age_selex_parms[i,c(1:5)] <- c(min(pr-4*sd,pr+4*sd),max(pr-4*sd,pr+4*sd),pr,pr,sd)
+      }
+ 
+
+ idxRep <- grep(paste0("1_GI_1a",collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ 
+ ctl_1$age_selex_parms[idxRep[3],1:2] <- c(-2,2)
  
  # Write SS files:
  
@@ -1048,16 +1091,11 @@ ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY8(8)",1:3] <- c(0,2,2)
  ctl_1 = base_ctl
  fore_1 = base_fore
  start_1 = base_start
- 
- fleetNames <- read.csv(file=file.path("data","ss3_inputs","4A_io","FleetNames.csv"))
- dat_1$fleetnames <- fleetNames$FleetNames
- 
 
- 
- ctl_1$MG_parms["RecrDist_GP_1_area_4_month_1",11] <- 296
- ctl_1$MainRdevYrLast <- 296
- ctl_1$last_yr_fullbias_adj <-299
- ctl_1$first_recent_yr_nobias_adj <- 304
+ ctl_1$MG_parms["RecrDist_GP_1_area_4_month_1",11] <- 300
+ ctl_1$MainRdevYrLast <- 300
+ ctl_1$last_yr_fullbias_adj <-303
+ ctl_1$first_recent_yr_nobias_adj <- 308
  # Read base SS inputs (from 2021 assessment)
  
  # Write SS files:
@@ -1199,7 +1237,10 @@ ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY8(8)",1:3] <- c(0,2,2)
  
  
  
- # Read base SS inputs (from 2021 assessment)
+ idxRep <- grep(paste0("1_GI_1a",collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ 
+ ctl_1$age_selex_parms[idxRep[3],1:2] <- c(-2.5,2)
  
  # Write SS files:
  
@@ -1212,11 +1253,99 @@ ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY8(8)",1:3] <- c(0,2,2)
  r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
  
  
-  ### correct size--------------------------------------------
+ #### Making free the parameter LL That was fixed ####
  #.......................................................................
- #remotes::install_github("r4ss/r4ss@signif") 
  
- config_name = '13_correctSize'
+ 
+ config_name = '14_cwp5x5_RQ_LL11_p2_free'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/13_cwp5x5_RQ'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ 
+ idxRep <- grep(paste0("LL_3",collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ 
+ ctl_1$age_selex_parms[idxRep[2],7] <- 3
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ #### biased adjust  ####
+ #...........................................
+ 
+ config_name = '15_BiasCorrectionRamp_hess'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/14_cwp5x5_RQ_LL11_p2_free_hess'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ 
+ idxRep <- grep(paste0("LL_3",collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ 
+ ctl_1$age_selex_parms[idxRep[2],7] <- 3
+ 
+ ctl_1$last_early_yr_nobias_adj  <- 69.5
+ ctl_1$first_yr_fullbias_adj <- 166.2
+ ctl_1$last_yr_fullbias_adj <- 304.4
+ ctl_1$first_recent_yr_nobias_adj <- 308.7
+ ctl_1$max_bias_adj <- 0.669
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+
+ #....................................................
+ #### DIVINDING IN 2 THE FLEETS 7,10 AND 13 THE YEAR 213-2000  ####
+ #.......................................................................
+ 
+ 
+ config_name = 'sensitivities_16/16_NsampLL5_LL_log'
  tmp_dir = file.path(shrpoint_path, SS_config, config_name)
  dir.create(tmp_dir)
  
@@ -1236,580 +1365,49 @@ ctl_1$size_selex_parms["SizeSel_Spline_Code_FISHERY8(8)",1:3] <- c(0,2,2)
  ctl_1 = base_ctl
  fore_1 = base_fore
  start_1 = base_start
- 
- # Read base SS inputs (from 2021 assessment)
- length_df = read.csv(file.path(shrpoint_path, SS_data, 'size-cwp55.csv'))
- dat_1$lencomp <- length_df %>% subset(!is.na(ModelFleet )) #%>% subset(!(Yr<230 & ModelFleet==21))
-  # Read base SS inputs (from 2021 assessment)
- 
- # Write SS files:
- dat_1$lencomp$Nsamp <- ifelse(length_df$Nsamp<=2,5,2)
- 
- # Write SS files:
- 
- SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
- SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
- SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
- SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
- 
- # Run model:
- r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
- 
- 
- ####    CHANGE THE PRIORS TO LL FLEETS  ####
- #.......................................................................
-
- 
- config_name = '14A_LLpriors_change'
- tmp_dir = file.path(shrpoint_path, SS_config, config_name)
- dir.create(tmp_dir)
- 
- # Temporary files:
- # SS base files path (in Sharepoint):
- SS_base = 'models/update/13_correctSize'
- # Temporary files:
- 
- base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
- base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
- base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
- base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
- 
- #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
- 
- dat_1 = base_dat
- ctl_1 = base_ctl
- fore_1 = base_fore
- start_1 = base_start
- 
- ctl_1$age_selex_parms["AgeSel_P_2_FISHERY11(11)",]$PHASE <-3
- 
- idx <- grep(paste0(c("FISHERY3","FISHERY7","FISHERY10","FISHERY11","FISHERY13"),collapse="|"), 
-             row.names(ctl_1$age_selex_parms), value=FALSE)
- 
-
- summary(ctl_1$age_selex_parms$PHASE[idx])
- ctl_1$age_selex_parms$PR_type[idx] <- 6
- 
- 
- #PRIORS MEAN LAST VALUE
- 
- for(i in idx){
-   if(base_ctl$age_selex_parms[i,3]>0){
-     ctl_1$age_selex_parms[i,c(1:5)] <- 
-       c(floor(base_ctl$age_selex_parms[i,3]*1),ceiling(base_ctl$age_selex_parms[i,3]*(1+1)),
-         base_ctl$age_selex_parms[i,3],base_ctl$age_selex_parms[i,3],abs(base_ctl$age_selex_parms[i,3]*0.2))
-   }else{
-     ctl_1$age_selex_parms[i,c(1:5)] <- 
-       c(floor(base_ctl$age_selex_parms[i,3]*(1+1)),ceiling(base_ctl$age_selex_parms[i,3]*1),
-         base_ctl$age_selex_parms[i,3],base_ctl$age_selex_parms[i,3],abs(base_ctl$age_selex_parms[i,3]*0.2))
-   }}
- 
- 
- # Read base SS inputs (from 2021 assessment)
- 
- # Write SS files:
- 
- SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
- SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
- SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
- SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
- 
- # Run model:
- r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
- 
- 
- #.......................................................................
- ### Adding selectivity LL based on length--------------------------------------------
- #.......................................................................
- 
-
- 
- config_name = '14B_LL_lengthSelex_type6'
- tmp_dir = file.path(shrpoint_path, SS_config, config_name)
- dir.create(tmp_dir)
- 
- # Temporary files:
- # SS base files path (in Sharepoint):
- SS_base = 'models/update/13_correctSize'
- # Temporary files:
- 
- base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
- base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
- base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
- base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
- 
- #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
- 
- dat_1 = base_dat
- ctl_1 = base_ctl
- fore_1 = base_fore
- start_1 = base_start
- 
- # 
- ctl_1$size_selex_types["FISHERY3",] <-c(1,0,0,0)
- ctl_1$size_selex_types["FISHERY7",] <-c(1,0,0,0)
- ctl_1$size_selex_types["FISHERY10",] <-c(1,0,0,0)
- ctl_1$size_selex_types["FISHERY11",] <-c(1,0,0,0)
- ctl_1$size_selex_types["FISHERY13",] <-c(1,0,0,0)
- 
- ctl_1$age_selex_types["FISHERY3",] <-c(0,0,0,0)
- ctl_1$age_selex_types["FISHERY7",] <-c(0,0,0,0)
- ctl_1$age_selex_types["FISHERY10",] <-c(0,0,0,0)
- ctl_1$age_selex_types["FISHERY11",] <-c(0,0,0,0)
- ctl_1$age_selex_types["FISHERY13",] <-c(0,0,0,0)
- 
- 
- idx <- grep(paste0(c("FISHERY3","FISHERY7","FISHERY10","FISHERY11","FISHERY13"),collapse="|"), 
-             row.names(ctl_1$age_selex_parms), value=FALSE)
- 
- ctl_1$age_selex_parms <- base_ctl$age_selex_parms[-idx,]
- 
- 
- 
- idx6 <- grep("FISHERY6", row.names(base_ctl$size_selex_parms), value=FALSE)
- idx8<- grep("FISHERY8", row.names(base_ctl$size_selex_parms), value=FALSE)
- 
- size_selex_parmsLL <- base_ctl$size_selex_parms[idx6[1:2],]
- size_selex_parmsLL[1,1:7] <- c(50,	158, 100, 100,20,6,3)
- size_selex_parmsLL[2,1:7] <- c(10,31,20,20,4,	6,	  3)
- size_selex_parmsLL3 <- size_selex_parmsLL
- size_selex_parmsLL7 <- size_selex_parmsLL
- size_selex_parmsLL10 <- size_selex_parmsLL
- size_selex_parmsLL11 <- size_selex_parmsLL
- size_selex_parmsLL13 <- size_selex_parmsLL
- row.names(size_selex_parmsLL3) <- c("Size_inflection_FISHERY3(3)","Size_95%width_FISHERY3(3)")
- row.names(size_selex_parmsLL7) <- c("Size_inflection_FISHERY7(7)","Size_95%width_FISHERY7(7)")
- row.names(size_selex_parmsLL10) <- c("Size_inflection_FISHERY10(10)","Size_95%width_FISHERY10(10)")
- row.names(size_selex_parmsLL11) <- c("Size_inflection_FISHERY11(11)","Size_95%width_FISHERY11(11)")
- row.names(size_selex_parmsLL13) <- c("Size_inflection_FISHERY13(13)","Size_95%width_FISHERY13(13)")
- 
- 
- 
- ctl_1$size_selex_parms <- rbind(size_selex_parmsLL3,
-                                 base_ctl$size_selex_parms[idx6,],
-                                 size_selex_parmsLL7,
-                                 base_ctl$size_selex_parms[idx8,],
-                                 size_selex_parmsLL10,
-                                 size_selex_parmsLL11,
-                                 size_selex_parmsLL13)
- 
- 
- # Read base SS inputs (from 2021 assessment)
- 
- # Write SS files:
- 
- SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
- SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
- SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
- SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
- 
- # Run model:
- r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
- 
- 
- #### based on run with modified priors
- 
- 
- #.......................................................................
- #### run 2: modifying priors with boundaries
- #.......................................................................
-
- 
- config_name = '14A2_LLpriors_change'
- tmp_dir = file.path(shrpoint_path, SS_config, config_name)
- dir.create(tmp_dir)
- 
- # Temporary files:
- # SS base files path (in Sharepoint):
- SS_base = 'models/update/14A_LLpriors_change'
- # Temporary files:
- 
- base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
- base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
- base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
- base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
- 
- #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
- 
- dat_1 = base_dat
- ctl_1 = base_ctl
- fore_1 = base_fore
- start_1 = base_start
- 
- #ctl_1$age_selex_parms["AgeSel_P_2_FISHERY11(11)",]$PHASE <-3
- 
- idx <- grep(paste0(c("FISHERY3","FISHERY7","FISHERY10","FISHERY11","FISHERY13","FISHERY21","FISHERY14","FISHERY4","FISHERY5"),collapse="|"), 
-             row.names(ctl_1$age_selex_parms), value=FALSE)
- 
- 
- #summary(ctl_1$age_selex_parms$PHASE[idx])
- #ctl_1$age_selex_parms$PR_type[idx] <- 6
- 
- 
- #PRIORS MEAN LAST VALUE
- 
- for(i in idx){
-   if(base_ctl$age_selex_parms[i,3]>0){
-     ctl_1$age_selex_parms[i,c(1:5)] <- 
-       c(floor(base_ctl$age_selex_parms[i,3]*0.25),ceiling(base_ctl$age_selex_parms[i,3]*(1+1)),
-         base_ctl$age_selex_parms[i,3],base_ctl$age_selex_parms[i,3],abs(base_ctl$age_selex_parms[i,3]*0.2))
-   }else{
-     ctl_1$age_selex_parms[i,c(1:5)] <- 
-       c(floor(base_ctl$age_selex_parms[i,3]*(1+1)),ceiling(base_ctl$age_selex_parms[i,3]*0.25),
-         base_ctl$age_selex_parms[i,3],base_ctl$age_selex_parms[i,3],abs(base_ctl$age_selex_parms[i,3]*0.2))
-   }}
- 
- 
- # Read base SS inputs (from 2021 assessment)
- 
- # Write SS files:
- 
- SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
- SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
- SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
- SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
- 
- # Run model:
- r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
- 
- 
- #...........................................................
- 
- #### LENGTH BASED V2 ####
- #...........................................................
- 
- config_name = '14B2_LL_lengthSelex_type6'
- tmp_dir = file.path(shrpoint_path, SS_config, config_name)
- dir.create(tmp_dir)
- 
- # Temporary files:
- # SS base files path (in Sharepoint):
- SS_base = 'models/update/14B_LL_lengthSelex_type6'
- # Temporary files:
- 
- base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
- base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
- base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
- base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
- 
- #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
- 
- dat_1 = base_dat
- ctl_1 = base_ctl
- fore_1 = base_fore
- start_1 = base_start
- 
- 
- 
- idx <- grep(paste0(c("FISHERY3","FISHERY7","FISHERY10","FISHERY11","FISHERY13"),collapse="|"), 
-             row.names(ctl_1$size_selex_parms), value=FALSE)
- 
- 
- #PRIORS MEAN LAST VALUE
- 
- for(i in idx){
-   if(base_ctl$size_selex_parms[i,3]>0){
-     ctl_1$size_selex_parms[i,c(1:5)] <- 
-       c(floor(base_ctl$size_selex_parms[i,3]*0.25),ceiling(base_ctl$size_selex_parms[i,3]*(1+1)),
-         base_ctl$size_selex_parms[i,3],base_ctl$size_selex_parms[i,3],abs(base_ctl$size_selex_parms[i,3]*0.2))
-   }else{
-     ctl_1$size_selex_parms[i,c(1:5)] <- 
-       c(floor(base_ctl$size_selex_parms[i,3]*(1+1)),ceiling(base_ctl$size_selex_parms[i,3]*0.25),
-         base_ctl$size_selex_parms[i,3],base_ctl$size_selex_parms[i,3],abs(base_ctl$size_selex_parms[i,3]*0.2))
-   }}
- 
- 
- idx <- grep(paste0(c("FISHERY21","FISHERY14","FISHERY4","FISHERY5"),collapse="|"), 
-             row.names(ctl_1$age_selex_parms), value=FALSE)
- 
- 
- 
- for(i in idx){
-   if(base_ctl$age_selex_parms[i,3]>0){
-     ctl_1$age_selex_parms[i,c(1:5)] <- 
-       c(floor(base_ctl$age_selex_parms[i,3]*0.25),ceiling(base_ctl$age_selex_parms[i,3]*(1+1)),
-         base_ctl$age_selex_parms[i,3],base_ctl$age_selex_parms[i,3],abs(base_ctl$age_selex_parms[i,3]*0.2))
-   }else{
-     ctl_1$age_selex_parms[i,c(1:5)] <- 
-       c(floor(base_ctl$age_selex_parms[i,3]*(1+1)),ceiling(base_ctl$age_selex_parms[i,3]*0.25),
-         base_ctl$age_selex_parms[i,3],base_ctl$age_selex_parms[i,3],abs(base_ctl$age_selex_parms[i,3]*0.2))
-   }}
- 
- 
- # Read base SS inputs (from 2021 assessment)
- 
- # Write SS files:
- 
- SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
- SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
- SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
- SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
- 
- # Run model:
- r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
- 
- 
-
- #....................................................
- #### ADDING REC DEV TO 14A2_LLpriors_change- better likelihood A: 8753.39 vs B-8963.92
- #.......................................................................
-
- 
- config_name = '15_recDev2021_'
- tmp_dir = file.path(shrpoint_path, SS_config, config_name)
- dir.create(tmp_dir)
- 
- # Temporary files:
- # SS base files path (in Sharepoint):
- SS_base = 'models/update/14A2_LLpriors_change'
- # Temporary files:
- 
- base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
- base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
- base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
- base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
- 
- #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
- 
- dat_1 = base_dat
- ctl_1 = base_ctl
- fore_1 = base_fore
- start_1 = base_start
- 
- #ctl_1$age_selex_parms["AgeSel_P_2_FISHERY11(11)",]$PHASE <-3
- 
- ctl_1$MG_parms["RecrDist_GP_1_area_4_month_1",11] <- 300
- ctl_1$MainRdevYrLast <- 300
- ctl_1$last_yr_fullbias_adj <-303
- ctl_1$first_recent_yr_nobias_adj <- 304
-
-
- 
- # Write SS files:
- 
- SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
- SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
- SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
- SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
- 
- # Run model:
- r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
- 
- #....................................................
- #### ADDING REC DEV TO 14A2_LLpriors_change- better likelihood A: 8753.39 vs B-8963.92
- # udpate catch and run model until 2023
- #.......................................................................
- 
- 
- config_name = '15_recDev2021_catch2023'
- tmp_dir = file.path(shrpoint_path, SS_config, config_name)
- dir.create(tmp_dir)
- 
- # Temporary files:
- # SS base files path (in Sharepoint):
- SS_base = 'models/update/14A2_LLpriors_change'
- # Temporary files:
- 
- base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
- base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
- base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
- base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
- 
- #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
- 
- dat_1 = base_dat
- ctl_1 = base_ctl
- fore_1 = base_fore
- start_1 = base_start
- 
- catch_df = read.csv(file.path(shrpoint_path, SS_data, 'catch.csv'))
- updated_catch = data.frame(year = catch_df[,'qtr'], seas = 1, fleet = catch_df[,'ModelFleet'], 
-                            catch = catch_df[,'Catch'], catch_se = 0.01)
- updated_catch = updated_catch %>% add_row(data.frame(year = -999, seas = 1, fleet = 1, catch = 0, catch_se = 0.01), .before = 1) # shouldnt we also add for all fleets?
- dat_1$catch = updated_catch
- # Last year = 2022:
- dat_1$endyr = 308
- 
- 
- ctl_1$MG_parms["RecrDist_GP_1_area_4_month_1",11] <- 300
- ctl_1$MainRdevYrLast <- 300
- ctl_1$last_yr_fullbias_adj <-305
- ctl_1$first_recent_yr_nobias_adj <- 308
- 
- 
- 
- # Write SS files:
- 
- SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
- SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
- SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
- SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
- 
- # Run model:
- r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
- 
- #### HIhg M 0.6
- 
- config_name = 'sensitivities_15/15_catchUpdate2023_MoldHigh_06'
- tmp_dir = file.path(shrpoint_path, SS_config, config_name)
- dir.create(tmp_dir)
- 
- # Temporary files:
- # SS base files path (in Sharepoint):
- SS_base = 'models/update/15_recDev2021_catch2023'
- #SS_base = 'models/update/test'
- # Temporary files:
- 
- base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
- base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
- base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
- base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
- 
- #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
- 
- dat_1 = base_dat
- ctl_1 = base_ctl
- fore_1 = base_fore
- start_1 = base_start
- 
- sc_ss3 <- SS_output(dir=SS_base,  repfile = "Report.sso",covar=F)
- 
- ctl_1$natM_type  <- 3
- ctl_1$N_natMparms <- 0
- #ctl_1$natM <- sc_ss3$endgrowth$M
- natM <- t(sc_ss3$endgrowth$M)
- natM<- as.data.frame(natM)
- names(natM) <- paste0("Age_",0:28)
- ctl_1$natM <- as.data.frame(natM)
- ctl_1$natM[21:29]<- 0.6
- ctl_1$Lorenzen_refage <- NULL
- ctl_1$MG_parms <- base_ctl$MG_parms[-1,]
- 
- # Write SS files:
- 
- SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
- SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
- SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
- SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
- 
- # Run model:
- r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
- 
- #### HIhg M 0.8
- 
- config_name = 'sensitivities_15/15_catchUpdate2023_MoldHigh_08'
- tmp_dir = file.path(shrpoint_path, SS_config, config_name)
- dir.create(tmp_dir)
- 
- # Temporary files:
- # SS base files path (in Sharepoint):
- SS_base = 'models/update/15_recDev2021_catch2023'
- #SS_base = 'models/update/test'
- # Temporary files:
- 
- base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
- base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
- base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
- base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
- 
- #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
- 
- dat_1 = base_dat
- ctl_1 = base_ctl
- fore_1 = base_fore
- start_1 = base_start
- 
- sc_ss3 <- SS_output(dir=SS_base,  repfile = "Report.sso",covar=F)
- 
- ctl_1$natM_type  <- 3
- ctl_1$N_natMparms <- 0
- #ctl_1$natM <- sc_ss3$endgrowth$M
- natM <- t(sc_ss3$endgrowth$M)
- natM<- as.data.frame(natM)
- names(natM) <- paste0("Age_",0:28)
- ctl_1$natM <- as.data.frame(natM)
- ctl_1$natM[21:29]<- 0.8
- ctl_1$Lorenzen_refage <- NULL
- ctl_1$MG_parms <- base_ctl$MG_parms[-1,]
- 
- # Write SS files:
- 
- SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
- SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
- SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
- SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
- 
- # Run model:
- r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
- 
- #....................................................
- #### DIVINDING IN 2 THE FLEETS 7,10 AND 13 THE YEAR 213-2000
- #.......................................................................
- 
- 
- config_name = 'sensitivities_16/16_NsampLL5_LL_log'
- tmp_dir = file.path(shrpoint_path, SS_config, config_name)
- dir.create(tmp_dir)
- 
- # Temporary files:
- # SS base files path (in Sharepoint):
- SS_base = 'models/update/15_recDev2021_catch2023'
- # Temporary files:
- 
- base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
- base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
- base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
- base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
- 
- #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
- 
- dat_1 = base_dat
- ctl_1 = base_ctl
- fore_1 = base_fore
- start_1 = base_start
- 
- #ctl_1$age_selex_parms["AgeSel_P_2_FISHERY11(11)",]$PHASE <-3
+  #ctl_1$age_selex_parms["AgeSel_P_2_FISHERY11(11)",]$PHASE <-3
 dat_1$Nfleets <- 28
-newfleets <- base_dat$fleetinfo[base_dat$fleetinfo$fleetname %in% c("FISHERY7","FISHERY10","FISHERY13"),]
-newfleets$fleetname <- c("FISHERY22","FISHERY23","FISHERY24")
+newfleets <- base_dat$fleetinfo[base_dat$fleetinfo$fleetname %in% base_dat$fleetinfo$fleetname[c(7,10,13)],]
+newfleets$fleetname <- c("22_LL_1b_A2000","23_LL_2_A2000","24_LL_4_A2000")
 row.names(newfleets) <- c("22","23","24")
 
 #fleetinfo
+
+dat_1$fleetinfo$fleetname[c(22:25)] <- paste0(25:28,"_CPUE_",c("LL_1b","LL_2","LL_3","LL_4"))
+
 dat_1$fleetinfo <- rbind(base_dat$fleetinfo[1:21,],
                          newfleets,
-                         base_dat$fleetinfo[22:25,])
+                         dat_1$fleetinfo[22:25,])
 
 row.names(dat_1$fleetinfo)[25:28] <- as.character(25:28)
- 
-newfleets <- dat_1$fleetinfo1[,c("FISHERY7","FISHERY10","FISHERY13")]
-names(newfleets)<- c("FISHERY22","FISHERY23","FISHERY24")
+dat_1$fleetinfo$fleetname[c(7,10,13)] <-  c("7_LL_1b_P2000","10_LL_2_P2000","13_LL_4_P2000")
 
 #fleetinfo1
+
+newfleets <- dat_1$fleetinfo1[,c(7,10,13)]
+names(newfleets)<- dat_1$fleetinfo$fleetname[22:24]
 
 dat_1$fleetinfo1 <- cbind(base_dat$fleetinfo1[,1:21],
                          newfleets,
                          base_dat$fleetinfo1[,22:25])
-
-newfleets <- dat_1$fleetinfo2[,c("FISHERY7","FISHERY10","FISHERY13")]
-names(newfleets)<- c("FISHERY22","FISHERY23","FISHERY24")
+names(dat_1$fleetinfo1) <- dat_1$fleetinfo$fleetname
 
 #fleetinfo2
+
+newfleets <- dat_1$fleetinfo2[,c(7,10,13)]
+names(newfleets)<- dat_1$fleetinfo$fleetname[c(22:24)]
 
 dat_1$fleetinfo2 <- cbind(base_dat$fleetinfo2[,1:21],
                           newfleets,
                           base_dat$fleetinfo2[,22:25])
-
-fleetNames <- read.csv(file=file.path("data","ss3_inputs","4A_io","FleetNames.csv"))
-
-dat_1$fleetnames <- c(fleetNames$FleetNames[1:21],c("22_LL_2000_1a","23_LL_2000_2","24_LL_2000_4"),
-                      c("25_LL_1b", "26_LL_2",  "27_LL_3",  "28_LL_4" ))
+names(dat_1$fleetinfo2) <- dat_1$fleetinfo$fleetname
 
 #catch
 
 dat_1$catch$fleet[dat_1$catch$fleet==13 & dat_1$catch$year>=213] <- 24
 dat_1$catch$fleet[dat_1$catch$fleet==10 & dat_1$catch$year>=213] <- 23
 dat_1$catch$fleet[dat_1$catch$fleet==7 & dat_1$catch$year>=213] <- 22
-base_dat$catch$catch[base_dat$catch$fleet==13 & base_dat$catch$year>=213] 
+
 #checking
 sum(base_dat$catch$catch)-sum(dat_1$catch$catch)
 sum(base_dat$catch$year)-sum(dat_1$catch$year)
@@ -1820,7 +1418,7 @@ sum(base_dat$catch$year)-sum(dat_1$catch$year)
 #cpue
 CPUEinfonew <- base_dat$CPUEinfo[c(7,10,13),]
 CPUEinfonew$fleet <- 22:24
-row.names(CPUEinfonew) <- paste0("FISHERY",22:24)
+row.names(CPUEinfonew) <- dat_1$fleetinfo$fleetname[22:24]
 
 CPUEinfonew2 <- base_dat$CPUEinfo[22:25,]
 CPUEinfonew2$fleet <- 25:28
@@ -1828,6 +1426,8 @@ CPUEinfonew2$fleet <- 25:28
 dat_1$CPUEinfo<- rbind(base_dat$CPUEinfo[1:21,],
                         CPUEinfonew,
                         CPUEinfonew2)
+row.names(dat_1$CPUEinfo) <- dat_1$fleetinfo$fleetname
+
 dat_1$CPUE$index[dat_1$CPUE$index==25 ] <- 28
 dat_1$CPUE$index[dat_1$CPUE$index==24 ] <- 27
 dat_1$CPUE$index[dat_1$CPUE$index==23 ] <- 26
@@ -1838,10 +1438,10 @@ dat_1$CPUE$index[dat_1$CPUE$index==22 ] <- 25
 #len_info
 
 newfleets <- base_dat$len_info[c(7,10,13),]
-row.names(newfleets) <- paste0("FISHERY",22:24)
+row.names(newfleets) <- dat_1$fleetinfo$fleetname[22:24]
 row.names(base_dat$len_info)
 dat_1$len_info<- rbind(base_dat$len_info[1:21,], newfleets, base_dat$len_info[22:25,]) 
-
+row.names(dat_1$len_info) <- dat_1$fleetinfo$fleetname
 #LENCOMP
 
 dat_1$lencomp$fleet[dat_1$lencomp$fleet==13 & dat_1$lencomp$year>=213] <- 24
@@ -1859,9 +1459,9 @@ dat_1$lencomp$Nsamp[dat_1$lencomp$fleet==13] <- 5
 
 #TG
 
-dat_1$tag_recaps$fleet[dat_1$tag_recaps$fleet==13 & dat_1$tag_recaps$year>=213] <- 25
-dat_1$tag_recaps$fleet[dat_1$tag_recaps$fleet==10 & dat_1$tag_recaps$year>=213] <- 24
-dat_1$tag_recaps$fleet[dat_1$tag_recaps$fleet==7 & dat_1$tag_recaps$year>=213] <- 23
+dat_1$tag_recaps$fleet[dat_1$tag_recaps$fleet==13 & dat_1$tag_recaps$year>=213] <- 24
+dat_1$tag_recaps$fleet[dat_1$tag_recaps$fleet==10 & dat_1$tag_recaps$year>=213] <- 23
+dat_1$tag_recaps$fleet[dat_1$tag_recaps$fleet==7 & dat_1$tag_recaps$year>=213] <- 22
 
 sum(dat_1$tag_recaps$Nrecap) - sum(dat_1$tag_recaps$Nrecap)
 
@@ -1875,60 +1475,63 @@ ctl_1$Q_options$link_info[2:4] <- 25
 ctl_1$Q_options
 
 #Q_parms
-row.names(ctl_1$Q_parms) <- c("LnQ_base_SURVEY1(25)", "LnQ_base_SURVEY2(26)", "LnQ_base_SURVEY3(27)", "LnQ_base_SURVEY4(28)")
+row.names(ctl_1$Q_parms) <- paste0("LNQ_base_",dat_1$fleetinfo$fleetname[25:28], "(",25:28,")")
 ctl_1$Q_parms
 
 
 #size_selex_types
 
-newfleets <-rbind(base_ctl$size_selex_types["FISHERY7",],
-                  base_ctl$size_selex_types["FISHERY10",],
-                  base_ctl$size_selex_types["FISHERY13",])
-row.names(newfleets) <- paste0("FISHERY",22:24)
+newfleets <-rbind(base_ctl$size_selex_types[c(7,10,13),])
+row.names(newfleets) <- dat_1$fleetinfo$fleetname[c(22:24)]
 
 ctl_1$size_selex_types <- rbind(base_ctl$size_selex_types[1:21,],
                                newfleets,
                                base_ctl$size_selex_types[22:25,])
-
+row.names(ctl_1$size_selex_types) <- dat_1$fleetinfo$fleetname
 
 #age_selex_types
 
-newfleets <-rbind(base_ctl$age_selex_types["FISHERY7",],
-                  base_ctl$age_selex_types["FISHERY10",],
-                  base_ctl$age_selex_types["FISHERY13",])
-row.names(newfleets) <- paste0("FISHERY",22:24)
+newfleets <-rbind(base_ctl$age_selex_types[c(7,10,13),])
+row.names(newfleets) <- dat_1$fleetinfo$fleetname[c(22:24)]
 
 ctl_1$age_selex_types <- rbind(base_ctl$age_selex_types[1:21,],
                           newfleets,
                           base_ctl$age_selex_types[22:25,])
+row.names(ctl_1$age_selex_types) <- dat_1$fleetinfo$fleetname
 
-idx <- grep(paste0(c("FISHERY7","FISHERY10","FISHERY13"),collapse="|"), 
-            row.names(ctl_1$age_selex_types), value=FALSE)
-ctl_1$age_selex_types[idx,1] <- 12 #logistic
+# 
+# idx <- grep(paste0(c("FISHERY7","FISHERY10","FISHERY13"),collapse="|"), 
+#             row.names(ctl_1$age_selex_types), value=FALSE)
+# ctl_1$age_selex_types[idx,1] <- 12 #logistic
 
 #parms
 
-idx <- grep(paste0(c("FISHERY7","FISHERY10","FISHERY13"),collapse="|"), 
-            row.names(ctl_1$age_selex_parms), value=FALSE)
+idx <- grep(paste0(base_dat$fleetinfo$fleetname[c(7,10,13)],collapse="|"), 
+            row.names(base_ctl$age_selex_parms), value=FALSE)
 
 newfleets <- base_ctl$age_selex_parms[idx,]
 row.names(newfleets) <- gsub("13",  "24",row.names(newfleets))
 row.names(newfleets) <- gsub("10",  "23",row.names(newfleets))
 row.names(newfleets) <- gsub("7",  "22",row.names(newfleets))
 
-idxRep <- grep(paste0(c("FISHERY21"),collapse="|"), 
-               row.names(base_ctl$age_selex_parms), value=FALSE)
+row.names(newfleets) <- gsub("LL_4",  "LL_4_A2000",row.names(newfleets))
+row.names(newfleets) <- gsub("LL_2",  "LL_2_A2000",row.names(newfleets))
+row.names(newfleets) <- gsub("LL_1b",  "LL_1b_A2000",row.names(newfleets))
 
-base_ctl$age_selex_parms[idxRep,] 
+ 
 
-idx7 <- grep(paste0(c(paste0("FISHERY",1:6,"\\(")),collapse="|"), 
-               row.names(base_ctl$age_selex_parms), value=FALSE)
-idx10 <- grep(paste0(c(paste0("FISHERY",8:9,"\\(")),collapse="|"), 
+idx7 <- grep(paste0(c(base_dat$fleetinfo$fleetname[1:6]),collapse="|"), 
              row.names(base_ctl$age_selex_parms), value=FALSE)
-idx13 <- grep(paste0(c(paste0("FISHERY",11:12,"\\(")),collapse="|"), 
+
+idx10 <- grep(paste0(c(base_dat$fleetinfo$fleetname[8:9]),collapse="|"), 
               row.names(base_ctl$age_selex_parms), value=FALSE)
-idxH13 <- grep(paste0(c(paste0("FISHERY",14:21,"\\(")),collapse="|"), 
+idx13 <- grep(paste0(c(base_dat$fleetinfo$fleetname[11:12]),collapse="|"), 
               row.names(base_ctl$age_selex_parms), value=FALSE)
+idxH13 <- grep(paste0(c(base_dat$fleetinfo$fleetname[14:21]),collapse="|"), 
+               row.names(base_ctl$age_selex_parms), value=FALSE)
+
+idxRep <- grep(paste0(c(base_dat$fleetinfo$fleetname[21]),collapse="|"), 
+               row.names(base_ctl$age_selex_parms), value=FALSE)
 
 parm7 <- base_ctl$age_selex_parms[idxRep,]
 
@@ -1939,6 +1542,8 @@ sd2 <- pr2*0.2
 parm7[1,1:5] <- c(pr1-4*sd1,pr1+4*sd1,pr1,pr1,sd1)
 parm7[2,1:5] <- c(pr2-4*sd2,pr+4*sd2,pr2,pr2,sd2)
 row.names(parm7) <- gsub("21","7", row.names(parm7))
+row.names(parm7) <- gsub("LF_4","LL_1b_P2000", row.names(parm7))
+
 
 parm10 <- base_ctl$age_selex_parms[idxRep,]
 pr1 <- 7.77856
@@ -1948,6 +1553,7 @@ sd2 <- pr2*0.2
 parm10[1,1:5] <- c(pr1-4*sd1,pr1+4*sd1,pr1,pr1,sd1)
 parm10[2,1:5] <- c(pr2-4*sd2,pr+4*sd2,pr2,pr2,sd2)
 row.names(parm10) <- gsub("21","10", row.names(parm10))
+row.names(parm10) <- gsub("LF_4","LL_2_P2000", row.names(parm10))
 
 parm13 <- base_ctl$age_selex_parms[idxRep,]
 pr1 <- 7.56423
@@ -1956,7 +1562,9 @@ pr2 <- 1.95029
 sd2 <- pr2*0.2
 parm13[1,1:5] <- c(pr1-4*sd1,pr1+4*sd1,pr1,pr1,sd1)
 parm13[2,1:5] <- c(pr2-4*sd2,pr+4*sd2,pr2,pr2,sd2)
+
 row.names(parm13) <- gsub("21","13", row.names(parm13))
+row.names(parm13) <- gsub("LF_4","LL_4_P2000", row.names(parm13))
 
 new_age_selex_parms <- rbind(base_ctl$age_selex_parms[idx7,],#1:6
                              parm7,  #7
@@ -2024,11 +1632,11 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
  
  
  #....................................................
- #### DIVINDING IN 2 THE FLEETS 7,10 AND 13 THE YEAR 213-2000 AND FLEET 7 DN
+ #### DIVINDING IN 2 THE FLEETS 7,10 AND 13 THE YEAR 213-2000 AND FLEET 7 DN  ####
  #.......................................................................
  
  
- config_name = 'sensitivities_16/16_NsampLL5_LL_log_FL7DN'
+ config_name = 'sensitivities_16/16_NsampLL5_LL_log_LL1b_DN'
  tmp_dir = file.path(shrpoint_path, SS_config, config_name)
  dir.create(tmp_dir)
  
@@ -2050,27 +1658,27 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
  start_1 = base_start
  
  
- idx <- grep(paste0(c("FISHERY7"),collapse="|"), 
+ idx <- grep(paste0(base_dat$fleetinfo$fleetname[7],collapse="|"), 
              row.names(ctl_1$age_selex_types), value=FALSE)
  ctl_1$age_selex_types[idx,1] <- 20 #DN
  
  
- idx <- grep(paste0(c("FISHERY7"),collapse="|"), 
+ idx <- grep(paste0(base_dat$fleetinfo$fleetname[7],collapse="|"), 
              row.names(ctl_1$age_selex_parms), value=FALSE)
  
  newfleets <- base_ctl$age_selex_parms[idx,]
 
- idxRep <- grep(paste0(c("FISHERY14"),collapse="|"), 
+ idxRep <- grep(paste0(base_dat$fleetinfo$fleetname[14],collapse="|"), 
                 row.names(base_ctl$age_selex_parms), value=FALSE)
  
  base_ctl$age_selex_parms[idxRep,] 
  
- idx7 <- grep(paste0(c(paste0("FISHERY",1:6,"\\(")),collapse="|"), 
+ idx7 <- grep(paste0(c(base_dat$fleetinfo$fleetname[1:6]),collapse="|"), 
               row.names(base_ctl$age_selex_parms), value=FALSE)
- idxH7 <- grep(paste0(c(paste0("FISHERY",8:24,"\\(")),collapse="|"), 
+ idxH7 <- grep(paste0(c(base_dat$fleetinfo$fleetname[8:24]),collapse="|"), 
                row.names(base_ctl$age_selex_parms), value=FALSE)
  
- parm7 <- base_ctl$age_selex_parms[idxRep,]
+ parm <- base_ctl$age_selex_parms[idxRep,]
  
  pr1 <- 10
  sd1 <- pr1*0.2
@@ -2085,23 +1693,27 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
  pr6 <- -8.5
  sd6 <- abs(pr6*0.2)
  
- parm7[1,1:6] <- c(pr1-4*sd1,pr1+4*sd1,pr1,pr1,sd1,0)
- parm7[2,1:6] <- c(pr2-4*sd2,pr1+4*sd2,pr2,pr2,sd2,0)
- parm7[3,1:6] <- c(pr3-4*sd3,pr3+4*sd3,pr3,pr3,sd3,0)
- parm7[4,1:6] <- c(pr4-4*sd4,pr4+4*sd4,pr4,pr4,sd4,0)
- parm7[5,1:6] <- c(pr5-4*sd5,pr5+4*sd5,pr5,pr5,sd5,0)
- parm7[6,1:6] <- c(pr6-4*sd6,pr6+4*sd6,pr6,pr6,sd6,0)
- parm7[1:4,7] < abs(parm7[1:4,7])
- row.names(parm7) <- gsub("14","7", row.names(parm7))
+ parm[1,1:6] <- c(min(pr1-4*sd1,pr1+4*sd1),max(pr1-4*sd1,pr1+4*sd1),pr1,pr1,sd1,0)
+ parm[2,1:6] <- c(min(pr2-4*sd2,pr2+4*sd2),max(pr2-4*sd2,pr2+4*sd2),pr2,pr2,sd2,0)
+ parm[3,1:6] <- c(min(pr3-4*sd3,pr3+4*sd3),max(pr3-4*sd3,pr3+4*sd3),pr3,pr3,sd3,0)
+ parm[4,1:6] <- c(min(pr4-4*sd4,pr4+4*sd4),max(pr4-4*sd4,pr4+4*sd1),pr4,pr4,sd4,0)
+ parm[5,1:6] <- c(min(pr5-4*sd5,pr5+4*sd5),max(pr5-4*sd5,pr5+4*sd5),pr5,pr5,sd5,0)
+ parm[6,1:6] <- c(min(pr6-4*sd6,pr6+4*sd6),max(pr6-4*sd6,pr6+4*sd6),pr6,pr6,sd6,0)
+ parm[1:4,7] < abs(parm[1:4,7])
+ row.names(parm) <- gsub("14","7", row.names(parm))
+ row.names(parm) <- gsub("OT_4","LL_1b_P2000", row.names(parm))
  
  new_age_selex_parms <- rbind(base_ctl$age_selex_parms[idx7,],#1:6
-                              parm7,  #7
+                              parm,  #7
                               base_ctl$age_selex_parms[idxH7,])
- #write.csv(new_age_selex_parms, file=file.path("data","ss3_inputs","4A_io","age_selex_parms.csv"),row.names=TRUE)
  
  ctl_1$age_selex_parms <- new_age_selex_parms
  
+ idxRep <- grep(paste0("LL_1b_P2000",collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
  
+ ctl_1$age_selex_parms[idxRep[3],1:3] <- c(-6,0,-3,-3,0.6)
+ ctl_1$age_selex_parms[idxRep[4],1:3] <- c(-20,0,-10,-10,2)
  
  
  # Write SS files:
@@ -2118,17 +1730,17 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
  
  
  #....................................................
- #### DIVINDING IN 2 THE FLEETS 7,10 AND 13 THE YEAR 213-2000 AND FLEET 7 DN
+ #### DIVINDING IN 2 THE FLEETS 7,10 AND 13 THE YEAR 213-2000 AND FLEET 7 DN  ####
  #.......................................................................
  
  
- config_name = 'sensitivities_16/16_NsampLL5_LL_log_FL7_13DN_v2'
+ config_name = 'sensitivities_16/16_NsampLL5_LL_log_LL1b_LL4_DN'
  tmp_dir = file.path(shrpoint_path, SS_config, config_name)
  dir.create(tmp_dir)
  
  # Temporary files:
  # SS base files path (in Sharepoint):
- SS_base = 'models/update/sensitivities_16/16_NsampLL5_LL_log_FL7DN'
+ SS_base = 'models/update/sensitivities_16/16_NsampLL5_LL_log_LL1b_DN'
  # Temporary files:
  
  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
@@ -2159,19 +1771,19 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
  
  #add prior??
  
- idx <- grep(paste0(c("FISHERY13"),collapse="|"), 
+ idx <- grep(paste0(dat_1$fleetinfo$fleetname[13],collapse="|"), 
              row.names(ctl_1$age_selex_types), value=FALSE)
  ctl_1$age_selex_types[idx,1] <- 20 #DN
  
  
- idxRep <- grep(paste0(c("FISHERY14"),collapse="|"), 
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[14],collapse="|"), 
                 row.names(ctl_1$age_selex_parms), value=FALSE)
  
  ctl_1$age_selex_parms[idxRep,] 
  
- idx13 <- grep(paste0(c(paste0("FISHERY",1:12,"\\(")),collapse="|"), 
+ idx13 <- grep(paste0(c(dat_1$fleetinfo$fleetname[1:12]),collapse="|"), 
               row.names(ctl_1$age_selex_parms), value=FALSE)
- idxH13 <- grep(paste0(c(paste0("FISHERY",14:24,"\\(")),collapse="|"), 
+ idxH13 <- grep(paste0(c(dat_1$fleetinfo$fleetname[14:24]),collapse="|"), 
                row.names(ctl_1$age_selex_parms), value=FALSE)
  
  parm <- ctl_1$age_selex_parms[idxRep,]
@@ -2197,6 +1809,7 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
  parm[6,1:6] <- c(min(pr6-4*sd6,pr6+4*sd6),max(pr6-4*sd6,pr6+4*sd6),pr6,pr6,sd6,0)
  
  row.names(parm) <- gsub("14","13", row.names(parm))
+ row.names(parm) <- gsub("OT_4","LL_4", row.names(parm))
  parm[2,7] <- 5
  
  new_age_selex_parms <- rbind(ctl_1$age_selex_parms[idx13,],#1:12
@@ -2207,7 +1820,7 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
  ctl_1$age_selex_parms <- new_age_selex_parms
  
 #based on run
- idxRep <- grep(paste0(c("FISHERY7"),collapse="|"), 
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[7],collapse="|"), 
                 row.names(ctl_1$age_selex_parms), value=FALSE)
  
  pr1 <- -2.5
@@ -2218,13 +1831,93 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
  sd1 <- pr1*0.2
  ctl_1$age_selex_parms[idxRep[4],1:5] <- c(min(pr1-4*sd1,pr1+4*sd1),max(pr1-4*sd1,pr1+4*sd1),pr1,pr1,sd1)
  
- idxRep <- grep(paste0(c("FISHERY1"),collapse="|"), 
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[1],collapse="|"), 
                 row.names(ctl_1$age_selex_parms), value=FALSE)
  
  ctl_1$age_selex_parms[idxRep[3],1:2] <- c(-10,9)
  
-  
- # Write SS files:
+ 
+ 
+ idxRep <- grep(paste0("LL_1b_P2000",collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ 
+ ctl_1$age_selex_parms[idxRep[3],1:3] <- c(-6,0,-3,-3,0.6)
+ ctl_1$age_selex_parms[idxRep[4],1:3] <- c(-20,0,-10,-10,2)
+
+ idxRep <- grep(paste0("LL_1b_P2000",collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ 
+ ctl_1$age_selex_parms[idxRep[3],1:3] <- c(-6,0,-3,-3,0.6)
+ ctl_1$age_selex_parms[idxRep[4],1:3] <- c(-20,0,-10,-10,2)
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ #### DIVINDING IN 2 THE FLEETS 7,10 AND 13 THE YEAR 213-2000 AND FLEET 7 DN  ####
+ #.......................................................................
+ 
+ 
+ config_name = 'sensitivities_16/16B_NsampLL5_LL_log_LL1b_LL4_DN'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/sensitivities_16/16_NsampLL5_LL_log_LL1b_LL4_DN'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ #
+ 
+ idx <- 1:length(ctl_1$age_selex_parms$LO)
+ for(i in idx){
+   if(base_ctl$age_selex_parms[i,3]>0){
+     ctl_1$age_selex_parms[i,c(1:5)] <- 
+       c(floor(base_ctl$age_selex_parms[i,3]*0.25),ceiling(base_ctl$age_selex_parms[i,3]*(1+1)),
+         base_ctl$age_selex_parms[i,3],base_ctl$age_selex_parms[i,3],abs(base_ctl$age_selex_parms[i,3]*0.2))
+   }else{
+     ctl_1$age_selex_parms[i,c(1:5)] <- 
+       c(floor(base_ctl$age_selex_parms[i,3]*(1+1)),ceiling(base_ctl$age_selex_parms[i,3]*0.25),
+         base_ctl$age_selex_parms[i,3],base_ctl$age_selex_parms[i,3],abs(base_ctl$age_selex_parms[i,3]*0.2))
+   }}
+
+ 
+ #based on run
+
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[1],collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ 
+ ctl_1$age_selex_parms[idxRep[3],1:2] <- c(-10,9)
+ 
+ 
+ 
+ idxRep <- grep(paste0("LL_1b_P2000",collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ 
+ ctl_1$age_selex_parms[idxRep[3],1:3] <- c(-8,0,-3,-3,0.6)
+ ctl_1$age_selex_parms[idxRep[4],1:3] <- c(-20,0,-10,-10,2)
+ 
+ idxRep <- grep(paste0("LL_4_P2000",collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ 
+ ctl_1$age_selex_parms[idxRep[3],1:5] <- c(-40,0,-21,-21,4.2)
+ ctl_1$age_selex_parms[idxRep[4],1:5] <- c(-6,0,-1,-1,0.2)
  
  SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
  SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
@@ -2235,18 +1928,123 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
  r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
  
  
- #....................................................
- #### DIVINDING IN 2 THE FLEETS 7,10 AND 13 THE YEAR 213-2000 AND FLEET 7 DN
- #.......................................................................
- 
- 
- config_name = 'sensitivities_16/16_NsampLL5_LL_log_FL7_13_10DN_v2'
+ ##### FREE PARAMETER 2 FROM DN SHAPE LL4  ####
+ #................................................................
+ config_name = 'sensitivities_16/16C_NsampLL5_LL_log_LL1b_LL4_DN_freeParLL_HESS'
  tmp_dir = file.path(shrpoint_path, SS_config, config_name)
  dir.create(tmp_dir)
  
  # Temporary files:
  # SS base files path (in Sharepoint):
- SS_base = 'models/update/sensitivities_16/16_NsampLL5_LL_log_FL7_13DN_v2'
+ SS_base = 'models/update/sensitivities_16/16B_NsampLL5_LL_log_LL1b_LL4_DN'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ #
+ 
+ 
+ #based on run
+ 
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[7],collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ 
+ ctl_1$age_selex_parms[idxRep[2],7] <- 5
+ 
+ 
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ 
+ #### FREE PARAMETER 2 FROM DN SHAPE LL4  ####
+ #................................................................
+ config_name = 'sensitivities_16/16E_NsampLL5_LL_log_LL1b_LL4_DN-prior'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/sensitivities_16/16E_NsampLL5_LL_log_LL1b_LL4_DN'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ #
+ 
+ idx <- 1:length(ctl_1$age_selex_parms$LO)
+ for(i in idx){
+   if(base_ctl$age_selex_parms[i,3]>0){
+     ctl_1$age_selex_parms[i,c(1:6)] <- 
+       c(floor(base_ctl$age_selex_parms[i,3]*0.25),ceiling(base_ctl$age_selex_parms[i,3]*(1+1)),
+         base_ctl$age_selex_parms[i,3],base_ctl$age_selex_parms[i,3],abs(base_ctl$age_selex_parms[i,3]*0.2),6)
+   }else{
+     ctl_1$age_selex_parms[i,c(1:6)] <- 
+       c(floor(base_ctl$age_selex_parms[i,3]*(1+1)),ceiling(base_ctl$age_selex_parms[i,3]*0.25),
+         base_ctl$age_selex_parms[i,3],base_ctl$age_selex_parms[i,3],abs(base_ctl$age_selex_parms[i,3]*0.2),6)
+   }}
+ 
+ 
+ #based on run
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[7],collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ 
+ ctl_1$age_selex_parms[idxRep[3],1:2] <- c(-10,9)
+ 
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[1],collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ 
+ ctl_1$age_selex_parms[idxRep[3],1:2] <- c(-10,9)
+ 
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[13],collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ ctl_1$age_selex_parms[idxRep[3],1:3] <- c(-40,-5,-23,-23)
+ ctl_1$age_selex_parms[idxRep[4],1:3] <- c(-20,0,-2,-2)
+ 
+
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ 
+ #### FREE PARAMETER 2 FROM DN SHAPE LL4  ####
+ #................................................................
+ config_name = 'sensitivities_16/16D_NsampLL5_LL_log_LL1b_LL4_DN'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/sensitivities_16/16C_NsampLL5_LL_log_LL1b_LL4_DN_freeParLL_HESS'
  # Temporary files:
  
  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
@@ -2275,74 +2073,28 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
          base_ctl$age_selex_parms[i,3],base_ctl$age_selex_parms[i,3],abs(base_ctl$age_selex_parms[i,3]*0.2))
    }}
  
- #add prior??
- 
- idx <- grep(paste0(c("FISHERY10"),collapse="|"), 
-             row.names(ctl_1$age_selex_types), value=FALSE)
- ctl_1$age_selex_types[idx,1] <- 20 #DN
- 
- 
- idxRep <- grep(paste0(c("FISHERY14"),collapse="|"), 
-                row.names(ctl_1$age_selex_parms), value=FALSE)
- 
- ctl_1$age_selex_parms[idxRep,] 
- 
- idx10 <- grep(paste0(c(paste0("FISHERY",1:9,"\\(")),collapse="|"), 
-               row.names(ctl_1$age_selex_parms), value=FALSE)
- idxH10 <- grep(paste0(c(paste0("FISHERY",11:24,"\\(")),collapse="|"), 
-                row.names(ctl_1$age_selex_parms), value=FALSE)
- 
- parm <- ctl_1$age_selex_parms[idxRep,]
- 
- pr1 <- 7
- sd1 <- pr1*0.2
- pr2 <-  -0.38
- sd2 <- pr2*0.2
- pr3 <- -10.7
- sd3 <- abs(pr3*0.2)
- pr4 <- -0.47
- sd4 <- pr4*0.2 
- pr5 <- -6
- sd5 <- pr5*0.2
- pr6 <- -7
- sd6 <- abs(pr6*0.2)
- 
- parm[1,1:6] <- c(min(pr1-4*sd1,pr1+4*sd1),max(pr1-4*sd1,pr1+4*sd1),pr1,pr1,sd1,0)
- parm[2,1:6] <- c(min(pr2-4*sd2,pr2+4*sd2),max(pr2-4*sd2,pr2+4*sd2),pr2,pr2,sd2,0)
- parm[3,1:6] <- c(min(pr3-4*sd3,pr3+4*sd3),max(pr3-4*sd3,pr3+4*sd3),pr3,pr3,sd3,0)
- parm[4,1:6] <- c(min(pr4-4*sd4,pr4+4*sd4),max(pr4-4*sd4,pr4+4*sd1),pr4,pr4,sd4,0)
- parm[5,1:6] <- c(min(pr5-4*sd5,pr5+4*sd5),max(pr5-4*sd5,pr5+4*sd5),pr5,pr5,sd5,0)
- parm[6,1:6] <- c(min(pr6-4*sd6,pr6+4*sd6),max(pr6-4*sd6,pr6+4*sd6),pr6,pr6,sd6,0)
- 
- row.names(parm) <- gsub("14","10", row.names(parm))
- parm[2,7] <- 5
- 
- new_age_selex_parms <- rbind(ctl_1$age_selex_parms[idx10,],#1:12
-                              parm,  #13
-                              ctl_1$age_selex_parms[idxH10,])
- #write.csv(new_age_selex_parms, file=file.path("data","ss3_inputs","4A_io","age_selex_parms.csv"),row.names=TRUE)
- 
- ctl_1$age_selex_parms <- new_age_selex_parms
  
  #based on run
- #idxRep <- grep(paste0(c("FISHERY7"),collapse="|"), 
- #               row.names(ctl_1$age_selex_parms), value=FALSE)
- # 
- # pr1 <- -2.5
- # sd1 <- pr1*0.2
- # 
- # ctl_1$age_selex_parms[idxRep[3],1:5] <- c(min(pr1-4*sd1,pr1+4*sd1),max(pr1-4*sd1,pr1+4*sd1),pr1,pr1,sd1)
- # pr1 <- 0.2
- # sd1 <- pr1*0.2
- # ctl_1$age_selex_parms[idxRep[4],1:5] <- c(min(pr1-4*sd1,pr1+4*sd1),max(pr1-4*sd1,pr1+4*sd1),pr1,pr1,sd1)
- 
- 
- idxRep <- grep(paste0(c("FISHERY1"),collapse="|"), 
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[7],collapse="|"), 
                 row.names(ctl_1$age_selex_parms), value=FALSE)
  
- ctl_1$age_selex_parms[idxRep[3],1:2] <- c(-2,2)
+ ctl_1$age_selex_parms[idxRep[3],1:2] <- c(-10,9)
  
- # Write SS files:
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[1],collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ 
+ ctl_1$age_selex_parms[idxRep[3],1:2] <- c(-10,9)
+ 
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[13],collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ ctl_1$age_selex_parms[idxRep[3],1:3] <- c(-40,-5,-23,-23)
+ ctl_1$age_selex_parms[idxRep[4],1:3] <- c(-20,0,-2,-2)
+ 
+ ctl_1$last_early_yr_nobias_adj  <- -5.9
+ ctl_1$first_yr_fullbias_adj <- 163.3
+ ctl_1$last_yr_fullbias_adj <- 303.3
+ ctl_1$first_recent_yr_nobias_adj <- 309.1
+ ctl_1$max_bias_adj <- 0.7052
  
  SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
  SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
@@ -2352,18 +2104,19 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
  # Run model:
  r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
  
+ 
  #....................................................
  #### DIVINDING IN 2 THE FLEETS 7,10 AND 13 THE YEAR 213-2000 AND FLEET 7 DN
  #.......................................................................
  
  
- config_name = 'sensitivities_16/16B_NsampLL5_LL_log_FL7_13_10DN_V2'
+ config_name = 'sensitivities_16/16_NsampLL5_LL_log_LL1b_LL4_LL2_DN'
  tmp_dir = file.path(shrpoint_path, SS_config, config_name)
  dir.create(tmp_dir)
  
  # Temporary files:
  # SS base files path (in Sharepoint):
- SS_base = 'models/update/sensitivities_16/16_NsampLL5_LL_log_FL7_13_10DN_V2'
+ SS_base = 'models/update/sensitivities_16/16E_NsampLL5_LL_log_LL1b_LL4_DN'
  # Temporary files:
  
  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
@@ -2394,17 +2147,81 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
  
 
  
- idxRep <- grep(paste0(c("FISHERY1"),collapse="|"), 
+ idx <- grep(paste0(dat_1$fleetinfo$fleetname[10],collapse="|"), 
+             row.names(ctl_1$age_selex_types), value=FALSE)
+ ctl_1$age_selex_types[idx,1] <- 20 #DN
+ 
+ 
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[14],collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ 
+ ctl_1$age_selex_parms[idxRep,] 
+ 
+ idx10 <- grep(paste0(c(dat_1$fleetinfo$fleetname[1:9]),collapse="|"), 
+               row.names(ctl_1$age_selex_parms), value=FALSE)
+ idxH10 <- grep(paste0(c(dat_1$fleetinfo$fleetname[11:24]),collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ 
+ parm <- ctl_1$age_selex_parms[idxRep,]
+ 
+ pr1 <- 7
+ sd1 <- pr1*0.2
+ pr2 <-  -0.38
+ sd2 <- pr2*0.2
+ pr3 <- -10.7
+ sd3 <- abs(pr3*0.2)
+ pr4 <- -0.47
+ sd4 <- pr4*0.2 
+ pr5 <- -6
+ sd5 <- pr5*0.2
+ pr6 <- -7
+ sd6 <- abs(pr6*0.2)
+ 
+ parm[1,1:6] <- c(min(pr1-4*sd1,pr1+4*sd1),max(pr1-4*sd1,pr1+4*sd1),pr1,pr1,sd1,0)
+ parm[2,1:6] <- c(min(pr2-4*sd2,pr2+4*sd2),max(pr2-4*sd2,pr2+4*sd2),pr2,pr2,sd2,0)
+ parm[3,1:6] <- c(min(pr3-4*sd3,pr3+4*sd3),max(pr3-4*sd3,pr3+4*sd3),pr3,pr3,sd3,0)
+ parm[4,1:6] <- c(min(pr4-4*sd4,pr4+4*sd4),max(pr4-4*sd4,pr4+4*sd1),pr4,pr4,sd4,0)
+ parm[5,1:6] <- c(min(pr5-4*sd5,pr5+4*sd5),max(pr5-4*sd5,pr5+4*sd5),pr5,pr5,sd5,0)
+ parm[6,1:6] <- c(min(pr6-4*sd6,pr6+4*sd6),max(pr6-4*sd6,pr6+4*sd6),pr6,pr6,sd6,0)
+ 
+ row.names(parm) <- gsub("14","10", row.names(parm))
+ row.names(parm) <- gsub("OT_4","LL_2", row.names(parm))
+ parm[2,7] <- 5
+ 
+ new_age_selex_parms <- rbind(ctl_1$age_selex_parms[idx10,],#1:12
+                              parm,  #13
+                              ctl_1$age_selex_parms[idxH10,])
+ #write.csv(new_age_selex_parms, file=file.path("data","ss3_inputs","4A_io","age_selex_parms.csv"),row.names=TRUE)
+ 
+ ctl_1$age_selex_parms <- new_age_selex_parms
+ 
+ #based on run
+ #idxRep <- grep(paste0(c("FISHERY7"),collapse="|"), 
+ #               row.names(ctl_1$age_selex_parms), value=FALSE)
+ # 
+ # pr1 <- -2.5
+ # sd1 <- pr1*0.2
+ # 
+ # ctl_1$age_selex_parms[idxRep[3],1:5] <- c(min(pr1-4*sd1,pr1+4*sd1),max(pr1-4*sd1,pr1+4*sd1),pr1,pr1,sd1)
+ # pr1 <- 0.2
+ # sd1 <- pr1*0.2
+ # ctl_1$age_selex_parms[idxRep[4],1:5] <- c(min(pr1-4*sd1,pr1+4*sd1),max(pr1-4*sd1,pr1+4*sd1),pr1,pr1,sd1)
+ 
+ 
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[7],collapse="|"), 
                 row.names(ctl_1$age_selex_parms), value=FALSE)
  
  ctl_1$age_selex_parms[idxRep[3],1:2] <- c(-10,9)
  
- idxRep <- grep(paste0(c("FISHERY1"),collapse="|"), 
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[1],collapse="|"), 
                 row.names(ctl_1$age_selex_parms), value=FALSE)
  
- ctl_1$age_selex_parms[idxRep[3],1:2] <- c(-2,2)
+ ctl_1$age_selex_parms[idxRep[3],1:2] <- c(-10,9)
  
- 
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[13],collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ ctl_1$age_selex_parms[idxRep[3],1:3] <- c(-40,-5,-23,-23)
+ ctl_1$age_selex_parms[idxRep[4],1:3] <- c(-20,0,-2,-2)
  
  # Write SS files:
  
@@ -2417,105 +2234,17 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
  r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
  
  #....................................................
- #### DIVINDING IN 2 THE FLEETS 7,10 AND 13 THE YEAR 213-2000 AND FLEET 10 DN
+ #### DIVINDING IN 2 THE FLEETS 7,10 AND 13 THE YEAR 213-2000 AND FLEET 7 DN
  #.......................................................................
  
  
- config_name = 'sensitivities_16/16_NsampLL5_LL_log_FL7_13_10DN'
+ config_name = 'sensitivities_16/16B_NsampLL5_LL_log_LL1b_LL4_LL2_DN'
  tmp_dir = file.path(shrpoint_path, SS_config, config_name)
  dir.create(tmp_dir)
  
  # Temporary files:
  # SS base files path (in Sharepoint):
- SS_base = 'models/update/sensitivities_16/16_NsampLL5_LL_log_FL7_13DN_V2'
- # Temporary files:
- 
- base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
- base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
- base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
- base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
- 
- #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
- 
- dat_1 = base_dat
- ctl_1 = base_ctl
- fore_1 = base_fore
- start_1 = base_start
- 
- 
- #add prior??
- 
- idx <- grep(paste0(c("FISHERY10"),collapse="|"), 
-             row.names(ctl_1$age_selex_types), value=FALSE)
- ctl_1$age_selex_types[idx,1] <- 20 #DN
- 
- 
- idxRep <- grep(paste0(c("FISHERY14"),collapse="|"), 
-                row.names(base_ctl$age_selex_parms), value=FALSE)
- 
- base_ctl$age_selex_parms[idxRep,] 
- 
- idx10 <- grep(paste0(c(paste0("FISHERY",1:9,"\\(")),collapse="|"), 
-               row.names(base_ctl$age_selex_parms), value=FALSE)
- idxH10 <- grep(paste0(c(paste0("FISHERY",11:24,"\\(")),collapse="|"), 
-                row.names(base_ctl$age_selex_parms), value=FALSE)
- 
- parm <- base_ctl$age_selex_parms[idxRep,]
- 
- pr1 <- 11.0196
- sd1 <- pr1*0.2
- pr2 <-  -0.39063
- sd2 <- pr2*0.2
- pr3 <- 1.65945
- sd3 <- abs(pr3*0.2)
- pr4 <- 15.593
- sd4 <- pr4*0.2 
- pr5 <- -6
- sd5 <- pr5*0.2
- pr6 <- -7.79915
- sd6 <- abs(pr6*0.2)
- 
- parm[1,1:6] <- c(min(pr1-4*sd1,pr1+4*sd1),max(pr1-4*sd1,pr1+4*sd1),pr1,pr1,sd1,0)
- parm[2,1:6] <- c(min(pr2-4*sd2,pr2+4*sd2),max(pr2-4*sd2,pr2+4*sd2),pr2,pr2,sd2,0)
- parm[3,1:6] <- c(min(pr3-4*sd3,pr3+4*sd3),max(pr3-4*sd3,pr3+4*sd3),pr3,pr3,sd3,0)
- parm[4,1:6] <- c(min(pr4-4*sd4,pr4+4*sd4),max(pr4-4*sd4,pr4+4*sd1),pr4,pr4,sd4,0)
- parm[5,1:6] <- c(min(pr5-4*sd5,pr5+4*sd5),max(pr5-4*sd5,pr5+4*sd5),pr5,pr5,sd5,0)
- parm[6,1:6] <- c(min(pr6-4*sd6,pr6+4*sd6),max(pr6-4*sd6,pr6+4*sd6),pr6,pr6,sd6,0)
- 
- row.names(parm) <- gsub("14","10", row.names(parm))
- parm[2,7] <- 5
- 
- new_age_selex_parms <- rbind(base_ctl$age_selex_parms[idx10,],#1:12
-                              parm,  #13
-                              base_ctl$age_selex_parms[idxH10,])
- #write.csv(new_age_selex_parms, file=file.path("data","ss3_inputs","4A_io","age_selex_parms.csv"),row.names=TRUE)
- 
- ctl_1$age_selex_parms <- new_age_selex_parms
- 
- idxRep <- grep(paste0(c("FISHERY1"),collapse="|"), 
-                row.names(ctl_1$age_selex_parms), value=FALSE)
- 
- ctl_1$age_selex_parms[idxRep[3],1:2] <- c(-10,9)
- # Write SS files:
- 
- SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
- SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
- SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
- SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
- 
- # Run model:
- r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
- 
- 
- #### 17 REC DEV
- 
- config_name = '17_recDev2021_catch2023'
- tmp_dir = file.path(shrpoint_path, SS_config, config_name)
- dir.create(tmp_dir)
- 
- # Temporary files:
- # SS base files path (in Sharepoint):
- SS_base = 'models/update/16_NsampLL5_LL_log_FL7_13DN_V2'
+ SS_base = 'models/update/sensitivities_16/16_NsampLL5_LL_log_LL1b_LL4_LL2_DN'
  # Temporary files:
  
  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
@@ -2530,11 +2259,233 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
  fore_1 = base_fore
  start_1 = base_start
  
+ #
  
- ctl_1$MG_parms["RecrDist_GP_1_area_4_month_1",11] <- 300
- ctl_1$MainRdevYrLast <- 300
- ctl_1$last_yr_fullbias_adj <-305
- ctl_1$first_recent_yr_nobias_adj <- 308
+ idx <- 1:length(ctl_1$age_selex_parms$LO)
+ for(i in idx){
+   if(base_ctl$age_selex_parms[i,3]>0){
+     ctl_1$age_selex_parms[i,c(1:5)] <- 
+       c(floor(base_ctl$age_selex_parms[i,3]*0.25),ceiling(base_ctl$age_selex_parms[i,3]*(1+1)),
+         base_ctl$age_selex_parms[i,3],base_ctl$age_selex_parms[i,3],abs(base_ctl$age_selex_parms[i,3]*0.2))
+   }else{
+     ctl_1$age_selex_parms[i,c(1:5)] <- 
+       c(floor(base_ctl$age_selex_parms[i,3]*(1+1)),ceiling(base_ctl$age_selex_parms[i,3]*0.25),
+         base_ctl$age_selex_parms[i,3],base_ctl$age_selex_parms[i,3],abs(base_ctl$age_selex_parms[i,3]*0.2))
+   }}
+ 
+
+ 
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[7],collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ 
+ ctl_1$age_selex_parms[idxRep[3],1:2] <- c(-10,9)
+ 
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[1],collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ 
+ ctl_1$age_selex_parms[idxRep[3],1:2] <- c(-10,9)
+ 
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[13],collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ ctl_1$age_selex_parms[idxRep[3],1:4] <- c(-40,-5,-23,-23)
+ ctl_1$age_selex_parms[idxRep[4],1:4] <- c(-20,0,-2,-2)
+ 
+ idxRep <- grep(paste0(dat_1$fleetinfo$fleetname[10],collapse="|"), 
+                row.names(ctl_1$age_selex_parms), value=FALSE)
+ ctl_1$age_selex_parms[idxRep[2],1:4] <- c(-1,5,0,0)
+ ctl_1$age_selex_parms[idxRep[3],1:4] <- c(-40,0,-20,-20)
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ #### double normal p2000 LL1B ADN LL4 BUT LL2 ONLY ONE FLEET ####
+ #.................................................
+ 
+ 
+ config_name = 'sensitivities_16/16F_NsampLL5_LL1b_LL4_DN'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/sensitivities_16/16E_NsampLL5_LL_log_LL1b_LL4_DN'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ #ctl_1$age_selex_parms["AgeSel_P_2_FISHERY11(11)",]$PHASE <-3
+ dat_1$Nfleets <- 27
+ # newfleets <- base_dat$fleetinfo[base_dat$fleetinfo$fleetname %in% base_dat$fleetinfo$fleetname[c(7,10,13)],]
+ # newfleets$fleetname <- c("22_LL_1b_A2000","23_LL_2_A2000","24_LL_4_A2000")
+ # row.names(newfleets) <- c("22","23","24")
+ 
+ #fleetinfo
+ 
+ 
+ dat_1$fleetinfo <- rbind(base_dat$fleetinfo[1:22,],
+                          base_dat$fleetinfo[24:28,])
+ 
+ row.names(dat_1$fleetinfo)[23:27] <- as.character(23:27)
+ dat_1$fleetinfo$fleetname[10] <-  c("10_LL_2")
+ dat_1$fleetinfo$fleetname[23] <-  c("23_LL_4_A2000")
+ dat_1$fleetinfo$fleetname[c(24:27)] <- paste0(24:27,"_CPUE_",c("LL_1b","LL_2","LL_3","LL_4"))
+ 
+ #fleetinfo1
+ 
+ dat_1$fleetinfo1 <- cbind(base_dat$fleetinfo1[,1:22],
+                           base_dat$fleetinfo1[,24:28])
+ names(dat_1$fleetinfo1) <- dat_1$fleetinfo$fleetname
+ 
+ #fleetinfo2
+ 
+ dat_1$fleetinfo2 <- cbind(base_dat$fleetinfo2[,1:22],
+                           base_dat$fleetinfo2[,24:28])
+ names(dat_1$fleetinfo2) <- dat_1$fleetinfo$fleetname
+ 
+ #catch
+ 
+ dat_1$catch$fleet[dat_1$catch$fleet==23] <- 10
+ dat_1$catch$fleet[dat_1$catch$fleet==24] <- 23
+ #checking
+ sum(base_dat$catch$catch)-sum(dat_1$catch$catch)
+ sum(base_dat$catch$year)-sum(dat_1$catch$year)
+ 
+ #write.csv(dat_1$catch,file=file.path("data","ss3_inputs","4A_io","catch_28fleets.csv"),row.names=FALSE)
+ 
+ 
+ #cpue
+ 
+ 
+ dat_1$CPUEinfo<- rbind(base_dat$CPUEinfo[1:22,],
+                        base_dat$CPUEinfo[24:28,])
+ row.names(dat_1$CPUEinfo) <- dat_1$fleetinfo$fleetname
+ dat_1$CPUEinfo$fleet <- 1:27
+ 
+ dat_1$CPUE$index[dat_1$CPUE$index==25 ] <- 24
+ dat_1$CPUE$index[dat_1$CPUE$index==26 ] <- 25
+ dat_1$CPUE$index[dat_1$CPUE$index==27 ] <- 26
+ dat_1$CPUE$index[dat_1$CPUE$index==28 ] <- 27
+ 
+ 
+ 
+ 
+ #write.csv(dat_1$CPUE,file=file.path("data","ss3_inputs","4A_io","cpue_28fleets.csv"),row.names=FALSE)
+ 
+ #len_info
+ 
+ dat_1$len_info<- rbind(base_dat$len_info[1:22,], base_dat$len_info[24:28,]) 
+ row.names(dat_1$len_info) <- dat_1$fleetinfo$fleetname
+ #LENCOMP
+ dat_1$lencomp$Nsamp[dat_1$lencomp$fleet==3] <- 5
+ dat_1$lencomp$Nsamp[dat_1$lencomp$fleet==7] <- 5
+ dat_1$lencomp$Nsamp[dat_1$lencomp$fleet==10] <- 5
+ dat_1$lencomp$Nsamp[dat_1$lencomp$fleet==11] <- 5
+ dat_1$lencomp$Nsamp[dat_1$lencomp$fleet==13] <- 5
+ 
+ dat_1$lencomp$fleet[dat_1$lencomp$fleet==23 ] <- 10
+ dat_1$lencomp$fleet[dat_1$lencomp$fleet==24 ] <- 23
+ summary(dat_1$lencomp)
+ 
+ #write.csv(dat_1$lencomp,file=file.path("data","ss3_inputs","4A_io","lencomp_28fleets.csv"),row.names=FALSE)
+ 
+ #TG
+ 
+ dat_1$tag_recaps$fleet[dat_1$tag_recaps$fleet==23 ] <- 10
+ dat_1$tag_recaps$fleet[dat_1$tag_recaps$fleet==24 ] <- 23
+ 
+ 
+ sum(dat_1$tag_recaps$Nrecap) - sum(dat_1$tag_recaps$Nrecap)
+ 
+ #write.csv(dat_1$tag_recaps,file=file.path("data","ss3_inputs","4A_io","tag_recaps_28fleets.csv"),row.names=FALSE)
+ 
+ #CONTROL
+ 
+ #Q_options
+ ctl_1$Q_options$fleet <- c(24:27)
+ ctl_1$Q_options$link_info[2:4] <- 24
+ ctl_1$Q_options
+ row.names(ctl_1$Q_options) <- dat_1$fleetinfo$fleetname[24:27]
+ #Q_parms
+ row.names(ctl_1$Q_parms) <- paste0("LNQ_base_",dat_1$fleetinfo$fleetname[24:27], "(",24:27,")")
+ ctl_1$Q_parms
+ 
+ 
+ #size_selex_types
+ 
+ ctl_1$size_selex_types <- rbind(base_ctl$size_selex_types[1:22,],
+                                 base_ctl$size_selex_types[24:28,])
+ row.names(ctl_1$size_selex_types) <- dat_1$fleetinfo$fleetname
+ 
+ #age_selex_types
+ 
+ ctl_1$age_selex_types <- rbind(base_ctl$age_selex_types[1:22,],
+                                base_ctl$age_selex_types[24:28,])
+ row.names(ctl_1$age_selex_types) <- dat_1$fleetinfo$fleetname
+ 
+ # 
+ # idx <- grep(paste0(c("FISHERY7","FISHERY10","FISHERY13"),collapse="|"), 
+ #             row.names(ctl_1$age_selex_types), value=FALSE)
+ # ctl_1$age_selex_types[idx,1] <- 12 #logistic
+ 
+ #parms
+ 
+ 
+ idx22 <- grep(paste0(c(base_dat$fleetinfo$fleetname[1:22]),collapse="|"), 
+               row.names(base_ctl$age_selex_parms), value=FALSE)
+ 
+ idxH24 <- grep(paste0(c(base_dat$fleetinfo$fleetname[24:28]),collapse="|"), 
+                row.names(base_ctl$age_selex_parms), value=FALSE)
+ 
+ 
+ new_age_selex_parms <- rbind(base_ctl$age_selex_parms[idx22,],#1:22
+                              base_ctl$age_selex_parms[idxH24,])  #24:28
+ #write.csv(new_age_selex_parms, file=file.path("data","ss3_inputs","4A_io","age_selex_parms.csv"),row.names=TRUE)
+ 
+ idx <- grep(paste0(base_dat$fleetinfo$fleetname[10],collapse="|"), 
+             row.names(new_age_selex_parms), value=FALSE)
+ 
+ 
+ row.names(new_age_selex_parms[idx,]) <- gsub("_P2000",  "",row.names(new_age_selex_parms[idx,]))
+ 
+ idx <- grep(paste0(base_dat$fleetinfo$fleetname[24],collapse="|"), 
+             row.names(new_age_selex_parms), value=FALSE)
+ 
+ row.names(new_age_selex_parms[idx,]) <- gsub("24",  "23",row.names(new_age_selex_parms[idx,]))
+ 
+ ctl_1$age_selex_parms <- new_age_selex_parms
+ 
+ #TAG
+ 
+ tg_rep24 <- base_ctl$TG_Report_fleet[24,]
+ row.names(tg_rep24) <-gsub("24","23",row.names(tg_rep24))
+ 
+ 
+ tag_recaps_new <- rbind(base_ctl$TG_Report_fleet[1:22,],
+                         base_ctl$TG_Report_fleet[24,] )
+ #write.csv(tag_recaps_new, file=file.path("data","ss3_inputs","4A_io","ctl_tag_recaps_28fleets.csv"),row.names=TRUE)
+ ctl_1$TG_Report_fleet <- tag_recaps_new
+ 
+ 
+ new_fleet_decay <- base_ctl$TG_Report_fleet_decay[c(24),]
+ row.names(new_fleet_decay) <- gsub("24","23", row.names(new_fleet_decay))
+ 
+ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay[1:22,],
+                                      new_fleet_decay)
  
  
  
@@ -2548,9 +2499,8 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
  # Run model:
  r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
  
- #.................................................
  
- ##### VARIABLE CV CPUE
+ ##### VARIABLE CV CPUE  ####
  
  #.................................................
  
@@ -2561,7 +2511,7 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
  
  # Temporary files:
  # SS base files path (in Sharepoint):
- SS_base = 'models/update/16_NsampLL5_LL_log_FL7_13DN_V2'
+ SS_base = 'models/update/sensitivities_16/16E_NsampLL5_LL_log_LL1b_LL4_DN'
  # Temporary files:
  
  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
@@ -2604,17 +2554,17 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
  #.................................................
  
  
- config_name = '19_EffortCreep'
+ config_name = 'sensitivities_Effort_Creep/19_EffortCreep'
  tmp_dir = file.path(shrpoint_path, SS_config, config_name)
  dir.create(tmp_dir)
  
  # Temporary files:
  # SS base files path (in Sharepoint):
- SS_base = 'models/update/16_NsampLL5_LL_log_FL7_13DN_V2'
+ SS_base = 'models/update/sensitivities_16/16E_fixPeak_hess'
  # Temporary files:
  
  base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
- base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
  base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
  base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
  
@@ -2625,18 +2575,57 @@ ctl_1$TG_Report_fleet_decay <- rbind(base_ctl$TG_Report_fleet_decay,
  fore_1 = base_fore
  start_1 = base_start
  
- cpue_dat_effcreep = apply_eff_creep(base_dat$CPUE, yr_col = 'time', fleet_col = 'fleet_number',
-                                     cpue_col = 'obs', cv_col = 'cv', rate = 0.005)
+ cpue_dat_effcreep = apply_eff_creep(base_dat$CPUE, yr_col = 'year', fleet_col = 'index',
+                                     cpue_col = 'obs', cv_col = 'se_log', rate = 0.005)
+cpue_dat_effcreep$month <- 1
+ dat_1$CPUE <-  cpue_dat_effcreep[,c(1,5,2:4)]
+summary(dat_1$CPUE)
  
  
- cpue_df = read.csv(file.path(shrpoint_path, SS_data, 'scaled_cpue_Meancv_02.csv'))
  
- dat_1$CPUE <- cpue_df
- names(dat_1$CPUE)  <- names(base_dat$CPUE)
- dat_1$CPUE$index[dat_1$CPUE$index==25 ] <- 28
- dat_1$CPUE$index[dat_1$CPUE$index==24 ] <- 27
- dat_1$CPUE$index[dat_1$CPUE$index==23 ] <- 26
- dat_1$CPUE$index[dat_1$CPUE$index==22 ] <- 25
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ 
+ ##### EFFORT CREEP
+ 
+ #.................................................
+ 
+ 
+ config_name = 'sensitivities_Effort_Creep/19_EffortCreep_prior'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/sensitivities_16/16E_fixPeak_prior_hess'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ cpue_dat_effcreep = apply_eff_creep(base_dat$CPUE, yr_col = 'year', fleet_col = 'index',
+                                     cpue_col = 'obs', cv_col = 'se_log', rate = 0.005)
+ cpue_dat_effcreep$month <- 1
+ dat_1$CPUE <-  cpue_dat_effcreep[,c(1,5,2:4)]
+ summary(dat_1$CPUE)
+ 
  
  
  # Write SS files:

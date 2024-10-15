@@ -1,9 +1,13 @@
 rm(list = ls())
 
+library(tidyverse)
+
 # Read path and parameters for plots:
 source('sharepoint_path.R')
 source(here('code', 'parameters_for_plots.R'))
 source(here('code', 'auxiliary_functions.R'))
+
+plot_dir <- "output/figures/"
 
 # Spatial configuration:
 spat_config = '4A_io'
@@ -61,7 +65,7 @@ p2 = ggplot(plot_data %>% dplyr::filter(type == 'Simple aggregation'), aes(x = l
   geom_line() +
   geom_line(data = plot_data %>% dplyr::filter(type == 'Catch-raised aggregation'), aes(x = len_bin, y = prop), color = 'black') +
   ylab("Proportion") + xlab('Length bin (cm)') +
-  scale_color_manual(values = fleet_col) +
+  scale_color_manual(values = fleet_number) +
   coord_cartesian(ylim = c(0, 0.25)) +
   theme_classic() +
   theme(legend.position = 'none') +
@@ -86,12 +90,29 @@ size_dat = size_dat %>% mutate(time2 = ssts2yq(time))
 p3 = ggplot(size_dat, aes(x = time2, y = fleet_name, fill = fisherycode)) + 
   geom_point(aes(size = nsamp), pch = 21, color = 'black') +
   ylab(NULL) + xlab(NULL) +
-  scale_fill_manual(values = fleet_col) +
+ # scale_fill_manual(values = fleet_col) +
   scale_size_continuous(range = c(1, 3)) +
   coord_cartesian(xlim = c(1955, 2023)) +   
   theme_classic() +
   theme(legend.position = 'none') +
   ggtitle(label = 'Simple aggregation')
+
+
+
+size_dat$nsampGB <- ifelse(size_dat$nsamp<=2,5,2)
+pGB <-  ggplot(size_dat, aes(x = time2, y = fleet_name, fill = fisherycode)) + 
+  geom_point(aes(size = nsampGB), pch = 21, color = 'black') +
+  ylab(NULL) + xlab(NULL) +
+  # scale_fill_manual(values = fleet_col) +
+  scale_size_continuous(range = c(1, 3)) +
+  coord_cartesian(xlim = c(1955, 2023)) +   
+  theme_classic() +
+  theme(legend.position = 'none') +
+  ggtitle(label = 'Simple aggregation')
+
+ggsave(file.path(shrpoint_path, plot_dir, paste0('rq_size_goodAndBad', img_type)), plot = pGB,
+       width = img_width, height = 220, units = 'mm', dpi = img_res)
+
 
 # Catch raised aggregation
 size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-cwp55.csv'))
@@ -107,7 +128,7 @@ size_dat = size_dat %>% mutate(time2 = ssts2yq(time))
 p4 = ggplot(size_dat, aes(x = time2, y = fleet_name, fill = fisherycode)) + 
   geom_point(aes(size = nsamp), pch = 21, color = 'black') +
   ylab(NULL) + xlab(NULL) +
-  scale_fill_manual(values = fleet_col) +
+ # scale_fill_manual(values = fleet_col) +
   scale_size_continuous(range = c(1, 3)) +
   coord_cartesian(xlim = c(1955, 2023)) +
   theme_classic() +
@@ -119,7 +140,24 @@ p5 = grid.arrange(p3, p4, ncol = 1)
 ggsave(file.path(shrpoint_path, plot_dir, paste0('rq_size', img_type)), plot = p5,
        width = img_width, height = 220, units = 'mm', dpi = img_res)
 
+#good <=2 and bad >2
 
+#good <=2 and bad >2 catch raised
+
+size_dat$nsampGB <- ifelse(size_dat$nsamp<=2,5,2)
+
+pGB2<- ggplot(size_dat, aes(x = time2, y = fleet_name, fill = fisherycode)) + 
+  geom_point(aes(size = nsampGB), pch = 21, color = 'black') +
+  ylab(NULL) + xlab(NULL) +
+ # scale_fill_manual(values = fleet_col) +
+  scale_size_continuous(range = c(1, 3)) +
+  coord_cartesian(xlim = c(1955, 2023)) +
+  theme_classic() +
+  theme(legend.position = 'none') +
+  ggtitle(label = 'Catch-raised aggregation')
+
+ggsave(file.path(shrpoint_path, plot_dir, paste0('rq_size_goodAndBad_catch_raised', img_type)), plot = pGB2,
+       width = img_width, height = 220, units = 'mm', dpi = img_res)
 # Mean length over the years ----------------------------------------------
 
 # Original:
