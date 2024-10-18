@@ -98,3 +98,29 @@ cpue_df$seas = 1
 
 # Save data:
 write.csv(cpue_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'cpue.csv'), row.names = FALSE)
+
+
+# -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# For other CPUE indices (FS, LS, ABBI), just copy the input files generated for the 4A model.
+# Make sure to change the fleet number in your SS3 configuration
+
+# Areas-as-fleets subconfiguration
+spat_subconfig = 'aaf'
+file.copy(from = file.path(shrpoint_path, 'data/ss3_inputs/4A_io', 'cpue-fs.csv'),
+          to = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'cpue-fs.csv'))
+file.copy(from = file.path(shrpoint_path, 'data/ss3_inputs/4A_io', 'cpue-ls.csv'),
+          to = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'cpue-ls.csv'))
+file.copy(from = file.path(shrpoint_path, 'data/ss3_inputs/4A_io', 'cpue-abbi.csv'),
+          to = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'cpue-abbi.csv'))
+
+# aggregated subconfiguration
+spat_subconfig = 'agg'
+file.copy(from = file.path(shrpoint_path, 'data/ss3_inputs/4A_io', 'cpue-fs.csv'),
+          to = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'cpue-fs.csv'))
+file.copy(from = file.path(shrpoint_path, 'data/ss3_inputs/4A_io', 'cpue-ls.csv'),
+          to = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'cpue-ls.csv'))
+file.copy(from = file.path(shrpoint_path, 'data/ss3_inputs/4A_io', 'cpue-abbi.csv'),
+          to = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'cpue-abbi.csv'))
+
+

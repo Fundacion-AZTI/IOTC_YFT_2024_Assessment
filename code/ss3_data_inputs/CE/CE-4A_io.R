@@ -47,7 +47,7 @@ fish_info = get_fisheries(spat_config)
 ModelFisheries = fish_info$fleet_name
 
 # -------------------------------------------------------------------------
-# Read traditional LF data after preprocessing:
+# Read traditional CE data after preprocessing:
 data = read.csv(file.path(shrpoint_path, 'data/processed', 'catch_grid.csv'))
 
 # Get area information:
@@ -116,9 +116,9 @@ which(is.na(work$ModelFleet))
 write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'catch.csv'), row.names = FALSE)
 
 # Save table fleet labels:
-fleet_name_df = work %>% group_by(ModelFleet) %>% summarise(fleet_name = unique(ModelFishery))
-colnames(fleet_name_df) = c('fleet_number', 'fleet_name')
-write.csv(fleet_name_df, file = file.path(shrpoint_path, tab_dir, paste0('fleet_label_', spat_config, '.csv')), row.names = FALSE)
+# fleet_name_df = work %>% group_by(ModelFleet) %>% summarise(fleet_name = unique(ModelFishery))
+# colnames(fleet_name_df) = c('fleet_number', 'fleet_name')
+# write.csv(fleet_name_df, file = file.path(shrpoint_path, tab_dir, paste0('fleet_label_', spat_config, '.csv')), row.names = FALSE)
 
 
 # -------------------------------------------------------------------------

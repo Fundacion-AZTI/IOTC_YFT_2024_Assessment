@@ -23,7 +23,7 @@ affiliations:
   - id: 3
     name: Indian Ocean Tuna Commission Secretariat, Blend Building, Providence, Seychelles
   - id: 4
-    name: Add institution
+    name: International Pole-and-Line Foundation, Maldives
 toc: true
 toccolor: blue
 format:
