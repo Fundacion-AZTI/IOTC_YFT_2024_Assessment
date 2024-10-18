@@ -564,6 +564,30 @@ get_fisheries = function(config = '4A_io') {
   return(fish_df)
 }
 
+# ---------------------
+# Farley 2023 two stage vB function:
+twoStage_vB = function(all_ages = 1:10, Linf_par, gamma_par, k1_par, a_0, k2_par, alpha_par) {
+  
+  L_a = numeric(length(all_ages))
+  for(a in seq_along(all_ages)) {
+    
+    tau = alpha_par + (1/k2_par)*log(1 - gamma_par*(1-exp(-k1_par*alpha_par)))
+    if(all_ages[a] <= alpha_par) L_a[a] = gamma_par*Linf_par*(1-exp(-k1_par*(all_ages[a]-a_0)))
+    if(all_ages[a] > alpha_par) L_a[a] = Linf_par*(1-exp(-k2_par*(all_ages[a]-a_0-tau)))
+    
+  }
+  
+  return(L_a)
+}
+
+
+# -------------------------------------------------------------------------
+# Maturity function in Zudaire 2022:
+maturity_Zudaire = function(len_vec, alpha = -9.25, beta = 0.091) {
+  mat = exp(alpha + beta*len_vec)/(1+exp(alpha + beta*len_vec))
+  return(mat)
+}
+
 
 # -------------------------------------------------------------------------
 # Several growth-related functions:
