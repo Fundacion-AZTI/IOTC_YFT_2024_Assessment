@@ -188,7 +188,7 @@ dir_table <- "output/tables/"
   scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings","05_update_M","06_update_Growth",
            "06b_update_GrowthTaggingData","07_update_Maturity",
            "08_selectivity_PS","09_boundaries","10_recDevs","11_RQ","12_cwp5x5","13_cwp5x5_RQ","14_cwp5x5_RQ_LL11_p2_free",
-           "15_BiasCorrectionRamp_hess","16_LLsplit_LL1b_LL4_DN","19_EffortCreep","21_dwtag01")
+           "15_BiasCorrectionRamp_hess","16_LLsplit_LL1b_LL4_DN","19_EffortCreep","21_dwtag01","18_CPUEvariable")
 
 
   desc <- c("BaseCase", "update catch","update cpue","update length","update warnings",
@@ -197,9 +197,9 @@ dir_table <- "output/tables/"
             "Maturity Zudaire et al. 2022","update PS selectivity","update boundaries",
            "update recruitment deviates","Adding report quality","Regular grid cwp5x5","Regular grid and cwp5x5 and report quality",
            "free parameter-2 LL 3","Apply bias correction ramp","LL split LL1B and LL4 DN selectivity",
-           "Effort creep 0.5% per day","Downweight tagging data by 0.1")
+           "Effort creep 0.5% per day","Downweight tagging data by 0.1","CPUE cv variable")
 
-  scs <- scs[18]
+  scs <- scs[1:17]
   desc <- desc[1:17]
   scs_wd <-paste0("models/update/",scs)
   # scs <- paste0("sensitivities_16_CT/",c("16C_NsampLL5_LL_log_FL7_13DN"))
@@ -207,7 +207,7 @@ dir_table <- "output/tables/"
   # scs <- paste0("sensitivities_17_CT/",c("17_NoRecDev","17_Rec3Region",
   #                                        "17_RecDev_188betweenRegions","17_Rec1Region"))
  # scs <- c("20_H07","20_H09")
-  scs <- c("sensitivities_16/test/16E_fixPeak_prior_hess")
+  scs <- c("23B_BCR1_dev300")
   scs_wd <-paste0("models/update/",scs)
   
   plot_ss3 <-TRUE
@@ -235,9 +235,23 @@ dir_table <- "output/tables/"
   #...................................................
   
   
-
-  i <- 17:20
   
+  scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings","05_update_M","06_update_Growth",
+           "06b_update_GrowthTaggingData","07_update_Maturity",
+           "08_selectivity_PS","09_boundaries","10_recDevs","11_RQ","12_cwp5x5","13_cwp5x5_RQ","14_cwp5x5_RQ_LL11_p2_free",
+           "15_BiasCorrectionRamp_hess","16_LLsplit_LL1b_LL4_DN","19_EffortCreep","21_dwtag01","18_CPUEvariable")
+  
+  
+  desc <- c("BaseCase", "update catch","update cpue","update length","update warnings",
+            "Natural mortality age 4.07 years M=0.467",
+            "Farley 2023 growth","update_Growth Tagging Data",
+            "Maturity Zudaire et al. 2022","update PS selectivity","update boundaries",
+            "update recruitment deviates","Adding report quality","Regular grid cwp5x5","Regular grid and cwp5x5 and report quality",
+            "free parameter-2 LL 3","Apply bias correction ramp","LL split LL1B and LL4 DN selectivity",
+            "Effort creep 0.5% per day","Downweight tagging data by 0.1","CPUE cv variable")
+  
+  i <- 17:21
+  #i <- 17:20 last 4 models
   sub_scs <- scs[i]
   sub_scs_wd <-paste0("models/update/",sub_scs)
   mod_sum <- aggregate.ssMod(sub_scs, sub_scs_wd)
@@ -257,7 +271,7 @@ dir_table <- "output/tables/"
     scale_color_discrete(labels=levels(sub_df_long$scenario))+
     xlab("Year")+ ylab("F/Fmsy")+theme_fun()
   
-  SavePlot(paste0('Stepwise_update_F_last4_',max(i)),15,10)
+  SavePlot(paste0('Stepwise_update_F_',max(i)),15,10)
   
   ### end ###
   
@@ -279,7 +293,7 @@ dir_table <- "output/tables/"
     scale_color_discrete(labels=levels(sub_df_long$scenario))+xlab("Year")+ ylab("SSB")+
     theme_fun()
   
-  SavePlot(paste0('Stepwise_update_SSB_last4_',max(i)),15,10)
+  SavePlot(paste0('Stepwise_update_SSB_',max(i)),15,10)
   
   #COMPARISON SSB/B0
   
@@ -463,9 +477,10 @@ dir_table <- "output/tables/"
   scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings","05_update_M","06_update_Growth",
            "06b_update_GrowthTaggingData","07_update_Maturity",
            "08_selectivity_PS","09_boundaries","10_recDevs","11_RQ","12_cwp5x5","13_cwp5x5_RQ","14_cwp5x5_RQ_LL11_p2_free",
-           "15_BiasCorrectionRamp_hess","16_LLsplit_LL1b_LL4_DN","19_EffortCreep","21_dwtag01","20_H07","20_h09")
+           "15_BiasCorrectionRamp_hess","16_LLsplit_LL1b_LL4_DN","19_EffortCreep","21_dwtag01","20_H07","20_h09",
+           "22_TwoBlockCPUE","18_CPUEvariable","23_Last8recdev_RemLC_B300","23_BCR1_dev300","23_recdev300","23_BCR1")
   
-  sub_scs <- scs[17:22]
+  sub_scs <- scs[c(18,25:28)]
   i <- 1
   mod.sum <- NULL
   for (i in 1:length(sub_scs)){
@@ -476,7 +491,7 @@ dir_table <- "output/tables/"
     rm(ss3)
   }
   mod.plots <- SSsummarize(mod.sum)
-  SSplotComparisons(mod.plots, legendlabels=sub_scs,print=TRUE,plotdir="output/figures/ComparisonModels_H/")
+  SSplotComparisons(mod.plots, legendlabels=sub_scs,print=TRUE,plotdir="output/figures/ComparisonBCR/")
   
   
   
