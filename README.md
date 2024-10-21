@@ -1,51 +1,10 @@
 # IOTC Yellowfin Stock Assessment 2024
 
-This Github repository is used to conduct the 2024 Yellowfin assessment in the Indian Ocean. **Open it in RStudio as a project**.
-
 > :loudspeaker: **Goal**
 >
-> The main goal of this Github repository is to replicate all the 2024 SS configurations using R code, which will improve the collaboration among stock assessors and the communication of results.
+> The main goal of this repository is to replicate the 2024 Indian Ocean yellowfin assessment configurations in R. The assessment is implemented in [Stock Synthesis 3](https://vlab.noaa.gov/web/stock-synthesis).
 
-These following folders can be found in this repository:
-
--   `code`: store the R scripts used to analyze the data (`code/analyses`), and to create the SS inputs (`code/ss/inputs`) and configurations (`code/ss/configurations`).
--   `presentation`: store Quarto files (`.qmd`) to produce the assessment presentation(s).
--   `report`: store Quarto files (`.qmd`) to produce the assessment report.
-
-## Sharepoint
-
-You also need to have access to the Sharepoint to read the raw data and store the SS files. In the Sharepoint, you can find the following main folders:
-
--   `data`: store the raw data provided by the IOTC Secretariat (`data/raw`), the processed data to make figures (`data/processed`), and the SS inputs for different SS spatial configurations (`data/ss_inputs`). There raw data can be found online [here](https://iotc.org/documents/WPTT/26AS/Data/01).
--   `models`: store the base SS files (e.g., the 2021 SS files, `models/base`) that will be then modified to create the 2024 configurations. Only include one set of base files (`control.ss`, `data.ss`, `forecast.ss`, `starter.ss`) per spatial configuration. This folder also store the SS configurations for the 2024 assessment by spatial configuration (`models/configurations`). Use the R scripts in `code/ss/configurations` in the Github repository to create the 2024 configurations.
--   `output`: store figures and tables from the data analysis and SS.
-
-> :warning: **Important**
->
-> Since the Sharepoint local path might change for AZTI and external collaborators, you will need to locally change the `sharepoint_path.R` script in order to read the data and save the SS configurations properly. DO NOT commit/push changes in `sharepoint_path.R`.
-
-The **folders** in the Sharepoint should look like:
-
-``` bash
-└───IOTC_YFT_2024 - General
-    ├───data
-    │   ├───processed
-    │   ├───raw
-    │   └───ss_inputs
-    │       ├───1A_west
-    │       ├───2A_io
-    │       └───4A_io
-    ├───models
-    │   ├───base
-    │   │   └───4A_io
-    │   └───configurations
-    │       ├───1A_west
-    │       ├───2A_io
-    │       └───4A_io
-    └───outputs
-        ├───figures
-        └───tables
-```
+This is the developers' branch. If you want to reproduce this assessment, see the `reproducible` branch: <https://github.com/Fundacion-AZTI/IOTC_YFT_2024_Assessment/tree/reproducible>.
 
 ## Basic steps to use Github
 
