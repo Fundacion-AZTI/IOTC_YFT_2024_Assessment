@@ -184,22 +184,21 @@ dir_table <- "output/tables/"
   fish_names = gsub(pattern = ' ', replacement = '_', x = fish_names)
   fleetnames <- paste0(1:25,"_",c(fish_names,c(fish_names[c(7,10,11,13)])))
   
-  
   scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings","05_update_M","06_update_Growth",
            "06b_update_GrowthTaggingData","07_update_Maturity",
            "08_selectivity_PS","09_boundaries","10_recDevs","11_RQ","12_cwp5x5","13_cwp5x5_RQ","14_cwp5x5_RQ_LL11_p2_free",
-           "15_BiasCorrectionRamp_hess","16_LLsplit_LL1b_LL4_DN","19_EffortCreep","21_dwtag01")
-
-
+           "15_BiasCorrectionRamp_hess","16_LLsplit_LL1b_LL4_DN","19_EffortCreep","21_dwtag01",'22_TwoBlockCPUE','23_BCR1')
+  
+  
   desc <- c("BaseCase", "update catch","update cpue","update length","update warnings",
-           "Natural mortality age 4.07 years M=0.467",
+            "Natural mortality age 4.07 years M=0.467",
             "Farley 2023 growth","update_Growth Tagging Data",
             "Maturity Zudaire et al. 2022","update PS selectivity","update boundaries",
-           "update recruitment deviates","Adding report quality","Regular grid cwp5x5","Regular grid and cwp5x5 and report quality",
-           "free parameter-2 LL 3","Apply bias correction ramp","LL split LL1B and LL4 DN selectivity",
-           "Effort creep 0.5% per day","Downweight tagging data by 0.1")
-
-  scs <- scs[18]
+            "update recruitment deviates","Adding report quality","Regular grid cwp5x5","Regular grid and cwp5x5 and report quality",
+            "free parameter-2 LL 3","Apply bias correction ramp","LL split LL1B and LL4 DN selectivity",
+            "Effort creep 0.5% per day","Downweight tagging data by 0.1","Two block CPUE","Bias correction ramp of 1")
+  
+  scs <- scs[1:17]
   desc <- desc[1:17]
   scs_wd <-paste0("models/update/",scs)
   # scs <- paste0("sensitivities_16_CT/",c("16C_NsampLL5_LL_log_FL7_13DN"))
@@ -207,10 +206,10 @@ dir_table <- "output/tables/"
   # scs <- paste0("sensitivities_17_CT/",c("17_NoRecDev","17_Rec3Region",
   #                                        "17_RecDev_188betweenRegions","17_Rec1Region"))
  # scs <- c("20_H07","20_H09")
-  scs <- c("sensitivities_16/test/16E_fixPeak_prior_hess")
+  scs <- c("23_BCR1")
   scs_wd <-paste0("models/update/",scs)
   
-  plot_ss3 <-TRUE
+  plot_ss3 <-FALSE
   add_perf_table <- TRUE
   i<-1
     
@@ -235,9 +234,23 @@ dir_table <- "output/tables/"
   #...................................................
   
   
-
-  i <- 17:20
   
+  scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings","05_update_M","06_update_Growth",
+           "06b_update_GrowthTaggingData","07_update_Maturity",
+           "08_selectivity_PS","09_boundaries","10_recDevs","11_RQ","12_cwp5x5","13_cwp5x5_RQ","14_cwp5x5_RQ_LL11_p2_free",
+           "15_BiasCorrectionRamp_hess","16_LLsplit_LL1b_LL4_DN","19_EffortCreep","21_dwtag01","18_CPUEvariable")
+  
+  
+  desc <- c("BaseCase", "update catch","update cpue","update length","update warnings",
+            "Natural mortality age 4.07 years M=0.467",
+            "Farley 2023 growth","update_Growth Tagging Data",
+            "Maturity Zudaire et al. 2022","update PS selectivity","update boundaries",
+            "update recruitment deviates","Adding report quality","Regular grid cwp5x5","Regular grid and cwp5x5 and report quality",
+            "free parameter-2 LL 3","Apply bias correction ramp","LL split LL1B and LL4 DN selectivity",
+            "Effort creep 0.5% per day","Downweight tagging data by 0.1","CPUE cv variable")
+  
+  i <- 17:21
+  #i <- 17:20 last 4 models
   sub_scs <- scs[i]
   sub_scs_wd <-paste0("models/update/",sub_scs)
   mod_sum <- aggregate.ssMod(sub_scs, sub_scs_wd)
@@ -257,7 +270,7 @@ dir_table <- "output/tables/"
     scale_color_discrete(labels=levels(sub_df_long$scenario))+
     xlab("Year")+ ylab("F/Fmsy")+theme_fun()
   
-  SavePlot(paste0('Stepwise_update_F_last4_',max(i)),15,10)
+  SavePlot(paste0('Stepwise_update_F_',max(i)),15,10)
   
   ### end ###
   
@@ -279,7 +292,7 @@ dir_table <- "output/tables/"
     scale_color_discrete(labels=levels(sub_df_long$scenario))+xlab("Year")+ ylab("SSB")+
     theme_fun()
   
-  SavePlot(paste0('Stepwise_update_SSB_last4_',max(i)),15,10)
+  SavePlot(paste0('Stepwise_update_SSB_',max(i)),15,10)
   
   #COMPARISON SSB/B0
   
@@ -319,7 +332,7 @@ dir_table <- "output/tables/"
   scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings","05_update_M","06_update_Growth",
            "06b_update_GrowthTaggingData","07_update_Maturity",
            "08_selectivity_PS","09_boundaries","10_recDevs","11_RQ","12_cwp5x5","13_cwp5x5_RQ","14_cwp5x5_RQ_LL11_p2_free",
-           "15_BiasCorrectionRamp_hess","16_LLsplit_LL1b_LL4_DN","19_EffortCreep","21_dwtag01")
+           "15_BiasCorrectionRamp_hess","16_LLsplit_LL1b_LL4_DN","19_EffortCreep","21_dwtag01",'22_TwoBlockCPUE','23_BCR1')
   
   
   desc <- c("BaseCase", "update catch","update cpue","update length","update warnings",
@@ -328,15 +341,24 @@ dir_table <- "output/tables/"
             "Maturity Zudaire et al. 2022","update PS selectivity","update boundaries",
             "update recruitment deviates","Adding report quality","Regular grid cwp5x5","Regular grid and cwp5x5 and report quality",
             "free parameter-2 LL 3","Apply bias correction ramp","LL split LL1B and LL4 DN selectivity",
-            "Effort creep 0.5% per day","Downweight tagging data by 0.1")
+            "Effort creep 0.5% per day","Downweight tagging data by 0.1","Two block CPUE","Bias correction ramp of 1")
   
   
-  i <- 1:3
   
-  sub_scs <- scs[i]
-  sub_scs_wd <-paste0("models/update/",sub_scs)
-  mod_sum <- aggregate.ssMod(sub_scs, sub_scs_wd)
-  
+  i <- c(2,6)
+  nmplot<- "BCR"
+  RefModels <- TRUE
+  if(RefModels == TRUE){
+    scs <- c( "1_OneBlock_LLsel","2_TwoBlock_LLsel","3_EffortCreep","4_Dwtag01",'5_TwoBlockCPUE','6_BCR1')
+    sub_scs <- scs[i]
+    sub_scs_wd <-paste0("models/RefModels/",sub_scs)
+    mod_sum <- aggregate.ssMod(sub_scs, sub_scs_wd)
+  }else {
+    sub_scs <- scs[i]
+    sub_scs_wd <-paste0("models/update/",sub_scs)
+    mod_sum <- aggregate.ssMod(sub_scs, sub_scs_wd)
+}
+   
   ### Comparison f
   df <- mod_sum$Fvalue
   df <- df %>% rename_at(1:length(sub_scs),~sub_scs)
@@ -368,7 +390,7 @@ dir_table <- "output/tables/"
       theme_fun()
     
   }
-  SavePlot(paste0('Stepwise_update_F_GRAY_',max(i)),15,10)
+  SavePlot(paste0('Stepwise_update_F_GRAY_',max(i),'_',nmplot),15,10)
   #SavePlot(paste0('Stepwise_update_F_',max(i)),15,10)
   
   ### end ###
@@ -408,7 +430,7 @@ dir_table <- "output/tables/"
       theme_fun()
     }
   
-  SavePlot(paste0('Stepwise_update_SSB_GRAY_',max(i)),15,10)
+  SavePlot(paste0('Stepwise_update_SSB_GRAY_',max(i),'_',nmplot),15,10)
   
   
   # Comparison SSB/b0
@@ -447,7 +469,7 @@ dir_table <- "output/tables/"
       xlab("Year")+ ylab("SSB/B0")+
       theme_fun()
   }
-  SavePlot(paste0('Stepwise_update_SSB_B0_GRAY_',max(i)),15,10)
+  SavePlot(paste0('Stepwise_update_SSB_B0_GRAY_',max(i),'_',nmplot),15,10)
   
   
   
@@ -463,9 +485,10 @@ dir_table <- "output/tables/"
   scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings","05_update_M","06_update_Growth",
            "06b_update_GrowthTaggingData","07_update_Maturity",
            "08_selectivity_PS","09_boundaries","10_recDevs","11_RQ","12_cwp5x5","13_cwp5x5_RQ","14_cwp5x5_RQ_LL11_p2_free",
-           "15_BiasCorrectionRamp_hess","16_LLsplit_LL1b_LL4_DN","19_EffortCreep","21_dwtag01","20_H07","20_h09")
+           "15_BiasCorrectionRamp_hess","16_LLsplit_LL1b_LL4_DN","19_EffortCreep","21_dwtag01","20_H07","20_h09",
+           "22_TwoBlockCPUE","18_CPUEvariable","23_Last8recdev_RemLC_B300","23_BCR1_dev300","23_recdev300","23_BCR1")
   
-  sub_scs <- scs[17:22]
+  sub_scs <- scs[c(18,25:28)]
   i <- 1
   mod.sum <- NULL
   for (i in 1:length(sub_scs)){
@@ -476,9 +499,36 @@ dir_table <- "output/tables/"
     rm(ss3)
   }
   mod.plots <- SSsummarize(mod.sum)
-  SSplotComparisons(mod.plots, legendlabels=sub_scs,print=TRUE,plotdir="output/figures/ComparisonModels_H/")
+  SSplotComparisons(mod.plots, legendlabels=sub_scs,print=TRUE,plotdir="output/figures/ComparisonBCR/")
   
   
+  
+  #......................................................
+  
+  #### SSPLOT COMPARISON REFERENCE MODELS ####
+  
+  #.....................................................
+  
+  
+  
+  scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings","05_update_M","06_update_Growth",
+           "06b_update_GrowthTaggingData","07_update_Maturity",
+           "08_selectivity_PS","09_boundaries","10_recDevs","11_RQ","12_cwp5x5","13_cwp5x5_RQ","14_cwp5x5_RQ_LL11_p2_free",
+           "15_BiasCorrectionRamp_hess","16_LLsplit_LL1b_LL4_DN","19_EffortCreep","21_dwtag01","20_H07","20_h09",
+           "22_TwoBlockCPUE","18_CPUEvariable","23_Last8recdev_RemLC_B300","23_BCR1_dev300","23_recdev300","23_BCR1")
+  
+  sub_scs <- scs[c(1,18,25:28)]
+  i <- 1
+  mod.sum <- NULL
+  for (i in 1:length(sub_scs)){
+    #  load(paste("Results/",sc.nm[i],".RData",sep=""))
+    oldsubdir = paste0("models/update/",sub_scs[i])
+    ss3 <- SSgetoutput(dirvec=oldsubdir,  getcovar=TRUE,forecast=FALSE)
+    mod.sum <- c(mod.sum,ss3)
+    rm(ss3)
+  }
+  mod.plots <- SSsummarize(mod.sum)
+  SSplotComparisons(mod.plots, legendlabels=sub_scs,print=TRUE,plotdir="output/figures/ComparisonBCR/")
   
   #...................................................
   ### STEPWISE sub analysis
@@ -627,4 +677,125 @@ dir_table <- "output/tables/"
              plotdir="output/figures/LLdividedModel")
   SSplotTags(sc_ss3,subplots=10,taggroups = "TG_1")
   
+  i <- c(1:6)
+  nmplot<- "RefMOdels"
+  
+  scs <- c("0_BC_2021", "1_OneBlock_LLsel","2_TwoBlock_LLsel",'3_TwoBlockCPUE',"4_Dwtag01","5_EffortCreep")
+  sub_scs <- scs[i]
+  sub_scs_wd <-paste0("models/RefModels/",sub_scs)
+  mod_sum <- aggregate.ssMod(sub_scs, sub_scs_wd)
+  
+  
+  ### Comparison f
+  df <- mod_sum$Fvalue
+  df <- df %>% rename_at(1:length(sub_scs),~sub_scs)
+  df_long <- df %>% pivot_longer(cols =sub_scs, names_to = "scenario", values_to = "value")
+  sub_df_long <- df_long %>% subset(scenario %in% sub_scs)  %>% dplyr::filter(!(scenario=="00_BC" & Yr>=297))
+  sub_df_long$scenario <- as.factor(as.character(sub_df_long$scenario))
+  levels(sub_df_long$scenario) <- droplevels(sub_df_long$scenario)
+  sub_df_long  <- sub_df_long %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))%>%
+    mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
+  
+  scGrey<- levels(sub_df_long$scenario)[-length(levels(sub_df_long$scenario))]
+  scRed <- levels(sub_df_long$scenario)[length(levels(sub_df_long$scenario))]
+  scBlack <- levels(sub_df_long$scenario)[length(levels(sub_df_long$scenario))-1]  
+  scBlue <- 
+    scGreen <-
+    sc
+  if(length(i)>2){
+    ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+      geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGrey),size=1) +
+      geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=1.5) +
+      geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=1) +
+      scale_color_manual(values = c(gray.colors(length(i)-2,start=0.7,end=0.5),'black', 'red')) +xlim(1950,2023)+ylim(0,2.5)+
+      xlab("Year")+ ylab("F/Fmsy")+
+      theme_fun()
+  }else{
+    ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+      geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGrey),size=1) +
+      geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=1.25) +
+      geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=1) +
+      scale_color_manual(values = c(gray.colors(0,start=0.7,end=0), 'black', 'red')) +xlim(1950,2023)+ylim(0,2.5)+
+      xlab("Year")+ ylab("F/Fmsy")+
+      theme_fun()
+    
+  }
+  SavePlot(paste0('Stepwise_update_F_GRAY_',max(i),'_',nmplot),15,10)
+  #SavePlot(paste0('Stepwise_update_F_',max(i)),15,10)
+  
+  ### end ###
+  
+  
+  # Comparison SSB REFERENCE MDOELS
+  
+  df <- mod_sum$SpawnBio
+  df <- df %>% rename_at(1:length(sub_scs),~sub_scs)
+  df_long <- df %>% pivot_longer(cols =sub_scs, names_to = "scenario", values_to = "value")
+  sub_df_long <- df_long %>% subset(scenario %in% sub_scs)  %>% dplyr::filter(!(scenario=="00_BC" & Yr>=297))
+  sub_df_long <- sub_df_long %>% subset(scenario %in% sub_scs) 
+  sub_df_long$scenario <- as.factor(as.character(sub_df_long$scenario))
+  levels(sub_df_long$scenario) <- droplevels(sub_df_long$scenario)
+  sub_df_long  <- sub_df_long %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))%>%
+    mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
+  
+  #SavePlot(paste0('Stepwise_update_SSB',max(i)),15,10)
+  scRed <-  "0_BC_2021"#, "1_OneBlock_LLsel","2_TwoBlock_LLsel",'3_TwoBlockCPUE',"4_Dwtag01","5_EffortCreep")
+  scBlack <- "1_OneBlock_LLsel"
+  scBlue <- "2_TwoBlock_LLsel"
+  scGreen <- '3_TwoBlockCPUE'
+  scPurple <-"4_Dwtag01"
+  scOrange <-"5_EffortCreep"
+  
+  p1 <- ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=1.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlue),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGreen),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scPurple),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scOrange),size=1) +
+    scale_color_manual(values = c( 'red','black','blue','green','purple','orange')) +xlim(1950,2023)+ylim(0,4.5e6)+
+    xlab("Year")+ ylab("SSB")+
+    theme_fun()
+  p1
+  SavePlot(paste0('Stepwise_update_SSB_',max(i),'_',nmplot),15,10)
+  
+  
+  # Comparison SSB/b0
+  
+  df <- mod_sum$SpawnBio
+  B0 <- as.vector(df[df$Label=="SSB_Virgin",-c(length(i)+1,length(i)+2)])
+  df[,-c(length(i)+1,length(i)+2)] <- df[,-c(length(i)+1,length(i)+2)]/B0
+  df <- df %>% rename_at(1:length(sub_scs),~sub_scs)
+  df_long <- df %>% pivot_longer(cols =sub_scs, names_to = "scenario", values_to = "value")
+  sub_df_long <- df_long %>% subset(scenario %in% sub_scs)  %>% dplyr::filter(!(scenario=="00_BC" & Yr>=297))
+  sub_df_long <- sub_df_long %>% subset(scenario %in% sub_scs) 
+  sub_df_long$scenario <- as.factor(as.character(sub_df_long$scenario))
+  levels(sub_df_long$scenario) <- droplevels(sub_df_long$scenario)
+  sub_df_long  <- sub_df_long %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))%>%
+    mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
+  
+  #SavePlot(paste0('Stepwise_update_SSB',max(i)),15,10)
+  scRed <-  "0_BC_2021"#, "1_OneBlock_LLsel","2_TwoBlock_LLsel",'3_TwoBlockCPUE',"4_Dwtag01","5_EffortCreep")
+  scBlack <- "1_OneBlock_LLsel"
+  scBlue <- "2_TwoBlock_LLsel"
+  scGreen <- '3_TwoBlockCPUE'
+  scPurple <-"4_Dwtag01"
+  scOrange <-"5_EffortCreep"
+  
+  p2 <- ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=1.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlue),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGreen),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scPurple),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scOrange),size=1) +
+    scale_color_manual(values = c( 'red','black','blue','green','purple','orange')) +xlim(1950,2023)+ylim(0,1.5)+
+    xlab("Year")+ ylab("SSB/B0")+
+    theme_fun()
+  P2
+  SavePlot(paste0('Stepwise_update_SSB_B0_',max(i),'_',nmplot),15,10)
+  
+  ggarrange(p1,p2,ncol=2,common.legend = TRUE)
+  
+  SavePlot(paste0('Stepwise_update_SSB_and_SSB_B0_',max(i),'_',nmplot),15,10)
   

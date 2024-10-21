@@ -1,15 +1,29 @@
 ---
 title: "Preliminary 2024 stock assessment of yellowfin tuna in the Indian Ocean"
 authors: 
-  - name: Name 1
-    affil-id: 1,2
-  - name: Name 2
+  - name: Agurtzane Urtizberea
+    affil-id: 1
+  - name: Giancarlo M. Correa
+    affil-id: 1
+  - name: Adam Langley
     affil-id: 2
+  - name: Gorka Merino
+    affil-id: 1
+  - name: Dan Fu
+    affil-id: 3
+  - name: Emmanuel Chassot
+    affil-id: 3
+  - name: Shiham Adam
+    affil-id: 4
 affiliations:
   - id: 1
-    name: AZTI, Marine Research, Basque Research and Technology Alliance (BRTA), Txatxarramendi ugartea z/g, 48395 Sukarrieta (Bizkaia), Spain
+    name: AZTI, Marine Research, Basque Research and Technology Alliance (BRTA), Herrera Kaia, Portualdea z/g, Pasaia, Gipuzkoa, Spain
   - id: 2
-    name: Affiliation 2
+    name: Independent Consultant, Nelson, New Zealand
+  - id: 3
+    name: Indian Ocean Tuna Commission Secretariat, Blend Building, Providence, Seychelles
+  - id: 4
+    name: Add institution
 format:
   docx:
     toc: false
@@ -29,6 +43,7 @@ knitr::opts_chunk$set(echo = FALSE,
 ```{r}
 # To output figures and tables in sharepoint:
 source('sharepoint_path.R')
+source('code/auxiliary_functions.R')
 ```
 
 ```{r}
@@ -47,7 +62,9 @@ rbbt::bbt_update_bib(path_rmd = 'report/report.qmd',
 
 # Executive Summary {.unnumbered}
 
-This report presents a preliminary stock assessment for Indian Ocean yellowfin tuna (*Thunnus albacares*) using Stock Synthesis 3. The assessment uses an age-structured and spatially-explicit population model and is fitted to catch, catch per unit effort (CPUE) indices, length compositions, tagging data, and conditional age-at-length. The assessment covers 1950 – 2023 and represents an update of the previous assessment model, taking into account progress and improvements made since the previous assessment. The assessment assumes that the Indian Ocean yellowfin tuna constitute a single spawning stock, modelled as spatially disaggregated four regions, with twenty one fisheries. Standardized CPUE series from the main longline fleets 1975 – 2023 were included in the models as the relative abundance index of exploitable biomass in each region. The CPUE indices from EU purse seine sets on free schools were included in a subset of models with a revised fleet structure to better accommodate the distribution and size structure of the free school purse seine fishery. Indices based on associative and non-associative dynamics of yellowfin tuna with floating objects were also available, and the utility of these indices was examined in the assessment. Tag release and recovery data from the RTTP-IO program were included in the model to inform abundance, movement, and mortality rates.
+This report presents a preliminary stock assessment for Indian Ocean yellowfin tuna (*Thunnus albacares*) using Stock Synthesis 3. The assessment uses an age-structured spatially-explicit population model and is fitted to catch, catch per unit effort (CPUE) indices, length compositions, tagging data, and conditional age-at-length. The assessment covers 1950 – 2023 and represents an update of the previous assessment model, taking into account progress and improvements made since the previous assessment, including recommendations from the review of the previous assessment undertaken in 2023. The assessment assumes that the Indian Ocean yellowfin tuna constitute a single spawning stock, modelled as spatially disaggregated four regions, with twenty-one fisheries. Key biological parameters were revised, specifically growth and natural mortality. Standardized CPUE series from the main longline fleets 1975 – 2023 were included in the models as the relative abundance index of exploitable abundance in each region, including alternative assumptions regarding changes in the efficiency of the longline fleet (“effort creep”). The CPUE indices from EU purse seine sets on free schools were included in a subset of models. Indices based on associative and non-associative dynamics of yellowfin tuna with floating objects were also available, and the utility of these indices was examined in the assessment. Tag release and recovery data from the RTTP-IO program were included in the model to inform abundance, movement, and mortality rates.
+
+Include an overall summary of stock status, including magnitude of recent catch, estimated yields, etc. To be completed.
 
 {{< pagebreak >}}
 
@@ -55,15 +72,15 @@ This report presents a preliminary stock assessment for Indian Ocean yellowfin t
 
 Before 2008, Indian Ocean (IO) yellowfin tuna (*Thunnus albacares*) was assessed using methods such as Virtual Population Analysis (VPA) and production models [@nishidaStockAssessmentYellowfin2007; @nishidaStockAssessmentYellowfin2005]. In 2008, a preliminary stock assessment of IO yellowfin tuna was conducted using MULTIFAN-CL [@langleyPreliminaryStockAssessment2008], enabling the integration of the tag release/recovery data collected from the large-scale tagging programme conducted in the IO in the preceding years. The MULTIFAN-CL assessment was revised and updated in the following years [@langleyStockAssessmentYellowfin2009; @langleyStockAssessmentYellowfin2010; @langleyStockAssessmentYellowfin2011; @langleyStockAssessmentYellowfin2012].
 
-In 2015, the assessment of IO yellowfin tuna was implemented [@langleyStockAssessmentYellowfin2015], which used the Stock Synthesis 3 (SS3) modelling platform [@methotStockSynthesisBiological2013]. SS3 is conceptually similar to MFCL, and the two platforms have yielded similar results. On basis of that assessment, the yellowfin tuna stock was determined to be overfished and subject to overfishing. At its 20th meeting, the Indian Ocean Tuna Commission (IOTC) adopted an Interim Plan for Rebuilding the Indian Ocean Yellowfin Tuna Stock (Res. 16/01).
+The 2015 assessment [@langleyStockAssessmentYellowfin2015] was implemented using the Stock Synthesis 3 (SS3) modelling platform [@methotStockSynthesisBiological2013]. SS3 is conceptually similar to MFCL, and the two platforms have yielded similar results. On basis of that assessment, the yellowfin tuna stock was determined to be overfished and subject to overfishing. At its 20th meeting, the Indian Ocean Tuna Commission (IOTC) adopted an Interim Plan for Rebuilding the Indian Ocean Yellowfin Tuna Stock (Res. 16/01).
 
 The SS3 assessment was updated in 2016 [@langleyUpdate2015Indian2016] and was revised and updated in 2018 [@fuPreliminaryIndianOcean2018]. These assessments utilised new composite longline CPUE indices derived from the main distant water longline fleets, replacing the Japanese longline CPUE indices used previously. The 2018 assessment also included a comprehensive analysis of the main assumptions of the stock assessment. A model ensemble covering major components of structural uncertainty was used to characterise the stock status. The assessment estimated that the spawning stock biomass in 2017 was below $SSB_{MSY}$, and that fishing mortality was above $F_{MSY}$. Therefore, the stock status was determined to remain overfished and experiencing overfishing.
 
-An external review of the 2018 assessment provided recommendations to improve model parametrisations [@methotRecommendationsConfigurationIndian2019]. An attempt was made to update the assessment in 2019 with extensive investigations of alternative spatial structures, data weighting and biological parameters [@urtizbereaPreliminaryAssessmentIndian2019]. Further analyses were conducted in 2020 to refine the process of model selection through an objective scoring system based on diagnostic metrics [@urtizbereaProvidingScientificAdvice2020].
+An external review of the 2018 assessment provided recommendations to improve model parametrisations [@methotRecommendationsConfigurationIndian2019]. An attempt was made to update the assessment in 2019 with extensive investigations of alternative spatial structures, data weighting, and biological parameters [@urtizbereaPreliminaryAssessmentIndian2019]. Further analyses were conducted in 2020 to refine the process of model selection through an objective scoring system based on diagnostic metrics [@urtizbereaProvidingScientificAdvice2020].
 
-The most recent assessment was conducted in 2021 [@fuPreliminaryIndianYellowfin2021], which also used SS3 as the modelling platform and was based on the four-area spatial configuration as in 2018. This recent assessment included a standardised CPUE series from the main longline fleets as the main index but also tested the inclusion of EU purse seine indices, operating on free schools and floating objects, and an index from the Maldivian pole and line fishery. A range of exploratory models were presented to address issues in observational datasets, improve the stability of the assessment model, and explore the effects of alternative model assumptions. Overall, stock status estimates did not differ substantially from the 2018 assessment, estimating $SSB/SSB_{MSY}=0.78$ and $F/F_{MSY}=1.27$ for the last model year (2020), which suggests that the stock is overfished and experiencing overfishing. An external review of the 2021 assessment was carried out in 2023 [@maunderIndependentReviewRecent2023], which provided a set of recommendations for the next assessment implementation. 
+The most recent assessment was conducted in 2021 [@fuPreliminaryIndianYellowfin2021], which also used SS3 as the modelling platform and was based on the four-area spatial configuration as in 2018. This recent assessment included a standardised CPUE series from the main longline fleets as the main index but also tested the inclusion of EU purse seine indices, operating on free schools and floating objects, and an index from the Maldivian pole and line fishery. A range of exploratory models were presented to address issues in observational datasets, improve the stability of the assessment model, and explore the effects of alternative model assumptions. Overall, stock status estimates did not differ substantially from the 2018 assessment, estimating $SSB/SSB_{MSY}=0.78$ and $F/F_{MSY}=1.27$ for the last model year (2020), which suggests that the stock is overfished and experiencing overfishing. An external review of the 2021 assessment was carried out in 2023 [@maunderIndependentReviewRecent2023], which provided a set of recommendations for the next assessment implementation. Some recommendations of the review were further investigated in @langleyInvestigationRecruitmentDynamics2023.
 
-In this report, we document the next iteration of the stock assessment of the IO yellowfin tuna stock for consideration at the 26th WPTT meeting. This stock assessment includes fishery and biological data up to the end of 2023 and its configuration is based on the 2021 assessment, although two other spatial configurations have also been tested. It implements an age- and spatially-structured population model using SS3 (v3.30.22.1) and incorporates some revisions made by the last external review.
+In this report, we document the next iteration of the stock assessment of the IO yellowfin tuna stock for consideration at the 26th WPTT meeting. This stock assessment includes fishery and biological data up to the end of 2023 and its configuration is based on the 2021 assessment, although two other spatial configurations are also tested. It implements an age- and spatially-structured population model using SS3 (v3.30.22.1) and incorporates some recommendations made by the last external review [@maunderIndependentReviewRecent2023].
 
 # Background
 
@@ -75,23 +92,23 @@ This species has a high metabolic rate and, therefore, requires large energy sup
 
 ## Stock structure
 
-Fisheries information indicates that adult yellowfin are distributed continuously throughout the entire tropical Indian Ocean, but some more detailed analysis of fisheries data suggests that the stock structure may be more complex. The tag recoveries may indicate that the western and eastern regions of the IO support relatively discrete sub-populations of yellowfin tuna. Studies of stock structure using DNA techniques have suggested that there may be genetically discrete subpopulations of yellowfin tuna in the northwestern IO [@dammannagodaEvidenceFineGeographical2008] and within Indian waters [@kunalMitochondrialDNAAnalysis2013]. A recent study of stock structure using the gene sequencing technology along with a basin-scale sampling design indicated genetic differentiation between north and south of the equator within the IO, and possibly additional genetic structure within the locations north of the equator [@greweGeneticPopulationConnectivity2020]. Parasite composition and abundance suggest limited movement of yellowfin between the Indonesian archipelago (eastern IO) and the Maldives (central IO) [@mooreMovementJuvenileTuna2019]. Isotope studies have also suggested relatively limited movement, with resident behaviour at the temporal scale of their muscle turnover ($\sim$ 3 months) [@menardIsotopicEvidenceDistinct2007]. Otolith chemistry analyses concluded that fisheries operating in the western IO are mainly composed of fish of western origin, which suggests limited movement from east to west [@artetxe-arrateOtolithStableIsotopesinreview]. These studies generally support the potential presence of population units of yellowfin tuna within the IO, despite the fact that considerable uncertainty remains on sub-regional population structure in this region. This assessment assumes that the IO yellowfin tuna stock consists of several interconnected regional populations (@fig-4A-config) that have the same biological characteristics; however, we acknowledge that more studies are needed to reveal the structure of this species.
+Fisheries information indicates that adult yellowfin are distributed continuously throughout the entire tropical Indian Ocean, but some more detailed analysis of fisheries data suggests that the stock structure may be more complex. The tag recoveries may indicate that the western and eastern regions of the IO support relatively discrete sub-populations of yellowfin tuna. Studies of stock structure using DNA techniques have suggested that there may be genetically discrete subpopulations in the northwestern IO [@dammannagodaEvidenceFineGeographical2008] and within Indian waters [@kunalMitochondrialDNAAnalysis2013]. A recent study of stock structure using the gene sequencing technology along with a basin-scale sampling design indicated genetic differentiation between north and south of the equator within the IO, and possibly additional genetic structure within the locations north of the equator [@greweGeneticPopulationConnectivity2020]. Parasite composition and abundance suggest limited movement between the Indonesian archipelago (eastern IO) and the Maldives (central IO) [@mooreMovementJuvenileTuna2019]. Isotope studies have also suggested relatively limited movement, with resident behaviour at the temporal scale of their muscle turnover ($\sim$ 3 months) [@menardIsotopicEvidenceDistinct2007]. Otolith chemistry analyses concluded that fisheries operating in the western IO are mainly composed of fish of western origin, which suggests limited movement from east to west [@artetxe-arrateOtolithStableIsotopesinreview]. These studies generally support the potential presence of population units of yellowfin tuna within the IO, despite the fact that considerable uncertainty remains on sub-regional population structure in this region. This assessment assumes that the IO yellowfin tuna stock consists of several interconnected regional populations (@fig-4A-config) that have the same biological characteristics; however, we acknowledge that more studies are needed to reveal the structure of this species.
 
 ## Fisheries
 
 Yellowfin tuna are harvested with a diverse variety of gear types, from small-scale artisanal fisheries (in the Arabian Sea, the Mozambique Channel and waters around Indonesia, Sri Lanka, the Maldives, and Lakshadweep Islands) to large gillnetters (from Oman, Iran and Pakistan, mainly operating but not exclusively in the Arabian Sea) and distant-water longliners and purse seiners that operate widely in equatorial and tropical waters (@fig-catch-grid). Purse seiners and gillnetters catch a wide size range of yellowfin tuna, whereas the longline fishery mostly catches adult fish (@fig-agg-size).
 
-Prior to 1980, annual catches of yellowfin tuna remained below about 80,000 mt and were dominated by longline catches (@fig-catch-bar). Annual catches increased markedly during the 1980s and early 1990s, mainly due to the development of the purse-seine fishery as well as an expansion of the other established fisheries (fresh-tuna longline, gillnet, baitboat, handline and, to a lesser extent, troll). A peak in catches was recorded in 1993, with catches over 400,000 mt. The increase in catch almost fully attributable to longline fleets, particularly longliners flagged in Taiwan, which reported exceptional catches of yellowfin tuna in the Arabian Sea. The Taiwanese longline fishery in the IO has been equipped with super-cold storage. Since around 1986, the fleet has fished more frequently with deep sets.
+Prior to 1980, annual catches of yellowfin tuna remained below 80,000 mt and were dominated by longline catches (@fig-catch-bar). Annual catches increased markedly during the 1980s and early 1990s, mainly due to the development of the purse-seine fishery as well as an expansion of the other established fisheries (fresh-tuna longline, gillnet, baitboat, handline and, to a lesser extent, troll). A peak in catches was recorded in 1993, with catches over 400,000 mt. The increase in catch almost fully attributable to longline fleets, particularly longliners flagged in Taiwan, which reported exceptional catches of yellowfin tuna in the Arabian Sea. The Taiwanese longline fishery in the IO has been equipped with super-cold storage. Since around 1986, the fleet has fished more frequently with deep sets.
 
-Catches declined in 1994 to about 350,000 mt, remaining at that level for the next decade, then increasing sharply to reach a peak of about 520,000 mt in 2004-2005, driven by a large increase in catch by all fisheries, especially the purse-seine (free school) fishery. Total annual catches declined sharply from 2004 to 2007 and remained at about 300,000 mt during 2007–2011. In 2012, total catches increased to about 400,000 mt and were maintained at about that level from 2013 to 2015. Total catches increased to an average of 430,000 mt between 2016 and 2019, and a maximum of close to 450,000 mt in 2019 (@fig-catch-bar), despite IOTC Resolution 17/01, which requested major fleets to substantially reduce their yellowfin catches below the 2014 or 2015 catch level. Furthermore, catch levels of about 440,000 mt reported for 2018 might be under-estimated, to some extent, because of changes in data processing methodology by European Union-Spain for its purse seine fleet for that year [@iotcReviewYellowfinTuna2021].
+Catches declined in 1994 to about 350,000 mt, remaining at that level for the next decade, then increasing sharply to reach a peak of about 520,000 mt in 2004-2005, driven by a large increase in catch by all fisheries, especially the purse-seine (free school) fishery. Total annual catches declined sharply from 2004 to 2007 and remained at about 300,000 mt during 2007–2011. In 2012, total catches increased to about 400,000 mt and were maintained at about that level from 2013 to 2015. Total catches increased to an average of 430,000 mt between 2016 and 2019, and a maximum of close to 450,000 mt in 2019 (@fig-catch-bar), despite IOTC Resolution 17/01, which requested major fleets to substantially reduce their yellowfin catches below the 2014 or 2015 catch level. Furthermore, catch levels of about 440,000 mt reported for 2018 might be under-estimated, to some extent, because of changes in data processing methodology by European Union-Spain for its purse seine fleet for that year [@iotcReviewYellowfinTuna2021]. 
 
-In recent years (2015–2023), purse seine has been the dominant fishing method, harvesting $\sim$ 36% of the total IO yellowfin tuna catch (by weight), with the gillnet and handline fisheries comprising $\sim$ 20% and 18% of the catch, respectively. There was a substantial increase in the catch by handline in 2020 (@fig-catch-bar). A smaller component of the catch was taken by industrial longline (5%) and the regionally important baitboat (4%) and troll (4%) fisheries. The recent increase in the total catch has been mostly attributable to a rise in catch from the gillnet and handline fisheries.
+In recent years (2015–2023), purse seine has been the dominant fishing method, harvesting $\sim$ 36% of the total IO yellowfin tuna catch (by weight), with the gillnet and handline fisheries, principally in the Arabian Sea, comprising $\sim$ 20% and 18% of the catch, respectively. There was a substantial increase in the catch by handline in 2020 (@fig-catch-bar). A smaller component of the catch was taken by industrial longline (5%) and the regionally important baitboat (4%) and troll (4%) fisheries. The recent increase in the total catch has been mostly attributable to a rise in catch from the gillnet and handline fisheries, mostly from the Omani fishery.
 
 The purse-seine catch is generally distributed equally between free-school and associated (log and FAD sets) schools, although the large catches in 2003–2005 were dominated by fishing on free-schools. Conversely, during 2015–2023, the purse-seine catch was dominated ($\sim$ 70%) by the associated fishery.
 
-Historically, most of the yellowfin catch has been taken from the western equatorial region of the IO (44%; region 1b, @fig-catch-grid) and, to a lesser extent, the Arabian Sea (26%), the eastern equatorial region (24%, region 4) and the Mozambique Channel (5%; region 2). The purse-seine and baitboat fisheries operate almost exclusively within the western equatorial region, while catches from the Arabian Sea are principally by handline, gillnet, and longline (see @fig-catch-grid). Catches from the eastern equatorial region (region 4) were dominated by longline and gillnet (around Sri Lanka and Indonesia). The southern IO (region 3) accounts for a small proportion of the total yellowfin catch (1%) taken exclusively by longline.
+Historically, most of the yellowfin catch has been taken from the western equatorial region of the IO ($\sim$ 44%, @fig-catch-grid) and, to a lesser extent, the Arabian Sea ($\sim$ 26%), the eastern equatorial region ($\sim$ 24%) and the Mozambique Channel ($\sim$ 5%). The purse-seine and baitboat fisheries operate almost exclusively within the western equatorial region, while catches from the Arabian Sea are principally by handline, gillnet, and longline (@fig-catch-grid). Catches from the eastern equatorial region were dominated by longline and gillnet (around Sri Lanka and Indonesia). The southern IO accounts for a small proportion of the total yellowfin catch (1%) taken exclusively by longline.
 
-In recent years (2008–2012), due to the threat of piracy, the bulk of the industrial purse seine and longline fleets moved out of the western waters of Region 1b to avoid the coastal and off-shore waters off Somalia, Kenya and Tanzania. The threat of piracy particularly affected the freezer longline fleet, and levels of effort and catch decreased markedly from 2007. The total catch by freezing longliners declined to about 2,000 mt in 2010, a 10-fold decrease in catch from the years before the onset of piracy. Purse seine catches also dropped in 2007–2009 and then started to recover. Piracy off the Somali coast was almost eliminated by 2013, but longline catches have not recovered.
+During 2008–2012, due to the threat of piracy, the bulk of the industrial purse seine and longline fleets moved out of the western equatorial region to avoid the coastal and off-shore waters off Somalia, Kenya and Tanzania. The threat of piracy particularly affected the freezer longline fleet, and levels of effort and catch decreased markedly from 2007. The total catch by freezing longliners declined to about 2,000 mt in 2010, a 10-fold decrease in catch from the years before the onset of piracy. Purse seine catches also dropped in 2007–2009 and then started to recover. Piracy off the Somali coast was almost eliminated by 2013, but longline catches have not recovered.
 
 The sizes caught in the IO range from 30 cm to 180 cm fork length (@fig-agg-size). Intermediate-age yellowfin are seldom taken in industrial fisheries but are abundant in some artisanal fisheries, mainly in the Arabian Sea (@fig-size-grid). Newly recruited fish are primarily caught by the purse seine fishery on floating objects and the pole-and-line fishery in the Maldives. Males are predominant in the catches of larger fish at sizes larger than 150 cm, which is also observed in other oceans. Medium-sized yellowfin concentrate for feeding in the Arabian Sea (@fig-size-grid).
 
@@ -99,9 +116,9 @@ The sizes caught in the IO range from 30 cm to 180 cm fork length (@fig-agg-size
 
 ## Spatial stratification
 
-The geographic area considered in the assessment is the IO, defined by the coordinates 40$^\circ$S-25$^\circ$N and  20$^\circ$E-150$^\circ$E. Earlier yellowfin stock assessments have adopted a five-area spatial structure [@langleyStockAssessmentYellowfin2012], but several issues were identified for that structure. Since 2015, a four-area spatial structure is used for this stock (@fig-4A-config). The Arabian Sea (area 1a) and western equatorial region (area 1b) make up the model area 1 but kept the fishery information separated (i.e., areas-as-fleet approach) to account for differences in selectivity between these sub-areas [@puntSpatialStockAssessment2019]. The spatial structure retains two regions that encompass the main year-round fisheries in the tropical area (regions 1 and 4) and two austral, subtropical regions where the longline fisheries occur more seasonally (regions 2 and 3).
+The geographic area considered in the assessment is the IO, defined by the coordinates 40$^\circ$S-25$^\circ$N and  20$^\circ$E-150$^\circ$E. Earlier yellowfin stock assessments have adopted a five-area spatial structure [@langleyStockAssessmentYellowfin2012], but several issues were identified for that structure. Since 2015, a four-area spatial structure is used for this stock (@fig-4A-config). The Arabian Sea (region 1a) and western equatorial area (region 1b) make up the region 1 but kept the fishery information separated (i.e., areas-as-fleet approach) to account for differences in selectivity between these sub-areas [@puntSpatialStockAssessment2019]. The spatial structure retains two regions that encompass the main year-round fisheries in the tropical area (regions 1 and 4) and two austral, subtropical regions where the longline fisheries occur more seasonally (regions 2 and 3).
 
-The current spatial structure separates the purse-seine fishery in the northern Mozambique Channel (10-15$^\circ$S) from the equatorial region, as the fishery in the northern Mozambique Channel exhibits strong seasonal variation in effort and operates differently from the equatorial region [@langleyStockAssessmentYellowfin2015]. There is also a separation of the purse-seine fishery between the western and eastern tropical region with the current boundary between region 1b and region 4. In addition to the four-area configuration, we also evaluated two more spatial structures: one-area and two-area configurations (see more details in Appendix XX). The 2021 assessment also evaluated a modified version of the four-area structure [@fuPreliminaryIndianYellowfin2021], but there were some constraints to evaluate that configuration in the current assessment (see @sec-llcpue).
+The current spatial structure separates the purse-seine fishery in the northern Mozambique Channel (10-15$^\circ$S) from the equatorial region, as the fishery in the northern Mozambique Channel exhibits strong seasonal variation in effort and operates differently from the equatorial region [@langleyStockAssessmentYellowfin2015]. There is also a separation of the purse-seine fishery between the western and eastern tropical region with the current boundary between regions 1b and 4. In addition to the four-area configuration, we also evaluated two more spatial structures: one-area and two-area configurations (see more details in Appendix XX). The 2021 assessment also evaluated a modified version of the four-area structure [@fuPreliminaryIndianYellowfin2021], but it produced similar results. We did not evaluate that modified four-area configuration in the current assessment.
 
 ## Temporal stratification
 
@@ -111,15 +128,15 @@ The time step in the assessment model was a quarter (i.e., three months duration
 
 # Model inputs
 
-Catch (1950-2023) and size (1952-2023) information was provided by the IOTC Secretariat in a comma-separated values (CSV) format. These datasets and the metadata can be found online at the IOTC website: <https://iotc.org/documents/WPTT/26AS/Data/01>. Four indices of abundance were also available: joint longline, purse seine fishing on free schools, purse seine fishing on associated schools, and the associative behaviour-based abundance index. These indices can also be found online at <https://iotc.org/documents/standardised-cpue-yft-and-bet>. Release and recovery data (2005-2015) from two tagging programs were also available, as well as age data from the GERUNDIO project (2009-2022). Raw age data is confidential and cannot publicly shared; however, processed age-length data for SS3 can be found at XXXX.
+Catch (1950-2023) and size (1952-2023) information was provided by the IOTC Secretariat in a comma-separated values (CSV) format. These datasets and the metadata can be found online at the IOTC website: <https://iotc.org/documents/WPTT/26AS/Data/01>. Four indices of abundance were also available: joint longline, purse seine fishing on free schools, purse seine fishing on associated schools, and the associative behaviour-based abundance index. These indices can also be found online at <https://iotc.org/documents/standardised-cpue-yft-and-bet>. Release and recovery data (2005-2015) from two tagging programs were also available, as well as age data from the GERUNDIO project (2009-2022). Raw tagging and age datasets are confidential and cannot be shared; however, processed tagging and age-length data for SS3 can be found at XXXX.
 
 ## Definition of fisheries
 
-The assessment adopted the equivalent fisheries definitions used in the previous stock assessments. First, nine *fishery groups* were defined based on fleet, gear, purse seine set type, and type of vessel in the case of longline fleet (@tbl-fishery-codes), which represent relatively homogeneous fishing units with similar selectivity and catchability characteristics that do not vary greatly over time. Then, *fishery groups* were divided into regions, producing twenty-one *fisheries* in the assessment model (@tbl-fleet-4A). A brief description of each *fishery group* is provided below.
+The current assessment adopted the equivalent fisheries definitions used in the previous stock assessments. First, nine *fishery groups* were defined based on fleet, gear, purse seine set type, and type of vessel in the case of longline fleet (@tbl-fishery-codes), which represent relatively homogeneous fishing units with similar selectivity and catchability characteristics that do not vary greatly over time. Then, *fishery groups* were divided into regions, producing twenty-one *fisheries* in the assessment model (@tbl-fleet-4A). A brief description of each *fishery group* is provided below.
 
 The longline fishery was partitioned into two main components:
 
-- *Freezing longline fisheries (LL)*, or all those using drifting longlines for which one or more of the following three conditions apply: (i) the vessel hull is made up of steel; (ii) the vessel length overall of 30 m or greater; (iii) the majority of the catches of target species are preserved frozen or deep-frozen. A composite longline fishery was defined in each model area, aggregating the longline catch from all freezing longline fleets (principally Japan and Taiwan).
+- *Freezing longline fisheries (LL)*, or all those using drifting longlines for which one or more of the following three conditions apply: (i) the vessel hull is made up of steel; (ii) the vessel length overall of 30 m or greater; (iii) the majority of the catches of target species are preserved frozen or deep-frozen. A composite longline fishery was defined in each model area, aggregating the longline catch from all freezing longline fleets (principally Japan and Taiwan). **TODO: Include a note re Seychelles flagged TW vessels.**
 
 - *Fresh-tuna longline fisheries (LF)*, or all those using drifting longlines and made of vessels (i) having fibreglass, fibre-reinforced plastic, or wooden hull; (ii) having length overall less than 30 m; (iii) preserving the catches of target species fresh or in refrigerated seawater. A composite longline fishery was defined as aggregating the longline catch from all fresh-tuna longline fleets (principally Indonesia and Taiwan) in region 4, which is where the majority of the fresh-tuna longliners have traditionally operated. 
 
@@ -152,9 +169,9 @@ We followed the next steps to produce the catch input for SS3:
 
 ### Reassignment {#sec-catchreassign}
 
-To simplify the fishery structure in the stock assessment model, we reassigned catches in areas with low fishing activity to main areas as done in the 2021 assessment. 
+To simplify the fishery structure in the stock assessment model, we reassigned catches in regions with low fishing activity to main regions as done in the 2021 assessment. 
 
-- *LF* fisheries: catch in regions 1 to 3, representing only $\sim$ 3% of the total catches over the time series, were assigned to region 4.
+- *LF* fisheries: catch in regions 1 to 3, representing only $\sim$ 3% of the total catches over the time series, was assigned to region 4.
 
 - *FS* and *LS* fisheries: purse seine catches in region 1a and 3 were reassigned to region 1b and 4, respectively.
 
@@ -170,13 +187,13 @@ To simplify the fishery structure in the stock assessment model, we reassigned c
 
 ### Aggregation
 
-After catch reassignment, catch data (in metric tons) was summed by year, quarter, and fishery, and then organized in an SS3 format, assuming an error of 0.01. Overall, the time series of catches were quite similar to the catch series included in the 2021 assessment (@fig-comp-catch). The largest differences were observed for *OT* and *TR* in region 4, especially during the last two decades. Also, current catch estimates for *LL* in region 3 are slightly larger than the previous assessment during 2008-2020. The changes are mostly attributed to revisions of catch estimation by the IOTC Secretariat.
+After catch reassignment, catch data (in metric tons) was summed by year, quarter, and fishery, and then organized in an SS3 format. Overall, the time series of catches were quite similar to the catch series included in the 2021 assessment (@fig-comp-catch). The largest differences were observed for *OT* and *TR* in region 4, especially during the last two decades. Also, current catch estimates for *LL* in region 3 are slightly larger than the previous assessment during 2008-2020. The changes are mostly attributed to revisions of catch estimation by the IOTC Secretariat.
 
-## Size data
+## Size data {#sec-size}
 
-The size data was composed of information about time (year and month), CPC, gear type, type of association of the fish school, grid code, number of fish sampled per fork length bin (cm), and the score of reporting quality (RQ) [@herreraProposalSystemAssess2010; @iotcReviewStatisticalData2024]. The length bin width was 2 cm and the length bins spanned from 10 to 340 cm. The data were collected from a variety of sampling programmes, which can be summarized as follows:
+The size data was composed of information about time (year and month), CPC, gear type, type of association of the fish school, grid code, number of fish sampled per fork length bin (cm), and the score of reporting quality (RQ). The RQ score is a proxy of the quality (e.g., sampling coverage, reporting details) of the size information provided to the IOTC Secretariat by CPCs [@herreraProposalSystemAssess2010; @iotcReviewStatisticalData2024]. The length bin width was 2 cm and the length bins spanned from 10 to 340 cm. The data were collected from a variety of sampling programmes, which can be summarized as follows:
 
-- *FS* and *LS* fisheries: Length frequency samples from purse seiners have been collected from a variety of port sampling programmes since the mid-1980s. The samples are comprised of very large numbers of individual fish measurements. The length frequency samples are available by set type with sets catches from associated sets typically composed of smaller fish than free school catches (@fig-agg-size). The size composition of the catch from the free-school fishery is bimodal, being comprised of the smaller size range of yellowfin and a broad mode of larger fish. The bimodal distribution is likely to have reflected different types of schools in the catch composition (e.g., free schools of mostly large adult yellowfin or mixed species schools consisting of smaller yellowfin, M. Chassot, pers. comm.). Hence, the relative composition of large (>80cm) vs. small (<80cm) yellowfin in the purse seine free schools fluctuates considerably over time. Between 2010 and 2020, there was a dip in the average size of large fish caught in the FAD fishery and a temporary increase in the average sizes of large fish caught in the free school fishery (@fig-mlen). There is also a considerable catch of smaller fish taken during free school fishing operations in the Mozambique Channel area in region 2 [@chassotAreThereSmall2014]. The free-school fishery in region 4 appears to catch larger fish (@fig-size-grid).
+- *FS* and *LS* fisheries: Length frequency samples from purse seiners have been collected from a variety of port sampling programmes since the mid-1980s. The samples are comprised of very large numbers of individual fish measurements. The length frequency samples are available by set type, with sets catches from associated sets typically composed of smaller fish than free school catches (@fig-agg-size). The size composition of the catch from the free-school fishery is bimodal, being comprised of the smaller size range of yellowfin and a broad mode of larger fish. The bimodal distribution is likely to have reflected different types of schools in the catch composition (e.g., free schools of mostly large adult yellowfin or mixed species schools consisting of smaller yellowfin, M. Chassot, pers. comm.). Hence, the relative composition of large (>80cm) vs. small (<80cm) yellowfin in the purse seine free schools fluctuates considerably over time. Between 2010 and 2020, there was a dip in the average size of large fish caught in the FAD fishery and a temporary increase in the average sizes of large fish caught in the free school fishery (@fig-mlen). There is also a considerable catch of smaller fish taken during free school fishing operations in the Mozambique Channel area in region 2 [@chassotAreThereSmall2014]. The free-school fishery in region 4 appears to catch larger fish (@fig-size-grid).
 
 - *LL* fishery: Length and weight data have been collected from sampling at ports and aboard Japanese commercial, research vessels, and observer programmes. Weight frequency data collected from the fleet have been converted to length frequency data via a processed weight-whole weight conversion factor and a weight-length key. Length frequency data from the Taiwanese longline fleet from 1980−2003 were included in the 2018 assessment, although data from the more recent years were excluded due to concerns regarding their reliability [@greehanReviewLengthFrequency2013]. Length data have also been available from other fleets (e.g., Seychelles, Korean, China, etc.) in more recent years. Analyses of size data show that the average lengths of yellowfin caught by the longline fleet are generally larger in the southern regions, particularly in the southwest [@hoyleReviewSizeData2021]. There is considerable temporal variation in the length of fish caught (@fig-mlen), but some of this variation is inconsistent between datasets, such as temporal patterns of variation in the 1970s that differ between length and weight data from the Japanese fleet. For all longline fisheries, there was a marked decline in the size of fish caught by Japan during the 1950s and 1960s, while the size of fish caught stabilised during the 1970s and 1980s (@fig-mlen).
 
@@ -240,7 +257,7 @@ In order to remove inconsistent patterns in the length-frequency data, we carrie
 
 - *GI* fishery: we removed size data from the Sri Lankan fleet in 2021.
 
-- *HD* fishery: we only retained size information from the Maldivian fleet. We also removed Maldivian size data in 2003 and 2015 (quarter 1).
+- *HD* fishery: we only retained size information from the Maldivian fleet. We also removed Maldivian size data in 2003 and 2015 (quarter 1) due to inconsistent patterns. The contribution of the Omani fleet to the total catch has increased in recent years; however, length samples were almost absent (@fig-hd-cpc). Lengths from the Maldivian fleet is assumed to be quite similar to the Omani fleet since both fisheries operate on dolphin-associated sets.
 
 - *OT* fishery: we removed size data sampled during 2021-2022 in region 1a and data sampled in 2016 in region 4.
 
@@ -252,15 +269,15 @@ The filters applied to the *LL*, *LF*, and *TR* fisheries were also applied in t
 
 In order to aggregate the size data by year, quarter, and fishery for SS3, we followed two approaches: simple and catch-raised aggregation.
 
-* *Simple aggregation*: this type of aggregation was performed only for the *original* size dataset. We summed the number of sampled fish per length bin and averaged the RQ values by year, quarter, and fishery. RQ was treated as input sample size in SS3, but we also tested using an input sample size of 5 for every observation as done in the 2021 assessment. This aggregation approach was used in the 2021 assessment and assumed that the collection of samples was broadly representative of the operation of the fishery in each quarter. 
+* *Simple aggregation*: this type of aggregation was performed only for the *original* size dataset. We summed the number of sampled fish per length bin and averaged the RQ values by year, quarter, and fishery. This aggregation approach was used in the 2021 assessment and assumed that the collection of samples was broadly representative of the operation of the fishery in each quarter. 
 
-* *Catch-raised aggregation*: this type of aggregation was performed only for the *cwp55* size dataset. We performed a catch-weighted sum of the number of sampled fish by length bin and a catch-weighted average of the RQ values. RQ was treated as the input sample size in SS3. 
+* *Catch-raised aggregation*: this type of aggregation was performed only for the *cwp55* size dataset. We performed a catch-weighted sum of the number of sampled fish by length bin and a catch-weighted average of the RQ values. 
 
 A graphical representation of the availability of length samples is provided in @fig-rq-size. The longline fishery provided size data from the 1960s but with relatively low quality during the first decades. Most of the size information started to be available in the 1980s, and the purse seine fisheries provided the most consistent and high quality size information (@fig-rq-size). The RQ scores did not differ between aggregation methods. 
 
 The differences in size compositions between the simple and catch-raised aggregation methods were minimal for most fisheries (@fig-agg-size). The largest differences were found for the *OT* fisheries in region 1a and 4, and for the handline fishery in region 1a. We observed an increase in the mean length for the *LL* fisheries in all regions (@fig-mlen). In the case of the free school purse seine fishery, we also noted an increase in mean length over time in region 1b. Conversely, we noted a decrease in the mean length for the log school purse seine fishery over the years in regions 1b, 2, and 4, especially from 1980 to $\sim$ 2005. For the handline fishery, we noted an increase in mean length from the 1990 until $\sim$ 2010, and then a decrease until recent years. These patterns were quite similar between the two aggregation methods (@fig-mlen). 
 
-The size compositions used in the current assessment were comparable with the 2021 assessment (both using the simple aggregation approach), although small differences can be observed for the *OT* and *TR* fisheries in region 4 (@fig-comp-agg-size). Regarding mean length, most fisheries other than longline had similar tendencies over time when comparing 2021 and current values. For longline *LL* fisheries, size compositions in 2021 had larger mean lengths before 1990 compared with the current size compositions (@fig-comp-mlen). This difference is attributed to revisions of size estimation by the IOTC Secretariat.
+The size compositions used in the current assessment were comparable with the 2021 assessment (both using the simple aggregation approach), although small differences can be observed for the *OT* and *TR* fisheries in region 4 (@fig-comp-agg-size). Regarding mean length, most fisheries other than longline had similar tendencies over time when comparing 2021 and current values. For longline *LL* fisheries, size compositions in 2021 had larger mean lengths before 1990 compared with the current size compositions (@fig-comp-mlen). This difference is attributed to revisions of size estimation by the IOTC Secretariat regarding the conversion from fish weights to fish lengths.
 
 <!-- There was an error detected in the 2021 assessment when converting the length bin width from 2 to 4 cm, which only retained information on the number of sampled fish for length bins 10, 14, 18 cm, $...$, and ignored the number of sampled fish for length bins 12, 16, 20 cm, $...$ from the size database. The impact of this error was evaluated during the model implementation. -->
 
@@ -268,51 +285,55 @@ The size compositions used in the current assessment were comparable with the 20
 
 ### Longline CPUE {#sec-llcpue}
 
-Standardised CPUE indices (1975-2023) were derived using a hurdle generalized linear model (GLM) from longline catch and effort information provided by Japan, Korea, and Taiwan [@matsumotoJointLonglineCPUE2024]. The data used for the standardization included operation date, fishing location, vessel ID, fishing effort (number of hooks per set), and catch in numbers. Cluster analyses of species composition data for each fleet and model area were used to separate datasets into fisheries understood to target different species. Selected clusters were then combined and standardized using GLMs. The log-transformed yellowfin catch per number of hooks set was the dependent variable of the positive model component, while the probability of the catch rate being zero was the dependent variable in the binomial model component. In addition to the year and quarter variables, GLMs included covariates for 5$^\circ$ square location, cluster, and vessel ID. The data used in the GLM was subsampled from the operational data ($\sim$10-30%) or aggregated by 5$^\circ \times$ 5$^\circ$ grid. Moreover, data from regions 1a and 1b were combined as a single region. The CPUE indices were produced at an annual and quarterly time step and for each model area.
+Standardised CPUE indices (1975-2023) were derived using a hurdle generalized linear model (GLM) from longline catch and effort information provided by Japan, Korea, and Taiwan [@matsumotoJointLonglineCPUE2024]. The data used for the standardization included operation date, fishing location, vessel ID, fishing effort (number of hooks per set), and catch in numbers. Cluster analyses of species composition data for each fleet and model area were used to separate datasets into fisheries understood to target different species. Selected clusters were then combined and standardized using GLMs. The log-transformed yellowfin catch per number of hooks set was the dependent variable of the positive model component, while the probability of the catch rate being zero was the dependent variable in the binomial model component. In addition to the year and quarter variables, GLMs included covariates for 5$^\circ$ square location, cluster, and vessel ID. The data used in the GLM was subsampled from the operational data ($\sim$10-30%) or aggregated by 5$^\circ \times$ 5$^\circ$ grid. Moreover, data from regions 1a and 1b were combined as a single region. The CPUE indices were produced at an annual and quarterly time step and for each model area. 
 
 The CPUE index produced for region 1 was assigned to region 1b in the stock assessment model. For the regional longline fisheries, a common catchability coefficient (and selectivity) was estimated in the assessment model, thereby, linking the respective CPUE indices among regions. This significantly increases the power of the model to estimate the relative (and absolute) level of biomass among regions. However, as CPUE indices are essentially density estimates, it is necessary to scale them to account for the relative abundance of the stock among regions. For example, a relatively small region with a very high average catch rate may have a lower level of total biomass than a large region with a moderate level of CPUE.
 
-We determined regional scaling factors that incorporated both the size of the region and the relative catch rate to estimate the relative level of exploitable longline biomass among regions. This approach was also used in the 2021 assessment and is similar to that used in the Western and Central Pacific Fisheries Commission (WCPFC) regionally disaggregated tuna assessments. @hoyleIndianOceanTropical2018 proposed a set of regional weighing factors for IO yellowfin based on aggregated longline catch effort data. The authors recommended the estimates by method ‘8’ for the period 1979–1994 (referred to as ‘7994m8’, see Table 2 of @hoyleIndianOceanTropical2018) to be included in the current assessment. The relative scaling factors calculated for regions 1–4 are 1.674, 0.623, 0.455 and 1, respectively.
+We determined regional scaling factors that incorporated both the size of the region and the relative catch rate to estimate the relative level of exploitable longline biomass among regions. This approach was also used in the 2021 assessment and is similar to that used in the Western and Central Pacific Fisheries Commission (WCPFC) regionally disaggregated tuna assessments. @hoyleScalingFactorsMultiregion2020 proposed a set of regional weighing factors for IO yellowfin based on aggregated longline catch effort data. The authors recommended the estimates by method ‘8’ for the period 1979–1994 (referred to as ‘7994m8’, see Table 2 of @hoyleScalingFactorsMultiregion2020) to be included in the current assessment. The relative scaling factors calculated for regions 1–4 are 1.674, 0.623, 0.455 and 1, respectively.
 
-For each of the principal longline fisheries, the standardized CPUE index was normalized to the mean of the period for which the region scaling factors were derived (1979–1994). The normalized GLM index was then scaled by the respective regional scaling factor to account for the regional differences in the relative level of exploitable longline biomass among regions (@fig-ts-cpue).
+For each of the principal longline fisheries, the standardized CPUE index was normalized to the mean of the period for which the region scaling factors were derived (1979–1994). The normalized GLM index was then scaled by the respective regional scaling factor to account for the regional differences in the relative level of exploitable longline abundance among regions (@fig-ts-cpue).
 
 A number of important trends are evident in the CPUE indices:
 
 - The western tropical (region 1b) CPUE increased during the late 1970s and early 1980s, then suddenly declined from 1987 to 1990. After 1990, the CPUE in this region remained roughly stable until the late 2000s, which coincided with a number of piracy incidents in the western Indian Ocean (2008–2011). After that time, it remained close to the lowest level observed in that region but showed very large seasonal and annual variations. From 2020, we noticed a remarkable increase in CPUE values compared to the 2013-2019 period. 
 
-- The eastern tropical region 4 followed a similar pattern until 1990 but then declined steadily, and, by 2016, was also close to the lowest level in the time series. The recent decline in CPUE in this region is consistent with a decline in the proportion of yellowfin in the combined tuna catch from the Japanese longline fleet in the eastern IO. It is unclear whether the change in species proportion is related to a decline in the abundance of yellowfin in the region (relative to the other species) or a regional change in the targeting of the fishing fleet. However, there is an indication that there has been a differential shift towards deeper longline gear (greater HBF) in the eastern IO since 2000 and this may indicate a shift in targeting toward bigeye tuna in this region (Hoyle pers. comm. additional JP LL analyses). Such factors may not be adequately accounted for in the standardisation of the yellowfin CPUE data.
+- The eastern tropical region 4 followed a similar pattern until 1990 but then declined steadily, and, by 2016, was also close to the lowest level in the time series. The recent decline in CPUE in this region is consistent with a decline in the proportion of yellowfin in the combined tuna catch from the Japanese longline fleet in the eastern IO. It is unclear whether the change in species proportion is related to a decline in the abundance of yellowfin in the region (relative to the other species) or a regional change in the targeting of the fishing fleet. However, there is an indication that there has been a differential shift towards deeper longline gear (greater HBF) in the eastern IO since 2000 and this may indicate a shift in targeting toward bigeye tuna (*Thunnus obesus*) in this region (Hoyle pers. comm. additional JP LL analyses). Such factors may not be adequately accounted for in the standardisation of the yellowfin CPUE data.
 
-- The CPUE indices in western temperate region 2 followed a similar pattern to the western tropical indices, with a decline until the late 1970s followed by an increase until the late 1980s, and subsequently a slow decline with significant variability. Since 1990, the CPUE in this region has remained roughly stable, with no remarkable increase during the last years.
+- The CPUE index in the western temperate region 2 had a slight decline in the late 1980s, and then remained roughly stable until recent years. 
 
-- The CPUE indices from region 3 are low compared to the other three regions, reflecting the low regional scaling factor. However, the overall trend in the CPUE indices is broadly comparable to the other regions. The eastern temperate region 3 the pattern was similar to the western temperate area before 1979. After 1979, catch rates increased until the mid-2000s, but then declined rapidly and reached their lowest observed levels by 2016. In this region, we also noticed an increase in CPUE in the last years. 
+- The CPUE index values from the eastern temperate region (region 3) are the lowest compared to other regions, reflecting the low regional scaling factor. However, the overall trend in the CPUE indices is broadly comparable to the other regions. The temporal pattern was similar to the western temperate area before 1979. After 1979, catch rates decreased steadily until the mid-2010s, and then slightly increased until recent years.
 
-- There is an exceptionally high peak in CPUE indices 1976–78, which is also associated with a high uncertainty. @hoyleExploringPossibleCauses2017 showed that this discontinuity exists in Japanese, Taiwanese and Korean data in multiple regions in multiple oceans for both bigeye and yellowfin tuna. @hoyleExploringPossibleCauses2017 suggested this is unlikely to be explained by changes to the population or catchability but may be associated with catch reporting and data management.
+- There is an exceptionally high peak in CPUE indices 1976–78 (especially in regions 1 and 2), which is also associated with a high uncertainty. @hoyleExploringPossibleCauses2017 showed that this discontinuity exists in Japanese, Taiwanese and Korean data in multiple regions in multiple oceans for both bigeye and yellowfin tuna. @hoyleExploringPossibleCauses2017 suggested this is unlikely to be explained by changes to the population or catchability but may be associated with catch reporting and data management.
 
 - The spike in the CPUE indices around 2012 in the west equatorial region (region 1) was evident for most fishing fleets. Several hypotheses have been proposed on what could have caused CPUE to have increased, including a return to fishing in areas that were most affected by piracy. However, further investigation is required.
 
-The values and trend of LL CPUE used in the 2021 assessment and in this assessment were quite similar for all model areas before 1990 (@fig-comp-cpue). After 1990, we noted large differences for model area 1b, where the current CPUE showed consistently larger values ( $\sim$ 40%) than the 2021 CPUE, especially after 2005. For region 4, we also observed slightly larger 2024 CPUE values compared to the 2021 CPUE after 2005. However, this discrepancy was minimal for regions 2 and 3. 
+The values and trend of LL CPUE used in the 2021 assessment and in the current assessment were quite similar for all model areas before 1990 (@fig-comp-cpue). After 1990, we noted large differences for model area 1b, where the current CPUE showed consistently larger values ( $\sim$ 40%) than the 2021 CPUE, especially after 2005. For region 4, we also observed slightly larger current CPUE values compared to the CPUE series from the last assessment after 2005. On the other hand, this discrepancy was minimal for regions 2 and 3. The difference in CPUE indices might be due to the CPUE standardization in 2021 used aggregated data rather than operational data [@kitakadoReportTrilateralCollaborative2021]. 
 
 ### Purse seine CPUE indices
 
-The European and associated flags purse seine fishing activities in the Indian Ocean from 1981 to 2022 have been monitored through the collection of logbooks and observer sampling. Standardised indices of the biomass of yellowfin caught by European purse seiners (Spain and France) from sets on free-swimming schools (1991 – 2022) and sets on associated tuna schools (FOB, 2010 – 2022) were developed (@fig-ts-ps-cpue). The free school index was based on the application of a general additive mixed effect model with three components to model [@kaplanStandardizedCPUEAbundance2024]: i) the detection rate of free swimming schools per unit search time, ii) the probability that adult yellowfin are present in a set, and iii) the adult biomass per set given presence assuming a lognormal distribution. The FOB index was based on the application of two models: a generalized linear mixed model and a spatiotemporal model, both using a hurdle approach [@correaStandardizedCatchUnit2024]. These standardizations considered a comprehensive list of candidate covariates, including the effect of the technological improvement related to the use of echosounder buoys and environmental variables. The predicted CPUE over time was obtained using the *predict-then-aggregate* approach, which is considered best practice [@hoyleCatchUnitEffort2024]. 
+The European and associated flags purse seine fishing activities in the Indian Ocean from 1981 to 2022 have been monitored through the collection of logbooks and observer sampling. Standardised indices of the biomass of yellowfin caught by European purse seiners (Spain and France) from sets on free-swimming schools (1991 – 2022) and sets on associated tuna schools (2010 – 2022) were developed (@fig-ts-ps-cpue). The free school index was based on the application of a general additive mixed effect model with three components to model [@kaplanStandardizedCPUEAbundance2024]: i) the detection rate of free swimming schools per unit search time, ii) the probability that adult yellowfin are present in a set, and iii) the adult biomass per set given presence assuming a lognormal distribution. The log school index was based on the application of two models: a generalized linear mixed model and a spatiotemporal model, both using a hurdle approach [@correaStandardizedCatchUnit2024]. These standardizations considered a comprehensive list of candidate covariates, including the effect of the technological improvement related to the use of echosounder buoys and environmental variables. The predicted CPUE over time was obtained using the *predict-then-aggregate* approach, which is considered best practice [@hoyleCatchUnitEffort2024]. 
 
-The FOB mainly informs the biomass of juvenile yellowfin, while the free-school index informs the biomass of the adult portion of the population in region 1b. The FOB index displays juvenile biomass fluctuations over the years, with larger values during 2013 and 2014, and a remarkable increase after 2020. On the other hand, the free school CPUE index showed an increase from the late 1990s until 2004 and then a dramatic decrease until 2009. From 2015, the free school index showed another dramatic decrease until 2018 and a slight recovery after that (@fig-ts-ps-cpue). 
+The log school purse seine (*LS*) index mainly informs the biomass of juvenile yellowfin, while the free-school (*FS*) index informs the biomass of the adult portion of the population in region 1b. The *LS* index displays juvenile biomass fluctuations over the years, with larger values during 2013 and 2014, and a remarkable increase after 2020. On the other hand, the *FS* CPUE index showed an increase from the late 1990s until 2004 and then a dramatic decrease until 2009. From 2015, the free school index showed another dramatic decrease until 2018 and a slight recovery after that (@fig-ts-ps-cpue). Theoretically, the *LL* (region 1b) and *FS* CPUE indices should display similar temporal patterns since both contain information from adults. However, we only noticed comparable trends between 2005 and 2017, and distinct trend after 2017 (@fig-ts-llfs-cpue).
 
-We evaluated the impact of incorporating the free school and FOB CPUE series as auxiliary indices (i.e., always in conjunction with the LL CPUE index) in the assessment model. To incorporate the free school index, we revised the region/fishery structure in which purse seine fisheries are separated into the small and large fish components (EXPAND ON THIS).
+We evaluated the impact of incorporating the *FS* and *LS* CPUE series as auxiliary indices (i.e., always in conjunction with the *LL* CPUE index) in the assessment model.
 
 ### Effort creep
 
 It is well recognised that the relationship between PS CPUE and abundance is unlikely to be proportional, as the improvement of catch efficiency due to technology development is challenging to quantify, and the changes in catchability are not fully accounted for in the standardisation process. Effort creep can be defined as an unquantified increase in the average fishing power over time that disturbs the relationship of proportionality between the index and the stock trajectory [@hoyleEffortCreepLongline2024]. These changes in catchability over time can affect CPUE indices and, therefore, the outcomes of stock assessments. This is especially important for assessments that lack abundance indices from fishery-independent surveys, which include the majority of the fisheries managed by tuna regional fishery management organizations (RFMOs). 
 
-In the case of longline fleets, technological advances include electronic devices to help navigate, communicate, and find target species. Synthetic materials allowed fishers to improve hooks and lines, which increased the probabilities of both hooking and landing. Satellite imagery improved search efficiency. Freezers increased the proportion of time spent on fishing grounds, while equipment for faster longline retrieval increased hooks set without affecting soak time [@hoyleEffortCreepLongline2024]. In the 2021 IO yellowfin assessment, a sensitivity analysis was run during the WPTT meeting that included 1% effort creep per year for the entire period of the index, which resulted in changes in the stock depletion level. Based on the recommendations from @hoyleEffortCreepLongline2024, we evaluated two different levels of effort creep for the LL CPUE index in the current assessment: 0.5 and 1.5% per annum, which is associated with vessel turnover. 
+In the case of longline fleets, technological advances include electronic devices to help navigate, communicate, and find target species. Synthetic materials allowed fishers to improve hooks and lines, which increased the probabilities of both hooking and landing. Satellite imagery improved search efficiency. Freezers increased the proportion of time spent on fishing grounds, while equipment for faster longline retrieval increased hooks set without affecting soak time [@hoyleEffortCreepLongline2024]. Nonetheless, there may have been changes in the relative targeting of yellowfin by the longline fleet that are not adequately accounted for by the standardisation procedure, as evident from the decrease in the catch of yellowfin relative to bigeye tuna. Such changes may exaggerate the decline in the yellowfin tuna CPUE indices and counter any increases in fishing efficiency.
 
-The WCPFC assessments have often estimated substantial changes in PS FAD-associated fisheries (e.g., @mckechnieStockAssessmentBigeye2017). Using a similar approach, @kolodyEstimationIndianOcean2018 estimated a catchability increase of approximately 1.25% per year for the standardised purse seine effort for yellowfin from sets on associated schools. Likewise, studies on the French fleet indicate a 10% increase in catch per set associated with echosounder use, equivalent to about 1% per annum, and a 1.7 – 4.0 % increase in efficiency (stable across time) arising from fishing their own floating objects [@wainQuantifyingIncreaseFishing2021]. Based on the recommendations from @hoyleEffortCreepLongline2024, we evaluated two different levels of effort creep for both purse seine indices in the current assessment: 1.5 and 4.35% per annum.
+In the 2021 IO yellowfin assessment, a sensitivity analysis was run during the WPTT meeting that included 1% effort creep per year for the entire period of the index, which resulted in changes in the stock depletion level. In the current assessment, we evaluated two different levels of effort creep for the *LL* CPUE index: no effort creep and 0.5% per annum, assuming that the source is associated with vessel turnover. 
 
-## Age data
+The WCPFC assessments have often estimated substantial changes in PS FAD-associated fisheries (e.g., @mckechnieStockAssessmentBigeye2017). Using a similar approach, @kolodyEstimationIndianOcean2018 estimated a catchability increase of approximately 1.25% per year for the standardised purse seine effort for yellowfin from sets on associated schools. Likewise, studies on the French fleet indicate a 10% increase in catch per set associated with echosounder use, equivalent to about 1% per annum, and a 1.7 – 4.0 % increase in efficiency (stable across time) arising from fishing their own floating objects [@wainQuantifyingIncreaseFishing2021]. In the current assessment, we evaluated one level of effort creep for both purse seine indices: 1% per annum.
 
-Age and size information was available for fish sampled between 2009 and 2022 (@fig-caal-nsamp) from the *GERUNDIO* project that aimed the collection and analysis of biological samples of tropical tunas, swordfish, and blue sharks to improve age, growth, and reproduction data for the IOTC. In a first step, @farleyEstimatingAgeGrowth2021 presented this data that contained information from otoliths from 253 yellowfin tuna sampled mainly in the western IO. Then, @farleyUpdatingEstimationAge2023 presented an updated dataset with age and length information from an additional 136 individuals. To calculate decimal age of sampled fish, daily and annual ageing methods were used. Decimal age was calculated for each fish with an annual count based on the method developed for yellowfin and bigeye tuna (*Thunnus obesus*) in the western Pacific Ocean [@farleyAgeGrowthYellowfin2020]. To find more details on the ageing estimation method, see @farleyUpdatingEstimationAge2023.
+## Conditional age-at-length data
 
-Age and fork length information from a total of 389 individuals was provided to be used in the current stock assessment. This source of information can be included in SS3 as conditional age-at-length data, which is important to inform growth and stock age structure [@leeUseConditionalAge2019]. We followed these steps to produce the input CAAL data for SS3:
+Age and size information was available for fish sampled between 2009 and 2022 (@fig-caal-nsamp) from the *GERUNDIO* project that aimed the collection and analysis of biological samples of tropical tunas, swordfish, and blue sharks to improve age, growth, and reproduction data for the IOTC. In a first step, @farleyEstimatingAgeGrowth2021 presented this data that contained information from otoliths from 253 yellowfin tuna sampled mainly in the western IO. Then, @farleyUpdatingEstimationAge2023 presented an updated dataset with age and length information from an additional 136 individuals. To calculate decimal age of sampled fish, daily and annual ageing methods were used. Decimal age was calculated for each fish with an annual count based on the method developed for yellowfin and bigeye tuna in the western Pacific Ocean [@farleyAgeGrowthYellowfin2020]. To find more details on the ageing estimation method, see @farleyUpdatingEstimationAge2023.
+
+Age and fork length information from a total of 389 individuals was provided to be used in the current stock assessment. This source of information can be included in SS3 as conditional age-at-length data, which is important to inform growth and stock age structure because they provide direct observations of the distribution of fish ages within length classes [@leeUseConditionalAge2019]. The model fits the observed age-at-length data along with information from size mode progression to influence the estimation of the growth curve. The inclusion of which was recommended by the yellowfin tuna assessment peer review [@maunderIndependentReviewRecent2023]. 
+
+We followed these steps to produce the input CAAL data for SS3:
 
 * We first removed observations with incomplete age and fleet data, retaining 375 observations.
 * Month information was used to assign quarters.
@@ -323,13 +344,13 @@ Age and fork length information from a total of 389 individuals was provided to 
 * Region was assigned based on geographical location.
 * There were several observations ( $\sim$ 37%) with no geographical location, which were assigned to region 1b.
 
-@fig-caal shows the CAAL information included in the assessment model per fishery. Adults were mostly sampled from the *LL*, *FS*, and *HD* fisheries. Conversely, juveniles were mainly present in the *LS* fishery. The lengths ranged from 18 to 182 cm, and all the model ages (i.e., quarters) were sampled. The largest and oldest fish were observed in the *GI*, *LL*, and *FS* fisheries. Due to ageing error was not available, we assumed that the age estimation was precise in the assessment model.
+@fig-caal shows the CAAL information included in the assessment model per fishery. Adults were mostly sampled from the *LL*, *FS*, and *HD* fisheries. Conversely, juveniles were mainly present in the *LS* fishery. The lengths ranged from 18 to 182 cm, and all the age quarters were sampled. The largest and oldest fish were observed in the *GI*, *LL*, and *FS* fisheries. Due to ageing error was not available, we assumed that the age estimation was precise in the assessment model.
 
-## Tagging
+## Tagging {#sec-tag-data}
 
-Tagging data was available for inclusion in the assessment model, which consisted of yellowfin tuna tag releases and returns from the Indian Ocean Tuna Tagging Programme (IOTTP) and the main phase of the Regional Tuna Tagging Project-Indian Ocean (RTTP-IO) conducted during 2005−2009. The IOTC has compiled all the release and recovery data from the RTTP-IO and the complementary small-scale programmes in a single database. A total of 54688 yellowfin tuna were released by the RTTP-IO program. Most of the tag releases occurred within the western equatorial region (region 1b), and a high proportion of these releases occurred in the second and third quarters of 2006 (@fig-tag-rec). Limited tagging also occurred within regions 1a and 2. The model included all tag recoveries up to the end of 2014. The spatial distributions of tag releases and recoveries are presented in @fig-tag-map.
+Tagging data was available for inclusion in the assessment model, which consisted of yellowfin tuna tag releases and returns from the Indian Ocean Tuna Tagging Programme (IOTTP) and the main phase of the Regional Tuna Tagging Project-Indian Ocean (RTTP-IO) conducted during 2005−2009. The IOTC has compiled all the release and recovery data from the RTTP-IO and the complementary small-scale programmes in a single database. A total of 54,688 yellowfin tuna were released by the RTTP-IO program. Most of the tag releases occurred within the western equatorial region (region 1b), and a high proportion of these releases occurred in the second and third quarters of 2006 (@fig-tag-rec). Limited tagging also occurred within regions 1a and 2. The model included all tag recoveries up to the end of 2014. The spatial distributions of tag releases and recoveries are presented in @fig-tag-map.
 
-A total of 9916 tag recoveries (after removing tags with unknown recovery date or length) could be assigned to the fisheries included in the assessment model. Almost all of the tags released in region 1 were recovered in the home region, although some recoveries occurred in adjacent regions, particularly in region 2. A small number of tags were recovered in region 4 (from tags released in region 1b) and there were no tags recovered from region 3 (@fig-tag-rec-area). Most of the tag recoveries occurred between mid-2006 and mid 2008 (@fig-tag-rec). The number of tag recoveries started to attenuate in 2009, although small numbers of tags were still recovered up to the end of 2014.
+A total of 9,916 tag recoveries (after removing tags with unknown recovery date or length) could be assigned to the fisheries included in the assessment model. Almost all of the tags released in region 1 were recovered in the home region, although some recoveries occurred in adjacent regions, particularly in region 2. A small number of tags were recovered in region 4 (from tags released in region 1b) and there were no tags recovered from region 3 (@fig-tag-rec-area). Most of the tag recoveries occurred between mid-2006 and mid 2008 (@fig-tag-rec). The number of tag recoveries started to attenuate in 2009, although small numbers of tags were still recovered up to the end of 2014.
 
 Most of the tags were recovered by the purse seine fishery within region 1b (@fig-tag-rec-area). A significant proportion (35%) of the tag returns from purse seiners were not accompanied by information concerning the set type. These tag recoveries were assigned to either the free-school or log fishery based on the expected size of fish at the time of recapture; i.e. fish larger than 80 cm at release were assumed to be recaptured by the free-school fishery; fish smaller than 80 cm at release and recaptured within 18 months at liberty were assumed to be recovered by the floating object fishery; fish smaller than 80 cm at release and recaptured after 18 months at liberty were assumed to be recovered by the free-school fishery.
 
@@ -337,7 +358,7 @@ Tag releases were stratified by release region, time period of release (quarter)
 
 ### Age assignment of tag release
 
-The age at release was assumed based on the fish length at release and the average length-at-age from the yellowfin growth function (see @sec-growth). Fish aged 15 quarters and older were aggregated in a single age group. Tag releases in regions 1a and 1b were stratified in separate release groups due to the spatial separation of the individual release events. A total of 54392 releases were classified into 131 tag release groups. Most of the tag releases were in the 5−8 quarter age classes (@fig-tag-rec).
+The age at release was assumed based on the fish length at release and the average length-at-age from the yellowfin growth function (see @sec-growth). Fish aged 15 quarters and older were aggregated in a single age group. Tag releases in regions 1a and 1b were stratified in separate release groups due to the spatial separation of the individual release events. A total of 54,392 releases were classified into 131 tag release groups. Most of the tag releases were in the 5−8 quarter age classes (@fig-tag-rec).
 
 ### Initial tagging mortality
 
@@ -364,13 +385,13 @@ The adjusted number of recaptures for a FS fishery was calculated similarly. The
 
 ### Small-scale tagging programmes
 
-Additional tag release/recovery data are available from a number of small-scale tagging programmes. The data set included a total of 7,828 tags released during 2002-08, primarily within regions 1b (70%) and 4 (28%). A total of 366 tag recoveries were reported, predominantly from the Bait boat fishery in region 1a. There has been no comprehensive analysis of these data and there is no information available concerning the fishery specific reporting rate of these tags. The tag release/recovery data from the SS tagging programmes were not incorporated in the current range of assessment models. Earlier analysis indicated that the stock assessment results were relatively insensitive to the inclusion of these data [@langleyStockAssessmentYellowfin2012]. @fuPreliminaryIndianOcean2018 investigated a range of alternative options for processing and incorporating the tagging data into the assessment model (see Table 5 of @fuPreliminaryIndianOcean2018). These exploratory analyses are not repeated in the current assessment.
+Additional tag release/recovery data are available from a number of small-scale tagging programmes. The data set included a total of 7,828 tags released during 2002-08, primarily within regions 1b (70%) and 4 (28%). A total of 366 tag recoveries were reported, predominantly from the bait boat fishery in region 1a. There has been no comprehensive analysis of these data and there is no information available concerning the fishery specific reporting rate of these tags. The tag release/recovery data from the SS tagging programmes were not incorporated in the current range of assessment models. Earlier analysis indicated that the stock assessment results were relatively insensitive to the inclusion of these data [@langleyStockAssessmentYellowfin2012]. @fuPreliminaryIndianOcean2018 investigated a range of alternative options for processing and incorporating the tagging data into the assessment model (see Table 5 of @fuPreliminaryIndianOcean2018). These exploratory analyses are not repeated in the current assessment.
 
 ## Environmental data
 
 The 2018 assessment included a range of environmental data to investigate the potential for incorporating environmental covariates to inform the movement of fish. However, although there is evidence that there may be an association between the movement of yellowfin tuna and seasonal and temporal changes in ocean conditions in the IO, the potential relationship between environmental indices and fish movement is unclear. @langleyUpdate2015Indian2016 and @fuPreliminaryIndianOcean2018 suggested that these environmental indices had no influence on the estimation of yellowfin tuna movement rates of different life stages between adjacent model regions, and seasonal variation in movement may be better accounted for by models that can explicitly incorporate seasonal effects [@fuPreliminaryIndianOcean2018]. Therefore, environmental information was not included in the 2021 assessment.
 
-A significant negative association between the IODs and the catch rates of yellowfin tuna was observed [@lanEffectsClimateVariability2013; @lanInfluenceOceanographicClimatic2020], as well as an impact of the ENSO on catch rates near the Arabian Sea [@lanInfluenceOceanographicClimatic2020]. @langleyInvestigationRecruitmentDynamics2023 found that periods of strong recruitment in regions 1 and 4 appear to correspond with oceanographic conditions indexed by Dipole Mode Index (DMI), but they did not find apparent correspondence between yearly trends in IO environmental conditions and the LL CPUE indices from each of the model regions. There is no strong indication that the catchability of the equatorial longline fisheries (region 1 and 4) is strongly influenced by the prevailing environmental conditions, but there is some indication that oceanographic conditions may influence short-term (1-2 yr) variation in longline catchability in the sub tropical regions (region 2 and 3) [@langleyInvestigationRecruitmentDynamics2023]. Variability in deviates of movement rates between region 1 and 4 is broadly consistent with the fluctuations in the DMI with higher movement estimated under positive IOD conditions. 
+A significant negative association between the IODs and the catch rates of yellowfin tuna was observed [@lanEffectsClimateVariability2013; @lanInfluenceOceanographicClimatic2020], as well as an impact of the ENSO on catch rates near the Arabian Sea [@lanInfluenceOceanographicClimatic2020]. @langleyInvestigationRecruitmentDynamics2023 found that periods of strong recruitment in regions 1 and 4 appear to correspond with oceanographic conditions indexed by Dipole Mode Index (DMI), but they did not find apparent correspondence between yearly trends in IO environmental conditions and the *LL* CPUE indices from each of the model regions. There is no strong indication that the catchability of the equatorial longline fisheries (region 1 and 4) is strongly influenced by the prevailing environmental conditions, but there is some indication that oceanographic conditions may influence short-term (1-2 yr) variation in longline catchability in the sub tropical regions (region 2 and 3) [@langleyInvestigationRecruitmentDynamics2023]. Variability in deviates of movement rates between region 1 and 4 is broadly consistent with the fluctuations in the DMI with higher movement estimated under positive IOD conditions. 
 
 Since no strong relationships between IO environmental conditions and the yellowfin dynamics have been identified, we did not incorporate any environmental variable in the current assessment; however, we suggest further studies on this topic.
 
@@ -378,27 +399,149 @@ Since no strong relationships between IO environmental conditions and the yellow
 
 ## Population dynamics
 
+The main model configuration partitions the population into four spatial regions (@fig-4A-config) and 29 quarterly age-classes ($0-28+$) both sexes combined. The last age-class ($28+$) comprises a *plus group* in which mortality and other characteristics are assumed to be constant. A plus group of $40+$ was also tested in some configurations. Age quantities are partitioned into 48 length bins ranging from 10 to 198 cm, which covers the main size range observed for yellowfin in the IO, with length bin width of 4 cm. The population is monitored in the model at quarterly time steps, extending through a time window of 1950–2023. The main population dynamics processes are as follows.
+
+### Recruitment
+
+Recruitment in SS3 is defined as the appearance of age-class 0 quarter fish in the population. Yellowfin tuna spawning occurs all year round, with higher activity from November to February and higher batch fecundity estimates (i.e., number of oocytes released) in largest females [@zudairePreliminaryEstimatesSex2022]. The assessment model assumed that recruitment occurs instantaneously at the beginning of each quarter. This is a discrete approximation of continuous recruitment, but provides sufficient flexibility to allow a range of variability to be incorporated into the estimates as appropriate.
+
+Global recruitment was assumed to be a function of spawning biomass via a Beverton and Holt stock-recruitment relationship (SRR) with a fixed value of steepness ($h$). Steepness is defined as the ratio of the equilibrium recruitment produced by 20% of the equilibrium unexploited spawning potential to that produced by the equilibrium unexploited spawning potential [@francisUseRiskAnalysis1992]. Typically, fisheries data are not very informative about the steepness parameter of the SRR parameters [@leeCanSteepnessStock2012]; hence, the steepness parameter was fixed at a moderate value (0.80) and the sensitivity of the model results to the value of steepness was explored by setting it to lower (0.7) and higher (0.9) values as performed in other tuna RFMOs [@harleyPreliminaryExaminationSteepness2011]. Deviates from the SRR curve (*recruitment deviates*) were estimated from 1972 to 2021 (i.e., 200 deviates), which covers the period with more data in the assessment (@fig-data-plot). The recruitment deviates were assumed to have a standard deviation of 0.6 ($\sigma_R$) in log scale, which was fixed during the model development process.
+
+The global recruitment was distributed into the tropical regions 1 and 4. The choice of these regions was based on the temperature preference for the spawning of yellowfin tuna and a minimum temperature for larval survival of about 24$^\circ$C [@suzukiReviewBiologyFisheries1993; @regleroWorldwideDistributionsTuna2014]. The overall proportion of the quarterly recruitment allocated to regions 1 and 4 was estimated and varied for quarters between 1977 and 2021 (180 deviates). A time-block was imposed on the temporal deviates of the recruitment distribution parameters, which were divided into two periods: 1977 – 2008 and 2009 – 2021 (both assuming a standard deviation of 1.5 for the deviates). The time block makes it possible to use the average recruitment distribution of the most recent period instead of the long-term average in the model prediction. The selection of time period is based on the estimated relative trend of regional recruitment distribution.
+
+A sensitivity model was performed in which recruitment was assumed to occur in all model regions, which allowed the model to have more flexibility to distribute fish in model regions. This is preferable because although spawning and larvae require water of at least 24$^\circ$C, the growing juveniles can move to other regions before they reach the size of recruitment to the fishery, when the model first needs to predict their distribution. Their pre-recruitment movement behaviour is likely to differ from older fish. However, there is a significant increase in the computational overhead associated with the additional temporal deviates parameters for the regional recruitment distribution (unless a stationary regional distribution is assumed). As such, this parametrization was not used in the final model ensemble.
+
+### Initial population
+
+The population age structure in the initial time period in each region was assumed to be in an unexploited, equilibrium state. As noted above, the population is partitioned into quarterly age-classes with an aggregate class for the maximum age (plus-group). The aggregate age class makes it possible for accumulation of old and large fish, which is likely in the early years of the fishery when exploitation rates were assumed to be absent.
+
 ### Somatic growth {#sec-growth}
+
+The 2021 assessment used growth parameters that replicated the growth curve derived by @fonteneauWorkingProposalYellowfin2008 (@fig-growth1). This growth curve did not follow the traditional von Bertalanffy growth pattern, displaying slow growth between 30 and 60 cm fork length and faster growth between 60 and $\sim$ 120 cm, so the authors had to approximate it in SS3 by varying the growth rates ($k$ parameter) for age quarters from 2 to 13. @dortelIntegratedBayesianModeling2015 estimated growth parameters by integrating otolith readings, growth increments from mark-recapture data, and modal progressions from purse seine length frequency data. Mean length-at-age estimates were comparable to the values estimated by @fonteneauWorkingProposalYellowfin2008 for young ages and then diverges, with larger length-at-age due to higher asymptotic length ($L_{\infty}$).
+
+@evesonUpdatedGrowthEstimates2012 used otolith and growth increment from tag data to estimate a mean asymptotic length of about 130 cm fork length, which was low compared to the maximum lengths historically reported for yellowfin in the IO. Sex-specific estimates from a small subset of samples supported the hypothesis that, on average, males grow to a larger size than females, with the mean asymptotic length estimate being 151 cm for males versus 140 cm for females. Similar differences between sex have been observed in Atlantic yellowfin [@paciccoAgeGrowthYellowfin2021] and other *Thunnus* species. The sex-specific estimates were explored in a two-sex model in the 2018 assessment [@fuPreliminaryIndianOcean2018].
+
+@farleyEstimatingAgeGrowth2021 presented growth estimates using otolith information from the GERUNDIO project and found quite different growth patterns compared to previous studies, especially for young ages. In an updated study, @farleyUpdatingEstimationAge2023 provided new growth estimates based on daily and annual otolith readings validated with radiocarbon [@fraileAgeValidationYellowfin2024], and used a two-stage von Bertalanffy curve to fit the age-length data. @farleyUpdatingEstimationAge2023 found a larger $L_{\infty}$ parameter compared to previous studies, and also found distinct mean length-at-age patterns between males and females for ages older than 4 years. Since @farleyUpdatingEstimationAge2023 is the most recent study on growth, we use it in the current assessment. We approximated the two-stage von Bertalanffy curve by varying the growth rate $k$ parameters for age quarters 2 to 13 (@fig-growth1). We also tested the modelling of different growth curves for males and females (@fig-growth-sex) in a sensitivity run.
+
+@farleyUpdatingEstimationAge2023 found a larger variation of lengths for older ages, as also seen in previous growth studies. In SS3, we modelled the variation of lengths at ages as a function of mean length-at-age. The parameters of the length-weight relationship were updated in 2016 using information from more than 20 000 fish sampled since 1987 [@chassotLengthweightRelationshipsTropical2016], which were used in the 2021 assessment. @zudairePreliminaryEstimatesSex2022 also estimated these parameters using data from the GERUNDIO and EMOTION programs, which were similar to the ones estimated in @chassotLengthweightRelationshipsTropical2016 despite the much lower sample size. Therefore, we used the length-weight parameters from the 2021 assessment (@fig-lw).
+
+### Sexual maturity and fecundity
+
+The 2021 assessment used the length-based maturity ogive from @zudaireReproductivePotentialYellowfin2013, who presented two alternative maturity ogive based on either the cortical alveolar or vitellogenic stages of ovarian development. @fuPreliminaryIndianYellowfin2021 converted the length-based ogives to age-based ogive assuming an equilibrium population age-length structure. @fuPreliminaryIndianOcean2018 showed that the assessment estimates are not sensitive to whether age or length-based ogive was used. The maturity ogive based on cortical alveolar stage development indicated that the onset of maturity occurs at about age 5 quarters ($\sim$ 75 cm) and full maturity was attained at about 12 age quarters. The maturity ogive based on vitellogenic stage development was offset by about 3 quarters. The 2021 assessment included only the ogive based on cortical alveolar stage development. 
+
+@zudairePreliminaryEstimatesSex2022 provide the most recent review on the sexual maturity of yellowfin in the IO. They analyzed samples from a few data collection programs since 2009, principally from the purse seine fleet and western IO, and estimated the length at 50% maturity ($L_{50}$) by applying two different maturity thresholds depending on the oocyte development stage considered: physiological maturity (threshold established at cortical alveolar oocyte development stage) and functional maturity (threshold at initial vitellogenic oocyte development stage). The former method estimated $L_{50}$ at 75 cm fork length (FL) and was used in the 2021 assessment, while the latter estimated $L_{50}$ 101.7 cm FL. Using functional maturity as the threshold to determine sexually mature fish is preferable since it guarantees that the fish will inevitably reproduce in the very short term [@PACICCO2023106620; @zudairePreliminaryEstimatesSex2022], so we used the functional maturity curve in the current assessment. In addition, we decided to use length-based maturity since some of the model runs estimated growth parameters, which can affect the length to age conversion. In SS3, we modelled maturity-at-length using a logistic function with two parameters (@fig-maturity) that remained fixed during the model development process.
+
+@zudairePreliminaryEstimatesSex2022 also examined the sex ratio and found it to be close to 1:1 for most of the small and intermediate size classes (smaller than 115 cm). However, males dominated the samples for sizes larger than 150 cm, probably due to differences in growth between sexes [@farleyUpdatingEstimationAge2023]. Based on the current evidence, we assumed a sex ratio of 0.5. Finally, we assumed that the egg production ($eggs/kg$) was a linear function of female body weight (kg).
+
+### Natural mortality
+
+@hoyleApproachesEstimatingNatural2021 reviewed approaches for estimating natural mortality ($M$) and provided estimates of age-specific natural mortality based on methods described in @maunderReviewEstimationMethods2023. The new approach assumes a Lorenzen-type relationship [@lorenzenRelationshipBodyWeight1996] between natural mortality and length or weight. This relationship models high $M$ for younger fish which then declines as fish get older. Mortality increases again after individuals become mature, and this increase is linked to the proportion of mature fish following a logistic curve. This approach has also been applied in the 2021 South Pacific albacore stock assessment [@castillo-jordanStockAssessmentSouth2021]. 
+
+The 2019 yellowfin tuna assessment in the Atlantic Ocean [@iccatReport2019ICCAT2019] adopted natural mortality estimates based on the results of a study of the relationship between maximum observed age and natural mortality [@thenEvaluatingPredictivePerformance2015], and maximum age estimates derived from an aging study using annual otolith increments [@andrewsAgeValidationYellowfin2020; @paciccoAgeGrowthYellowfin2021]. A @lorenzenRelationshipBodyWeight1996 natural mortality form was developed with an $M$ of 0.35 for adult yellowfin, based on a validated maximum observed age of 18 years [@andrewsAgeValidationYellowfin2020]. This level of $M$ was slightly lower than the low $M$ option considered in the 2018 assessment of IO yellowfin tuna. 
+
+In the 2021 assessment, two alternative estimates were provided: one based on a maximum age of 10.5 years observed for IO yellowfin tuna [@shihFirstAttemptAge2014], and the other based on the validated maximum age of 18 years obtained in the Atlantic Ocean (as the *Mlow* option above). The range estimates by @hoyleApproachesEstimatingNatural2021 were somewhat lower than the natural mortality options in the basic and *Mlow* models for the sub-adults/adults particularly for juveniles, and do not include a ‘hump’ to allow for higher female natural mortality 1.5 years after maturation. The hump is removed because change in sex ratio at length observed for yellowfin tuna can be partly or completely explained by males growing larger than females [@paciccoAgeGrowthYellowfin2021]. The estimates by @hoyleApproachesEstimatingNatural2021 were examined in sensitivity models in 2021.
+
+@artetxe-arrateNaturalMortalityEstimates2024 presented the most recent update of natural mortality estimates for yellowfin in the IO. They presented three $M$ estimates based on different methodologies that relied on biological features of the stock such as growth or maximum age. For the current assessment, we used the $M_a$ estimates following @hamelDevelopmentConsiderationsApplication2022 and then rescaled based on @lorenzenPopulationDynamicsPotential2005. In SS3, the reference natural mortality is calculated from $M_{ref} = 5.4/A_{max}$, where $A_{max}$ is the assumed maximum age in the population equal to 11.7 years based on @farleyUpdatingEstimationAge2023. $M_{ref}$ is the natural mortality that corresponds to the age at the 95% maturity, assumed to be 16 age quarters based on @zudairePreliminaryEstimatesSex2022. Then, the rescaling of natural mortality at age is performed as a function of the $L_\infty$ and $k$ growth parameters. The resulting $M_a$ is shown in @fig-natmort.
+
+<!-- Then, natural mortality at age is scaled: -->
+
+<!-- $$M_{a} = log(\frac{\bar{L}_a}{\bar{L}_a + L_\infty(exp(k)-1)})L_{M_1}$$ -->
+
+<!-- where $\bar{L}_a$ is the mean length-at-age and: -->
+
+<!-- $$L_{M_1} = \frac{M_{ref}}{log(\frac{L_{mat}}{L_{mat}+L_\infty(exp(k)-1)})}$$ -->
+
+<!-- where $L_{mat}$ is the mean length at the 95% maturity age, which was assumed to be 16 quarters [@zudairePreliminaryEstimatesSex2022].  -->
+
+### Movement
+
+Reciprocal movement was assumed to occur between adjacent model regions, specifically R1-R2, R1-R4, R3-R4 (@fig-mov). Movement is parameterised as the proportional redistribution of fish among regions, including the proportion remaining in the home region. The redistribution of fish occurs instantaneously at the end of each model time step. Movement was parameterised to estimate differential movement for young (2–8 quarters) and old ($\geq$ 9 quarters) fish to approximate potential changes in movement dynamics associated with maturation. Thus, for each movement transition two separate movement parameters were estimated. Fish did not commence moving until the end of age 2 quarters.
+
+It is not possible to directly estimate seasonal movements due to the temporal model configuration. The seasonal variation in the longline CPUE indices and the purse-seine catches, particularly in region 2, indicate that there are likely to be significant seasonal changes in the regional abundance of yellowfin. Seasonal movement dynamics were investigated in the 2018 assessment and @langleyInvestigationRecruitmentDynamics2023 by correlating movement parameters with the environmental indices or using an alternative model structure that can explicitly estimate seasonal movements. However, neither option was able to explain the magnitude of variability exhibited in the longline CPUE nor have any significant effect on the model results.
 
 ## Fishery dynamics
 
-Selectivity principally.
+### Fishing mortality
 
-## Tagged fish
+Fishing mortality was modelled using the hybrid method, which uses the Pope’s equation and an iterative method to approximate the fishing mortality ($F$).
 
-Tag reporting, mixing, etc.
+### Catchability
+
+Since we performed a regional scaling to the standardized LL CPUE (see @sec-llcpue), we only estimated the catchability parameter for LL CPUE in region 1b. Catchability in regions 2, 3, and 4 were mirrored to the catchability in region 1b.
+
+### Selectivity 
+
+- Longline (*LL*) fisheries: Assumed to be age-specific, time-invariant, and principally parameterised with a logistic function that constrains the older age classes to be fully selected (“flat top”). Some configurations also tested time-variant selectivity in two blocks: before 2000 (double-normal parametrisation) and after 2000 (logistic parametrisation) for *LL 1b*, *LL 2*, and *LL 4* to account for changes in CPC contribution to length data (@fig-ll-cpc). The selectivity in each fishery is shared by corresponding set of *LL* CPUE indices.
+
+- Longline fresh tuna (*LF*) fishery: The *LF 4* fishery was age-specific and parameterised using a logistic function.
+
+- Purse seine (*FS* and *LS*) fisheries: Assumed to be length-based and formulated using a cubic spline with five nodes. The nodes were specified to approximate the main inflection points of the selectivity function. We only estimated selectivity parameters for fisheries in region 1b, while purse seine selectivities in other regions (2 and 4) were mirrored to the 1b selectivities. For models that divide the purse seine *FS* fisheries into the small ($\leq$ 80 cm)) and large (>80 cm) fish components, a length-based, double-normal selectivity was assumed for each component.
+
+- Handline (*HD*) fishery: Assumed to be age-specific and followed a logistic function.
+
+- Gillnet (*GI*), baitboat (*BB*), and other (*OT*) fisheries: Assumed to be age-specific and used a double-normal parametrization. 
+
+- Troll (*TR*) fishery: Assumed to be age-specific and used a double-normal parametrization. Selectivity parameters were only estimated for region 1b, while selectivity in regions 2 and 4 was mirrored to region 1b.
+
+## Dynamics of tagged fish
+
+The dynamics of the tagged and untagged fish are generally governed by the same model structures and parameters. An exception to this is recruitment, which for the tagged population is simply the release of tagged fish. The probability of recapturing a given tagged fish is the same as the probability of catching any given untagged fish in the same region. For this assumption to be valid, either the distribution of fishing effort must be random with respect to tagged and untagged fish and/or the tagged fish must be randomly mixed with the untagged fish. The former condition is unlikely to be met because fishing effort is almost never randomly distributed in space. The second condition is also unlikely to be met soon after release because of insufficient time for mixing to occur. Depending on the distribution of fishing effort in relation to tag release sites, the probability of capture of tagged fish soon after release may be different to that for the untagged fish. It is therefore desirable to designate one or more time periods after release as *pre-mixed* and compute fishing mortality for the tagged fish based on the actual recaptures, corrected for tag reporting (see below), rather than use fishing mortality from the general population parameters. This in effect desensitizes the likelihood function to tag recaptures in the pre-mixed periods while correctly discounting the tagged population for the recaptures that occurred.
+
+Several analyses of the tag recovery data have been undertaken to determine an appropriate mixing period for the tagging programme [@langleyDeterminingAppropriateTag2012; @kolodyEvaluationTagMixing2013]. The analysis revealed that the tag recoveries from the FAD purse-seine fishery were not adequately mixed, at least during the first six months following release. Conversely, the free-school tag recoveries indicate a higher degree of mixing within the fished population. Most of the tagged yellowfin were in the length classes that are not immediately selected by the free-school fishery (< 90 cm). A mixing period of about 6−12 months is sufficient for most tagged fish to recruit to the free-school fishery (> 90 cm) and no longer be vulnerable to the FAD fishery. However, the maximum displacements of tags reached a plateau within a few weeks of release suggesting rapid movement of yellowfin within the tag release/recovery areas. On basis of the above, it was considered that a mixing period of 3 or 4 quarters was probably sufficient to allow a reasonable degree of dispersal of tagged fish in the yellowfin tuna population within the primary region of release.
+
+The release phase of the tagging programme was essentially restricted to the western equatorial region. @fuPreliminaryIndianOcean2018 showed that the recovery rate of tags after three quarters at liberty was similar both in trend and magnitude between the main latitude bands within the western equatorial region, which suggested a reasonable degree of mixing of tagged fish at the regional scale. The distribution of tags throughout the wider IO appears to have been relatively limited as is evident from the low number of tag recoveries from the fisheries beyond region 1b. Tag recoveries from beyond region 1b are unlikely to significantly inform the model regarding movement rates.
+
+Estimates of tag reporting rates from the purse seine fishery were available from tag seeding trials. These estimates were applied to correct the number of tags included in the recovery dataset for the purse seine fisheries within region 1b and region 2 (see @sec-tag-data for details). For the other fisheries, there was very limited information available to indicate the tag reporting rates. Fishery-specific reporting rates were estimated based on uninformative priors. All fishery reporting rates were assumed to be temporally invariant and were estimated within the model. The assumptions on tagging dynamics just described did not vary from the 2021 assessment.
 
 ## Likelihood components
 
-Weights, error structure, observation error, etc.
+The total likelihood is composed of a number of components, including the fit to the catch data, indices of abundance (CPUEs), length frequency, CAAL, and tagging data. There are also contributions to the total likelihood from the recruitment deviates and priors on the individual model parameters. Details of the formulation of the individual components of the likelihood are provided in Appendix A of @methotStockSynthesisBiological2013.
+
+### Catch
+
+The catch data assumed a lognormal error structure. There is no objective estimates of the degree in uncertainty in aggregated catch data, therefore, like in the 2021 assessment, we assumed a value of 0.01 for every observation.
+
+### Indices of abundance
+
+The CPUE indices assumed a lognormal error structure. The 2021 assessment assumed a coefficient of variation for every LL CPUE observation of 0.2, which did not differentiate low or high uncertain CPUE estimates. In the current assessment, the coefficient of variation associated to every CPUE observation was derived from the standardization method (e.g., GLM, GAMM, or spatiotemporal GLM) and then rescaled to a mean of 0.2 per region for the LL indices. Purse seine indices kept the estimated coefficient of variation derived from the CPUE standardisation models.
+
+### Length frequency
+
+The length frequency assumed a multinomial error structure. The reliability of the length composition data is variable across fisheries and over time periods. For that reason, it was considered that the length composition data should not be allowed to dominate the model likelihood and directly influence the trends in stock abundance. In the 2018 and 2021 assessments, an overall input sample size (ESS) of 5 was assigned to all length composition observations (all fisheries, all time periods). That approach essentially gave the entire length composition data set a relatively low weighting in the overall likelihood, but did not differentiate data quality among fisheries and years. In order to incorporate a better proxy of size quality information, the current assessment treated the RQ values (see @sec-size) as the input sample size.
+
+<!-- which was then down- or upweighted based on @mcallisterBayesianStockAssessment1997. -->
+
+### Conditional age-at-length
+
+A further log-likelihood component involves the CAAL dataset. The observed age composition within each length interval is assumed to be multinomially distributed, and this forms the basis of the likelihood component for this data source. 
+
+### Tagging data
+
+There are two components of the tag likelihood: the multinomial likelihood for the distribution of tag recoveries by fleets over time and the negative binomial distribution of expected total recaptures across all regions. The relative weighting of the tagging data was controlled by the magnitude of the over-dispersion parameters assigned to the individual tag release groups. Like in the 2018 and 2021 assessments, the overdispersion parameters for all tag release groups were set at 7 in the current assessment, determined iteratively from the residuals of the fit to the tag recovery data (observed – expected number of tags recovered). During the model implementation, we tested downweigthing by 90% (i.e., lambda of 0.1) the influence of the tagging likelihood component on the total likelihood.
 
 ## Parameter estimation and uncertainty
 
-Hessian, max gradient, jitter analysis, likelihood profiles, etc.
+The parameters of the model were estimated by minimising the sum of the negative log-likelihood components associated with each of the data components plus the negative log of the probability density functions of the priors and recruitment deviates. Estimation was conducted in a series of phases, the first of which used relatively arbitrary starting values for most parameters (Table XX). Some parameters had starting values consistent with available biological information. Models were run with a gradient criterion of $10^{-4}$. The Hessian matrix computed at the mode of the posterior distribution was used to obtain estimates of the covariance matrix, which was used in combination with the Delta method to compute approximate confidence intervals for parameters of interest.
+
+The structural uncertainty grid attempts to describe the main sources of structural and data uncertainty in the assessment. For the current assessment, we have continued with a factorial grid of model runs which incorporates the following sources of uncertainties: 
+
+- Effort creep in the LL CPUE indices: no effort creep and a 0.5% annual rate.
+- Weighting of tagging data: lambda of 1 and 0.1.
+- Steepness: 0.7, 0.8, and 0.9.
+
+### Diagnostics
+
+Misspecification of key parameters or assumptions in integrated stock assessment models such as SS3 can strongly impact model outcomes and the estimates of quantities of management interest [@mangelPerspectiveSteepnessReference2013]. Model misspecifications can include incorrect specifications of important biological parameters or selectivity functions, or by not accounting for spatial stock structure [@puntSpatialStockAssessment2019] or temporal variation in recruitment [@thorsonCaseEstimatingRecruitment2019], growth [@correaSpatialTemporalVariability2021], selectivity [@stewartImplicationsProcessError2017], among others. Failing to account for an important process can also lead to conflicting information among data sets [@francisDataWeightingStatistical2011] and retrospective and forecast bias [@carvalhoCanDiagnosticTests2017].
+
+In order to evaluate model misspecification, we applied a series of diagnostics tools described in @carvalhoCookbookUsingModel2021 to candidate reference models. Regarding convergence, we examined the maximum final gradient, invertible Hessian, parameters stuck on bounds, correlation between parameters, and a jittering analysis to evaluate if models converged to a global solution. Regarding goodness-of-fit, we analyzed residuals patterns (*RunTest*) and the root mean square error (RMSE) for CPUE and mean length [@carvalhoCanDiagnosticTests2017].
+
+For highly complex population models fitted to large amounts of often conflicting data, it is common for there to be difficulties in estimating total abundance. Therefore, a likelihood profile analysis was undertaken of the marginal posterior likelihood in respect of population scaling ($R_0$), variability in recruitment ($\sigma_R$), and natural mortality ($M$). Retrospective analyses were conducted as a general test of the stability of the model, as a robust model should produce similar output when rerun with data for the terminal quarters sequentially excluded [@cadiganLocalInfluenceDiagnostics2005]. We used the Mohn's $\rho$ [@mohnRetrospectiveProblemSequential1999] as an indicator of retrospective patterns for spawning biomass and fishing mortality.
+
+Providing fisheries management advice requires predicting a stock’s response to management and checking that predictions are consistent with future reality [@kellEvaluationPredictionSkill2016]. The accuracy and precision of the predictions depend on the validity of the model, the information in the data, and how far ahead of time predictions are made. We applied the hindcasting cross-validation technique (*HCXval*) to CPUE data. Likewise, we calculate the mean absolute scaled error (MASE) [@hyndmanAnotherLookMeasures2006] for CPUE and mean length. The MASE is builds on the principle of evaluating the prediction skill of a model relative to a naive baseline prediction.
 
 ## Stock status
 
-Related to MSY, depletion trends, Kobe, etc.
+Maximum Sustainable Yield (MSY) based estimates of stock status were determined for the candidate reference models, including those in the uncertainty grid. The incorporation of both model and estimation uncertainty into management advice is necessary to accurately capture the current state of stock status as model uncertainty is not always greater than estimation uncertainty [@ducharme-barthFocusingFrontEnd2022]. MSY based reference points were derived for the model options based on the average F-at-age matrix for 2022−2023. The period was considered representative of the recent average pattern of exploitation from the fishery. However, variation in the proportion of catches between the main fishing gears are likely to influence the F-at-age matrix and, hence, MSY based indicators.
 
 # Model runs
 
@@ -420,6 +563,8 @@ Describe fits to data.
 
 Describe parameter estimates.
 
+<!-- Selectivity FS: This formulation was sufficiently flexible to provide a reasonable representation of the modal structure of the length composition of the catch from the two purse seine methods, but was not adequate to account for the temporal variations in the compositions of the two length modes, particularly for the *FS* fisheries. -->
+
 ## Time series
 
 Recruitment, SSB, etc.
@@ -428,13 +573,35 @@ Recruitment, SSB, etc.
 
 Describe sensitivity analyses.
 
+## Diagnostics
+
+<!-- Following the 2018 and 2021 assessments, the weighting of the CPUE indices followed the approach of @francisDataWeightingStatistical2011. A series of smoother lines were fitted to the CPUE index and the RMSE of the resulting fit to each set of CPUE indices was determined as a measure of the magnitude of the variation of each set of CPUE indices. The resulting RMSEs were relatively high (0.40–0.50). However, a significant proportion of this variation is related to the relatively high seasonal variation in CPUE in most regions. Performing the same analysis on the annualised CPUE index resulted in considerable reduction in the RMSEs (0.15-0.2). On that basis, a CV of 0.2 was assigned to each set of CPUE indices in the base model, to ensure the stock biomass trajectories were broadly consistent with the CPUE indices while allowed for a moderate degree of variability in fitting to the indices. -->
+
+# Projections
+
+**Gorka will write this.**
+
 # Discussion and conclusions
 
 Discuss. Recommendations for future assessments.
 
+# Reproducibility and transparency
+
+A number of authors have recently advocated for a culture of open science and reproducible research (i.e., a change in the transparency and reproducibility of science) [@hamptonBigDataFuture2013; @hamptonTaoOpenScience2015]. Proponents of open science and reproducible research highlight a number of benefits, including a more productive and responsible scientific culture, an ability to address larger and more complex questions, as well as a more efficient workflow and ability to reproduce one’s own work [@fomelGuestEditorsIntroduction2009].  Reproducibility of the implementation of stock assessment models has barely explored and published for tuna stocks, but some progress has been made in other RFMOs (e.g., ICES) [@millarIcesTAFFunctionsSupport2023]. 
+
+@magnussonOpenReproducibleFisheries2022 listed several advantages of make a stock assessment open and reproducible:
+
+- Easy to review the assessment process.
+- Easy to pick up a stock assessment from a previous year and run an update, which is particularly important when a new scientist is leading the assessment.
+- Easy to modify data treatment or model settings and rerun the entire workflow, which allows more analyses, exploration, and potential improvements.
+- Improve traceability and credibility of the assessment process.
+
+For the current assessment, we used Github to store the scripts to analyze and process the raw data, prepare the inputs for SS3, run all the SS3 model configurations, and produce summary figures and tables.
+The R scripts and instructions to rerun the entire assessment process presented in this document can be found at: <https://github.com/Fundacion-AZTI/IOTC_YFT_2024_Assessment/tree/reproducible>. In order to reproduce this assessment, the user needs to have some knowledge on R programming, Github, and Stock Synthesis and associated packages such as *r4ss* [@taylorVisualizingCatchageModels2021]. Future assessments may improve the transparency and reproducibility by developing interactive tools to analyze assessment results [@regularImprovingCommunicationAccessibility2020], especially for people with no programming skills.
+
 # Acknowledgements
 
-Write your acknowledgements.
+We thank the various fisheries agencies and regional fisheries observers for their support with data collection, as well as the IOTC Secretariat for tyding, analyzing, and preparing the data for the assessment. We thank participants at the 26th data preparatory meeting WPTT26(DP) for their contributions to the assessment. We particularly thank the independent peer review experts for the insightful comments that helped advance and improve this assessment. Finally, we highlight the lifetime of work that Dave Fournier put into ADMB and Richard Methot for leading the development of SS3, without which we could not have performed this assessment.
 
 {{< pagebreak >}}
 
@@ -458,9 +625,9 @@ Write your acknowledgements.
 
 ```{r}
 #| label: tbl-fleet-4A
-#| tab-cap: "Fishery definition in the four-areas assessment configuration."
-my_tab = read.csv(file.path(shrpoint_path, 'output/tables', "fleet_label_4A_io.csv"))
-colnames(my_tab) = c('Fishery number', 'Fishery code and region')
+#| tab-cap: "Fishery definition in the four-areas assessment configuration. The fishery label is derived from the fishery group and the model region."
+my_tab = get_fisheries(config = '4A_io')
+colnames(my_tab) = c('Fishery number', 'Fishery label')
 knitr::kable(my_tab, align=rep('l', 2))
 ```
 
@@ -484,7 +651,7 @@ knitr::kable(my_tab, align=rep('l', 2))
 
 ```{r}
 #| label: fig-4A-config
-#| fig-cap: "Model areas or regions used in the four-areas assessment configuration. The region 1 is divided into two sub-regions implicitly modelled in the assessment model using the fleets-as-areas approach."
+#| fig-cap: "Model areas or regions used in the four-areas assessment configuration. The region 1 is divided into two sub-regions implicitly modelled in the assessment model using the areas-as-fleets approach."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_IO_4ARegions.png"), rel_path = FALSE)
 ```
@@ -493,7 +660,7 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_IO_4AReg
 
 ```{r}
 #| label: fig-catch-grid
-#| fig-cap: "Spatial distribution of IO catches per fishery group. The pie radius represents the aggregated catch from 1980 to 2023. Fishery group codes are described in @tbl-fishery-codes."
+#| fig-cap: "Spatial distribution of yellowfin catches per fishery group. The pie radius represents the aggregated catch from 1980 to 2023. Fishery group codes are described in @tbl-fishery-codes."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "catch_grid.png"), rel_path = FALSE)
 ```
@@ -502,7 +669,7 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "catch_grid.p
 
 ```{r}
 #| label: fig-agg-size
-#| fig-cap: "Size compositions per fishery included in the assessment model. Colored lines are size compositions obtained using simple aggregation while black lines used the catch-raised aggregation. Size compositions were summed over time."
+#| fig-cap: "Size compositions per fishery included in the assessment model. Colored lines are size compositions obtained using simple aggregation while black lines used the catch-raised aggregation. Size compositions were aggregated over time."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "agg_size.png"), rel_path = FALSE)
 ```
@@ -574,7 +741,7 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "imputation_g
 
 ```{r}
 #| label: fig-rq-size
-#| fig-cap: "The availability of size composition data from each fishery by quarter. The size of the bubble indicates the reporting quality score (small size = high quality, large size = low quality)."
+#| fig-cap: "The availability of size composition data from each fishery by quarter. The size of the bubble indicates the input sample size calculated from reporting quality scores."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "rq_size.png"), rel_path = FALSE)
 ```
@@ -583,7 +750,7 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "rq_size.png"
 
 ```{r}
 #| label: fig-comp-agg-size
-#| fig-cap: "Comparison between the aggregated size compositions per fishery used in the 2021 and the current (2024) assessment."
+#| fig-cap: "Comparison between the aggregated size compositions per fishery used in the 2021 and the current (2024) assessment. Both used the simple aggregation approach."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_size.png"), rel_path = FALSE)
 ```
@@ -592,7 +759,7 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_size
 
 ```{r}
 #| label: fig-comp-mlen
-#| fig-cap: "Comparison between the mean length per quarter per fishery group used in the 2021 and in the current (2024) assessment."
+#| fig-cap: "Comparison between the mean length per quarter per fishery group used in the 2021 and in the current (2024) assessment. Both used the simple aggregation approach."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_mlen.png"), rel_path = FALSE)
 ```
@@ -600,8 +767,18 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_mlen
 {{< pagebreak >}}
 
 ```{r}
+#| label: fig-hd-cpc
+#| fig-cap: "Annual catch (first row), number of fish sampled in the size data (second row), and mean length (third row) by CPC before filtering for the HD 1a fishery. Only data from 1990 is shown."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "HD_catch-size_CPC.png"), rel_path = FALSE)
+```
+
+
+{{< pagebreak >}}
+
+```{r}
 #| label: fig-ts-cpue
-#| fig-cap: "Scaled CPUE LL time serie per region. The shaded area is the 95% confidence interval."
+#| fig-cap: "Scaled LL CPUE time serie per region. The shaded area represents the 95% confidence interval."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_cpue_area.png"), rel_path = FALSE)
 ```
@@ -610,7 +787,7 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_cpue_area
 
 ```{r}
 #| label: fig-comp-cpue
-#| fig-cap: "Comparison between the scaled CPUE LL values used in the 2021 assessment and the current (2024) values."
+#| fig-cap: "Comparison between the scaled LL CPUE values used in the 2021 assessment and the current (2024) values per region."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_cpue.png"), rel_path = FALSE)
 ```
@@ -619,9 +796,18 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_cpue
 
 ```{r}
 #| label: fig-ts-ps-cpue
-#| fig-cap: "Scaled purse seine CPUE time series. Both series were used for region 1b. The shaded area is the 95% confidence interval."
+#| fig-cap: "Purse seine free school (FS) and log school (LS) CPUE time series. Both series were used for region 1b in the stock assessment model. The shaded area represents the 95% confidence interval."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_ps_cpue.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-ts-llfs-cpue
+#| fig-cap: "Time series of FS and LL CPUE in region 1b. Both series were rescaled to a mean of 1 for comparison."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_llfs_cpue.png"), rel_path = FALSE)
 ```
 
 {{< pagebreak >}}
@@ -667,6 +853,78 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "tag_map.png"
 #| fig-cap: "Tag recoveries by year of recovery, region of release, and region of recovery. Regions are defined by the four-area model configuration (see @fig-4A-config)."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "tag_nfish_area.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-data-plot
+#| fig-cap: "Temporal coverage of data types included in the candidate reference models. The x-axis represents model years (i.e., quarters)."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'models/RefModels/2_TwoBlock_LLsel/plots', "data_plot.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-growth1
+#| fig-cap: "Mean length-at-age calculated using the two-stage growth function in Farley et al. (2023), and its approximation in SS3. The mean length-at-age from the growth parametrization used in the 2021 assessment is also shown."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "growth_1.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-growth-sex
+#| fig-cap: "Mean length-at-age by sex approximated in SS3 based on the two-stage growth function in Farley et al. (2023)."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "growth_sex.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-lw
+#| fig-cap: "Length-weight relationship used in the current assessment."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "LW.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-maturity
+#| fig-cap: "Upper panel: Maturity-at-length specified in the current assessment, based on Zudaire et al. (2022). Lower panel: Comparison between maturity-at-age specified in the 2021 and current assessment. For the current assessment, age-based maturity was converted from length-based maturity."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "maturity.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-natmort
+#| fig-cap: "Natural mortality at age used in the 2021 and current assessment."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "natmort.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-mov
+#| fig-cap: "Movement parametrization in the current assessment model (four-areas configuration)."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_IO_4ARegions_mov.png"), rel_path = FALSE)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-ll-cpc
+#| fig-cap: "Annual catch (first row), number of fish sampled in the size data (second row), and mean length (third row) by CPC after filtering for the LL 1b and LL 4 fisheries."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "LL_catch-size_CPC.png"), rel_path = FALSE)
 ```
 
 {{< pagebreak >}}
