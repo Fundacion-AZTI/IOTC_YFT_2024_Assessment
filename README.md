@@ -1,64 +1,36 @@
 # IOTC Yellowfin Stock Assessment 2024
 
-This Github repository is used to conduct the 2024 Yellowfin assessment in the Indian Ocean. **Open it in RStudio as a project**.
-
 > :loudspeaker: **Goal**
 >
-> The main goal of this Github repository is to replicate all the 2024 SS configurations using R code, which will improve the collaboration among stock assessors and the communication of results.
+> The main goal of this repository is to replicate the 2024 Indian Ocean yellowfin assessment configurations in R. The assessment is implemented in [Stock Synthesis 3](https://vlab.noaa.gov/web/stock-synthesis).
 
-These following folders can be found in this repository:
+In order to execute this repository, you will need to have some knowledge on:
 
--   `code`: store the R scripts used to analyze the data (`code/analyses`), and to create the SS inputs (`code/ss/inputs`) and configurations (`code/ss/configurations`).
--   `presentation`: store Quarto files (`.qmd`) to produce the assessment presentation(s).
--   `report`: store Quarto files (`.qmd`) to produce the assessment report.
+- Github (highly desirable but not mandatory)
+- Stock Synthesis 3 (SS3, mandatory)
+- R programming (mandatory)
+- `r4ss` R package (mandatory)
 
-## Sharepoint
+The steps to run this repository are described below.
 
-You also need to have access to the Sharepoint to read the raw data and store the SS files. In the Sharepoint, you can find the following main folders:
+## 1. Clone this repository
 
--   `data`: store the raw data provided by the IOTC Secretariat (`data/raw`), the processed data to make figures (`data/processed`), and the SS inputs for different SS spatial configurations (`data/ss_inputs`). There raw data can be found online [here](https://iotc.org/documents/WPTT/26AS/Data/01).
--   `models`: store the base SS files (e.g., the 2021 SS files, `models/base`) that will be then modified to create the 2024 configurations. Only include one set of base files (`control.ss`, `data.ss`, `forecast.ss`, `starter.ss`) per spatial configuration. This folder also store the SS configurations for the 2024 assessment by spatial configuration (`models/configurations`). Use the R scripts in `code/ss/configurations` in the Github repository to create the 2024 configurations.
--   `output`: store figures and tables from the data analysis and SS.
+If you are a Github user, you can clone this repository by following [these instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository).
 
-> :warning: **Important**
->
-> Since the Sharepoint local path might change for AZTI and external collaborators, you will need to locally change the `sharepoint_path.R` script in order to read the data and save the SS configurations properly. DO NOT commit/push changes in `sharepoint_path.R`.
+If you are not familiar with Github, you can download this repository as ZIP file by following [these instructions](https://docs.github.com/en/get-started/start-your-journey/downloading-files-from-github#downloading-a-repositorys-files). Save the downloaded folder somewhere locally. 
 
-The **folders** in the Sharepoint should look like:
+## 2. Open the R project
 
-``` bash
-└───IOTC_YFT_2024 - General
-    ├───data
-    │   ├───processed
-    │   ├───raw
-    │   └───ss_inputs
-    │       ├───1A_west
-    │       ├───2A_io
-    │       └───4A_io
-    ├───models
-    │   ├───base
-    │   │   └───4A_io
-    │   └───configurations
-    │       ├───1A_west
-    │       ├───2A_io
-    │       └───4A_io
-    └───outputs
-        ├───figures
-        └───tables
+There is an R project in the repository folder called `IOTC_YFT_2024_Assessment.Rproj`. We suggest to open it from RStudio. This will automatically set your working directory to the repository folder. 
+
+If you want to use a different visual interface that does not allow to work with R projects, you will need set the working directory mannually to the repository folder.
+
+## 3. Specify the working folder
+
+The *working folder* is a folder where the raw and processed data will be saved, and the SS3 configuration files will be created and run. Note that this is different than the *repository folder*.
+
+Create the working folder somewhere on your local computer, and then specify the path in the `sharepoint_path.R`. For example:
+
+```{r}
+shrpoint_path = 'C:/Use/2024_YFT_IOTC'
 ```
-
-## Basic steps to use Github
-
-If you are unfamiliar with Github, these are the first steps that you need to do:
-
-1.  Create a Github account [here](https://github.com).
-2.  The simplest way to manage your files (on Windows) is to use [Github Desktop](https://github.com/apps/desktop).
-3.  Clone this repository. Follow [these instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository).
-
-If you followed these steps, you will now have all the files of this repository locally (i.e., in your computer). Now you can start making changes to existing files or adding new files.
-
-Every time you want to make a new change (assuming you are already a collaborator in this repository), you must follow the following steps:
-
-1.  `git pull` to have all the updates that other people could have made. It is highly recommended to `git pull` the repository regularly and before making any change. Follow [these instructions](https://docs.github.com/en/desktop/working-with-your-remote-repository-on-github-or-github-enterprise/syncing-your-branch-in-github-desktop#pulling-to-your-local-branch-from-the-remote).
-2.  `git commit` to record changes to one or more files, and it is done after you have made the desired change. Write a short description of the change. Follow [these instructions](https://docs.github.com/en/desktop/making-changes-in-a-branch/committing-and-reviewing-changes-to-your-project-in-github-desktop#write-a-commit-message-and-push-your-changes).
-3.  After you are done with the `git commit`, you need to `git push` your changes to make them available to all the collaborators. You can check that your changes have been successfully uploaded to the repository by examining the Github repository site.
