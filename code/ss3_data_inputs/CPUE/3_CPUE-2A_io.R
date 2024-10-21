@@ -63,7 +63,8 @@ fish_info = get_fisheries(spat_config)
 n_fisheries = max(fish_info$fleet_number)
 
 # Mean CV of 0.2 again:
-data_agg <- data %>% group_by(NewAssessmentAreaName) %>% mutate(stdcv02=std/mean(std)*0.2) %>% mutate(season=1,cv=stdcv02) %>% 
+data_agg <- data %>% group_by(NewAssessmentAreaName) %>% mutate(stdcv02=std/mean(std)*0.2) %>% 
+  mutate(season=1,cv=stdcv02) %>% 
   mutate(fleet = case_when(NewAssessmentAreaName=='12' ~ n_fisheries+1, TRUE ~ n_fisheries+2)) %>% 
   select(qtr,season,fleet,pr7994_m8_2R,cv) # confirm fleet number 
 data_agg = data_agg[order(data_agg$fleet, data_agg$qtr), ]

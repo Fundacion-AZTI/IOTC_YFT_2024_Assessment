@@ -13,10 +13,6 @@ source('code/auxiliary_functions.R')
 fish_info = get_fisheries(spat_config)
 ModelFisheries = fish_info$fleet_name
 
-# Initial length bins (with bug) in IOTC dataset:
-# This was an error in the 2021, which did not include half of the length bins. Confirmed by Dan
-L_labels_wrong  =  c(Paste("L0",seq(10,98,4)), Paste("L",seq(102,198,4)))
-
 # Initial length bins (correct) in IOTC dataset:
 L_labels  =  c(Paste("L0",seq(10,98,2)), Paste("L",seq(100,198,2))) 
 

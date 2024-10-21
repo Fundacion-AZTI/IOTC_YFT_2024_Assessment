@@ -45,7 +45,7 @@ data <- data79 %>% mutate(season = 1,cv = stdcv02) %>%
   select(qtr, season, fleet, pr_7994_m8, cv)
 
 # Format for ss3:
-cpue_df = data_agg %>% ungroup() %>% select(qtr, season, fleet, pr_7994_m8, cv)
+cpue_df = data %>% ungroup() %>% select(qtr, season, fleet, pr_7994_m8, cv)
 cpue_df = cpue_df %>% dplyr::rename(year = qtr, seas = season, index = fleet, obs = pr_7994_m8, se_log = cv)
 cpue_df$seas = 1
 

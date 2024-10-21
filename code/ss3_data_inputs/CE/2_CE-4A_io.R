@@ -95,4 +95,4 @@ catch_df = bind_rows(tibble::tibble(year = -999, seas = 1, fleet = sort(unique(c
                      catch_df)
 
 # Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'catch.csv'), row.names = FALSE)
+write.csv(catch_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'catch.csv'), row.names = FALSE)

@@ -1,17 +1,22 @@
+# This script will do the preprocessing of the LF data regardless the number of areas in the SS model
+rm(list = ls())
+
+# Sharepoint path:
 source('sharepoint_path.R')
-source('code/parameters_for_plots.R')
+
+# Read auxiliary functions:
 source('code/auxiliary_functions.R')
 
+# Processed data folder:
 data_folder = 'data/processed'
 # Length bin column names (lowercase):
 len_bins = c(paste0("l0", seq(from = 10, to = 98, by = 2)), paste0("l", seq(from = 100, to = 198, by = 2)))
 
 # Define grid dim to use (degrees):
-grid_size = 5
+grid_size = 5 # 5x5
 
 # -------------------------------------------------------------------------
 # Make std grid 
-# Specify data folder in sharepoint:
 
 # Read datasets:
 catch_spt = read_csv(file.path(shrpoint_path, data_folder, 'catch_grid.csv'))
@@ -38,24 +43,11 @@ size_spt = size_spt %>% mutate(grid_type = str_sub(grid, 1, 1))
 # Double check this:
 table(size_spt$grid_type)
 
-# # -------------------------------------------------------------------------
-# # Spatially standardize catch data (e.g., from 30x30 to grid_size x grid_size):
-# size_spt = size_spt %>% mutate(grid_type = str_sub(grid, 1, 1))
-# # Do some processing:
-# size_spt = size_spt %>% mutate(samp_ID = 1:n()) # add samp_ID column
-# dim(size_spt)
-# # Transform to std grid (from larger irregular grids to grid_size):
-# size_spt_tf = size_spt %>% group_split(samp_ID) %>% 
-#   purrr::map(~ transform_to_stdgrid(.x, std_res = grid_size)) %>% 
-#   list_rbind()
-# dim(size_spt_tf)
-size_spt_tf = size_spt 
-
 # -------------------------------------------------------------------------
 # -------------------------------------------------------------------------
 # Create a standard grid in the IO based on std points of catch and size data:
 
-merged_spt = rbind(catch_spt[,c('long', 'lat')], size_spt_tf[,c('long', 'lat')])
+merged_spt = rbind(catch_spt[,c('long', 'lat')], size_spt[,c('long', 'lat')])
 MyPoints = merged_spt %>% st_as_sf(coords = c("long", "lat"), crs = 4326, remove = FALSE)
 range(MyPoints$long)
 range(MyPoints$lat)
@@ -64,25 +56,12 @@ min_lon = 20
 min_lat = -60
 stdGrid = st_make_grid(MyPoints, cellsize = c(grid_size, grid_size), offset = c(min_lon, min_lat)) %>%
   st_set_crs(4326) %>% st_sf() %>% dplyr::mutate(grid_ID = 1:n())
-
-# Calculate area on land of each grid (in km2):
-stdGrid_temp = stdGrid %>% group_split(grid_ID) %>% 
-                purrr::map(~ calculate_area_on_land(.x)) %>%
-                list_rbind() %>% select(-geometry)
-stdGrid = left_join(stdGrid, stdGrid_temp, by = 'grid_ID')
 save(stdGrid, file = file.path(shrpoint_path, data_folder, paste0('stdGrid_', grid_size,'.RData')))
 
 # Create points std Grid to get lon lat information later:
 stdGridPoint = st_centroid(stdGrid) %>% 
   dplyr::mutate(lon = sf::st_coordinates(.)[,1], lat = sf::st_coordinates(.)[,2])
 st_geometry(stdGridPoint) = NULL
-
-# Plot std grid:
-ggplot() +
-  geom_sf(data = worldmap, fill = 'grey60', color = "gray60") +
-  geom_sf(data = stdGrid, fill = NA) +
-  coord_sf(expand = FALSE, xlim = c(15, 165), ylim = c(-65, 35))
-  
 
 # -------------------------------------------------------------------------
 # Merge std grid with catch data:
@@ -103,10 +82,9 @@ catchStd = left_join(catchStd, stdGridPoint, by = 'grid_ID')
 # Save:
 save(catchStd, file = file.path(shrpoint_path, data_folder, paste0('catchStd_', grid_size,'.RData')))
 
-
 # -------------------------------------------------------------------------
 # Merge std grid with size data:
-sizePoints = size_spt_tf %>% st_as_sf(coords = c("long", "lat"), crs = 4326, remove = FALSE)
+sizePoints = size_spt %>% st_as_sf(coords = c("long", "lat"), crs = 4326, remove = FALSE)
 dim(sizePoints)
 sum(is.na(sizePoints$quality)) # check no NAs for reporting quality
 # Find stdGrid that corresponds to each size point (it takes a while):
@@ -142,7 +120,7 @@ save(sizeStd, file = file.path(shrpoint_path, data_folder, paste0('sizeStd_', gr
 # -------------------------------------------------------------------------
 # Merged size with catch data:
 # Remove some unnecessary columns from catch data:
-mergedStd = left_join(sizeStd, catchStd %>% select(-c('area_on_land', 'grid_area', 'portion_on_land', 'lon', 'lat')))
+mergedStd = left_join(sizeStd, catchStd %>% select(-c('lon', 'lat')))
 
 # Missing catch grid information (%)
 sum(is.na(mergedStd$ncnofish))/nrow(mergedStd)
@@ -211,15 +189,6 @@ sum(is.na(mergedStd$ncmtfish))
 # Make imputation plot:
 imputationLevel = mergedStd %>% group_by(type_imputation) %>% summarise(n = n()) %>% mutate(perc = (n/sum(n))*100)
 sum(imputationLevel$perc)
-p1 = ggplot(imputationLevel, aes(x = factor(type_imputation), y = perc)) +
-  geom_bar(stat = "identity") +
-  xlab('Imputation level') + ylab('% of grid observations')
-ggsave(file.path(shrpoint_path, plot_dir, paste0('imputation_grid_', grid_size, img_type)), plot = p1,
-       width = img_width*0.5, height = 70, units = 'mm', dpi = img_res)
-
-# Check if imputation methods did not produce outliers:
-ggplot(data = mergedStd) + geom_boxplot(aes(x = factor(type_imputation), y = ncnofish)) + facet_wrap(~ fisherycode)
-ggplot(data = mergedStd) + geom_boxplot(aes(x = factor(type_imputation), y = ncmtfish)) + facet_wrap(~ fisherycode)
 
 # Get lon lat information:
 mergedStd = left_join(mergedStd, stdGridPoint, by = 'grid_ID')

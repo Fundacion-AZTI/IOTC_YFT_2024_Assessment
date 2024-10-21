@@ -48,7 +48,6 @@ data79[index,]=work
 
 # Aggregate by assessment area:
 data <- data79 %>% group_by(yq,yr,qtr,NewAssessmentAreaName) %>% summarize(pr7994_m8_2R=sum(pr_7994_m8),std=sqrt(sum(var)))
-# mean(data$pr7994_m8_2R[data$yr>=1979 & data$yr<= 1994 & data$NewAssessmentAreaName==1234])
 
 # -------------------------------------------------------------------------
 # -------------------------------------------------------------------------

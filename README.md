@@ -106,11 +106,11 @@ The `2A_io` and `1A_io` configurations implement two subconfigurations: aggregat
 Download the raw data from the IOTC website. 
 
 * The catch and size data can be found here: <https://iotc.org/documents/WPTT/26AS/Data/01>. You will find *five Excel files*, copy all of them and paste them in `data/raw` in the *working folder*.
-* The CPUE data can be found here: <https://iotc.org/documents/standardised-cpue-yft-and-bet>. Copy the `YFT` **folder** and paste it in `data/raw` in the *working folder*.
+* The CPUE data can be found here: <https://iotc.org/documents/standardised-cpue-yft-and-bet>. Copy only the `YFT` **folder** and paste it in `data/raw` in the *working folder*.
 
 ## 7. Create SS3 inputs
 
-In this repository, the folder `code/ss3_data_inputs` contains the R scripts to generate the data inputs for SS3. They are organized in three folders and should be created in that order:
+In this repository, the folder `code/ss3_data_inputs` contains the R scripts to generate the data inputs for SS3. They are organized in three folders and should be created in this order:
 
 - `CE`: R scripts to generate catch input.
 - `CPUE`: R scripts to generate CPUE input.
@@ -118,17 +118,10 @@ In this repository, the folder `code/ss3_data_inputs` contains the R scripts to 
 
 The first number of the scripts names indicate the order in which should be run. 
 
+If you are only interested in `4A_io` models, you can ignore the `2A_io` and `1A_io` scripts.
+
 ## 8. Age-length and tagging data
 
 The raw age-length and tagging data are not publicy available, so it is not possible to generate them. 
 
-However, you can find the data in SS3 format for each model configuration in the `data/ss3_inputs` folder of this repository. Copy and paste them in `data/ss3_inputs` of the *working folder*. You could do this manually or by running these lines:
-
-```{r}
-source('sharepoint_path.R')
-file.copy(from = 'data/ss3_inputs/4A_io', to = file.path(shrpoint_path, 'data/ss3_inputs/4A_io'))
-file.copy(from = 'data/ss3_inputs/2A_io/agg', to = file.path(shrpoint_path, 'data/ss3_inputs/2A_io/agg'))
-file.copy(from = 'data/ss3_inputs/2A_io/aaf', to = file.path(shrpoint_path, 'data/ss3_inputs/2A_io/aaf'))
-file.copy(from = 'data/ss3_inputs/1A_io/agg', to = file.path(shrpoint_path, 'data/ss3_inputs/1A_io/agg'))
-file.copy(from = 'data/ss3_inputs/1A_io/aaf', to = file.path(shrpoint_path, 'data/ss3_inputs/1A_io/aaf'))
-```
+However, you can find the data in SS3 format for each model configuration in the `data/ss3_inputs` folder of this repository. Copy and paste them in `data/ss3_inputs` of the *working folder*. You could do this manually or by executing the R script `copy_tag_caal.R` located in `code/ss3_data_inputs`.

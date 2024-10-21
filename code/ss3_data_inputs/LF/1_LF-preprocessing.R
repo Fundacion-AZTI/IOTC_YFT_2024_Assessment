@@ -8,7 +8,8 @@ source('sharepoint_path.R')
 source('code/auxiliary_functions.R')
 
 # Define raw size filenames:
-raw_filenames = c("IOTC-2024-WPTT26(AS) - YFT - SF frequencies (original).csv", "IOTC-2024-WPTT26(AS) - YFT - SF frequencies (cwp55).csv")
+raw_filenames = c("IOTC-2024-WPTT26(AS) - YFT - SF frequencies (original).csv", 
+                  "IOTC-2024-WPTT26(AS) - YFT - SF frequencies (cwp55).csv")
 
 # Define output filenames (respect same order as before):
 output_filenames = c('size_grid-original.csv', 'size_grid-cwp55.csv')
