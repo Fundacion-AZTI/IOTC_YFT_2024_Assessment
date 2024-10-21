@@ -11,7 +11,7 @@ In order to execute this repository, you will need to have some knowledge on:
 - R programming (mandatory)
 - `r4ss` R package (mandatory)
 
-The steps to run this repository are described below.
+The steps to run this repository are described below. The functioning of this repository was tested on Windows. Some adaptations might be required for MacOS or Linux.
 
 ## 1. Clone this repository
 
@@ -39,14 +39,13 @@ The `FishFreqTree` package (see <https://github.com/HaikunXu/FishFreqTree>) can 
 devtools::install_github('HaikunXu/RegressionTree', ref='main')
 ```
 
-## 2. Open the R project
+## 3. Open the R project
 
 There is an R project in the repository folder called `IOTC_YFT_2024_Assessment.Rproj`. We suggest to open it from RStudio. This will automatically set your working directory to the repository folder and load the R packages listed in `.Rprofile`. 
 
 If you want to use a different visual interface that does not allow to work with R projects, you will need set the working directory mannually to the repository folder. Also, you will need to load all the R packages in `.Rprofile`.
 
-
-## 3. Specify the working folder
+## 4. Specify the working folder
 
 The *working folder* is a folder where the raw and processed data will be saved, and the SS3 configuration files will be created and run. Note that this is different than the *repository folder*.
 
@@ -56,7 +55,7 @@ Create the *working folder* somewhere on your local computer, and then specify t
 shrpoint_path = 'C:/Use/2024_YFT_IOTC'
 ```
 
-## 4. Create the working folder structure
+## 5. Create the working folder structure
 
 Some folders will need to be created in the *working folder*. This is automatically done by running `create_subfolders.R`. After running it, the *working folder* should look like:
 
@@ -94,16 +93,22 @@ Some folders will need to be created in the *working folder*. This is automatica
     └───tables
 ```
 
-This assessment implements three spatial configurations: `4A_io` (four areas, main configuration), `2A_io` (two areas), and `1A_io` (one area). The `2A_io` and `1A_io` configurations implement two subconfigurations: aggregated (`agg`) and areas-as-fleets (`aaf`). See assessment report.
+This assessment implements three spatial configurations: 
 
-## 5. Download the raw data
+- `4A_io`: four areas, main configuration
+- `2A_io`: two areas 
+- `1A_io`: one area 
+
+The `2A_io` and `1A_io` configurations implement two subconfigurations: aggregated (`agg`) and areas-as-fleets (`aaf`). See assessment report.
+
+## 6. Download the raw data
 
 Download the raw data from the IOTC website. 
 
 * The catch and size data can be found here: <https://iotc.org/documents/WPTT/26AS/Data/01>. You will find *five Excel files*, copy all of them and paste them in `data/raw` in the *working folder*.
 * The CPUE data can be found here: <https://iotc.org/documents/standardised-cpue-yft-and-bet>. Copy the `YFT` **folder** and paste it in `data/raw` in the *working folder*.
 
-## 6. Create SS3 inputs
+## 7. Create SS3 inputs
 
 In this repository, the folder `code/ss3_data_inputs` contains the R scripts to generate the data inputs for SS3. They are organized in three folders and should be created in that order:
 
@@ -113,7 +118,7 @@ In this repository, the folder `code/ss3_data_inputs` contains the R scripts to 
 
 The first number of the scripts names indicate the order in which should be run. 
 
-## 7. Age-length and tagging data
+## 8. Age-length and tagging data
 
 The raw age-length and tagging data are not publicy available, so it is not possible to generate them. 
 
