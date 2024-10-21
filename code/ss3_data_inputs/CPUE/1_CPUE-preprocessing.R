@@ -4,10 +4,10 @@ rm(list = ls())
 source('sharepoint_path.R')
 
 # Read auxiliary functions:
-source(here('code', 'auxiliary_functions.R'))
+source('code/auxiliary_functions.R')
 
 # Read raw data in:
-dat <- read_xlsx(file.path(shrpoint_path, 'data/raw/indices/LL/Joint_YFT_CPUE_2024.xlsx'), sheet="4 area QT", skip=1)
+dat <- read_xlsx(file.path(shrpoint_path, 'data/raw/YFT/LL/Joint_YFT_CPUE_2024.xlsx'), sheet="4 area QT", skip=1)
 
 # -------------------------------------------------------------------------
 # Organize data by region:

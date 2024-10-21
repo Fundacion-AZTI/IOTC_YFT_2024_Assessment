@@ -7,7 +7,7 @@ spat_config = '4A_io'
 source('sharepoint_path.R')
 
 # Read auxiliary functions:
-source(here('code', 'auxiliary_functions.R'))
+source('code/auxiliary_functions.R')
 
 # Read fishery definitions
 fish_info = get_fisheries(spat_config)
@@ -44,13 +44,17 @@ data <- data79 %>% mutate(season = 1,cv = stdcv02) %>%
                            AssessmentAreaName=='3' ~ n_fisheries+3, TRUE ~ n_fisheries+4)) %>% 
   select(qtr, season, fleet, pr_7994_m8, cv)
 
-# Save LL CPUE data:
-write.csv(data, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'scaled_cpue_Meancv_02.csv'), row.names = FALSE)
+# Format for ss3:
+cpue_df = data_agg %>% ungroup() %>% select(qtr, season, fleet, pr_7994_m8, cv)
+cpue_df = cpue_df %>% dplyr::rename(year = qtr, seas = season, index = fleet, obs = pr_7994_m8, se_log = cv)
+cpue_df$seas = 1
 
+# Save LL CPUE data:
+write.csv(cpue_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'cpue-ll.csv'), row.names = FALSE)
 
 # -------------------------------------------------------------------------
 # Read FS CPUE
-cpue_fs = read.csv(file.path(shrpoint_path, 'data/raw/indices/PS FSC/2024-cpue-standardization-iotc-yft-fsc.quarter-indices.just-essentials.csv'), sep = ';')
+cpue_fs = read.csv(file.path(shrpoint_path, 'data/raw/YFT/PS FSC/2024-cpue-standardization-iotc-yft-fsc.quarter-indices.just-essentials.csv'), sep = ';')
 cpue_fs = cpue_fs %>% mutate(year = yearqtr2qtr(year, quarter, initial = 1950, base = 13), .after = date)
 cpue_fs = cpue_fs %>% mutate(seas = 1, index =  n_fisheries + 5, .after = year)
 cpue_fs = cpue_fs %>% dplyr::rename(obs = yft_adult_rate_Mean, se_log = yft_adult_rate_cv)
@@ -61,7 +65,7 @@ write.csv(cpue_fs, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_confi
 
 # -------------------------------------------------------------------------
 # Read LS CPUE
-cpue_ls = read.csv(file.path(shrpoint_path, 'data/raw/indices/PSLS/st-GLMM_FOB.csv'))
+cpue_ls = read.csv(file.path(shrpoint_path, 'data/raw/YFT/PSLS/st-GLMM_FOB.csv'))
 cpue_ls = cpue_ls %>% mutate(year = floor(Time), quarter = (Time%%1)*4 + 1, .after = Time)
 cpue_ls = cpue_ls %>% mutate(year = yearqtr2qtr(year, quarter, initial = 1950, base = 13), .after = quarter)
 cpue_ls = cpue_ls %>% mutate(seas = 1, index =  n_fisheries + 6, .after = year)
@@ -74,7 +78,7 @@ write.csv(cpue_ls, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_confi
 
 # -------------------------------------------------------------------------
 # Read ABBI CPUE
-cpue_abbi = read.csv(file.path(shrpoint_path, 'data/raw/indices/ABBI/ABBI.csv'))
+cpue_abbi = read.csv(file.path(shrpoint_path, 'data/raw/YFT/ABBI/ABBI.csv'))
 cpue_abbi = cpue_abbi %>% mutate(quarter = quarter*4 + 1)
 cpue_abbi = cpue_abbi %>% mutate(year = yearqtr2qtr(yearN, quarter, initial = 1950, base = 13), .after = timestamp)
 cpue_abbi = cpue_abbi %>% mutate(seas = 1, index =  n_fisheries + 7, .after = year)

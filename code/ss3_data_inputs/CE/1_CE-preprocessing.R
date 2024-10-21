@@ -5,7 +5,7 @@ rm(list = ls())
 source('sharepoint_path.R')
 
 # Read auxiliary functions:
-source(here('code', 'auxiliary_functions.R'))
+source('code/auxiliary_functions.R')
 
 
 # -------------------------------------------------------------------------

@@ -5,7 +5,7 @@ rm(list = ls())
 source('sharepoint_path.R')
 
 # Read auxiliary functions:
-source(here('code', 'auxiliary_functions.R'))
+source('code/auxiliary_functions.R')
 
 # Define raw size filenames:
 raw_filenames = c("IOTC-2024-WPTT26(AS) - YFT - SF frequencies (original).csv", "IOTC-2024-WPTT26(AS) - YFT - SF frequencies (cwp55).csv")
