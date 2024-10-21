@@ -85,8 +85,8 @@ This assessment implements three spatial configurations: `4A_io` (four areas, ma
 
 Download the raw data from the IOTC website. 
 
-a. The catch and size data can be found here: <https://iotc.org/documents/WPTT/26AS/Data/01>. You will find *five Excel files*, copy all of them and paste them in `data/raw` in the *working folder*.
-b. The CPUE data can be found here: <https://iotc.org/documents/standardised-cpue-yft-and-bet>. Copy the `YFT` **folder** and paste it in `data/raw` in the *working folder*.
+* The catch and size data can be found here: <https://iotc.org/documents/WPTT/26AS/Data/01>. You will find *five Excel files*, copy all of them and paste them in `data/raw` in the *working folder*.
+* The CPUE data can be found here: <https://iotc.org/documents/standardised-cpue-yft-and-bet>. Copy the `YFT` **folder** and paste it in `data/raw` in the *working folder*.
 
 ## 6. Create SS3 inputs
 
