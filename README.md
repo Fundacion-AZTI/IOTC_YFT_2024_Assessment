@@ -15,9 +15,29 @@ The steps to run this repository are described below.
 
 ## 1. Clone this repository
 
-If you are a Github user, you can clone this repository by following [these instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository).
+If you are a Github user, you can clone this repository by following [these instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository). Make sure to use the `reproducible` branch.
 
 If you are not familiar with Github, you can download this repository as ZIP file by following [these instructions](https://docs.github.com/en/get-started/start-your-journey/downloading-files-from-github#downloading-a-repositorys-files). Save the downloaded folder somewhere locally. 
+
+## 2. Install R packages
+
+Install all R packages listed in `.Rprofile`. You can install the missing CRAN packages automatically by running this line:
+
+```{r}
+install.load::install_load("dplyr", "purrr", "readr", "sf", "stringr", "reshape", "readxl", "scales", "tidyr")
+```
+
+The `r4ss` package (see <https://github.com/r4ss/r4ss>) is probably the most important one. This repository was built using `r4ss` version 1.50.0, which is currently (October 2024) the latest release. Install it running this line: 
+
+```{r}
+remotes::install_github("r4ss/r4ss")
+```
+
+The `FishFreqTree` package (see <https://github.com/HaikunXu/FishFreqTree>) can be installed by running:
+
+```{r}
+devtools::install_github('HaikunXu/RegressionTree', ref='main')
+```
 
 ## 2. Open the R project
 
@@ -25,11 +45,6 @@ There is an R project in the repository folder called `IOTC_YFT_2024_Assessment.
 
 If you want to use a different visual interface that does not allow to work with R projects, you will need set the working directory mannually to the repository folder. Also, you will need to load all the R packages in `.Rprofile`.
 
-Regarding the R packages, the `r4ss` package (see <https://github.com/r4ss/r4ss>) is probably the most important one. This repository was built using `r4ss` version 1.50.0, which is currently (October 2024) the latest release: 
-
-```{r}
-remotes::install_github("r4ss/r4ss")
-```
 
 ## 3. Specify the working folder
 
