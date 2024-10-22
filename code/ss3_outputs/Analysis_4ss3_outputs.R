@@ -531,7 +531,7 @@ dir_table <- "output/tables/"
   SSplotComparisons(mod.plots, legendlabels=sub_scs,print=TRUE,plotdir="output/figures/ComparisonBCR/")
   
   #...................................................
-  ### STEPWISE sub analysis
+  ### STEPWISE sub analysis  ####
   #...................................................
   
 
@@ -609,8 +609,7 @@ dir_table <- "output/tables/"
   
   #### end ####
   
-  #update CPUE -VAR?
-  #biology
+
   
   
   
@@ -798,4 +797,138 @@ dir_table <- "output/tables/"
   ggarrange(p1,p2,ncol=2,common.legend = TRUE)
   
   SavePlot(paste0('Stepwise_update_SSB_and_SSB_B0_',max(i),'_',nmplot),15,10)
+  
+  
+  #### STEPWISE FIGURES MULTIPLOT ####
+  
+  
+  
+  scs <- c("00_BC","01_update_catch","02_update_cpue","03_update_length","04_update_warnings","05_update_M","06_update_Growth",
+           "06b_update_GrowthTaggingData","07_update_Maturity",
+           "08_selectivity_PS","09_boundaries","10_recDevs","11_RQ","12_cwp5x5","13_cwp5x5_RQ","14_cwp5x5_RQ_LL11_p2_free",
+           "15_BiasCorrectionRamp_hess","16_LLsplit_LL1b_LL4_DN","19_EffortCreep","21_dwtag01",'22_TwoBlockCPUE','23_BCR1')
+  
+  
+  desc <- c("BaseCase", "update catch","update cpue","update length","update warnings",
+            "Natural mortality age 4.07 years M=0.467",
+            "Farley 2023 growth","update_Growth Tagging Data",
+            "Maturity Zudaire et al. 2022","update PS selectivity","update boundaries",
+            "update recruitment deviates","Adding report quality","Regular grid cwp5x5","Regular grid and cwp5x5 and report quality",
+            "free parameter-2 LL 3","Apply bias correction ramp","LL split LL1B and LL4 DN selectivity",
+            "Effort creep 0.5% per day","Downweight tagging data by 0.1","Two block CPUE","Bias correction ramp of 1")
+  
+  nmplot<- "multiplot"
+  myplots <- list()
+  for(k in 6:17){
+    i <- 1:k
+    sub_scs <- scs[i]
+    sub_scs_wd <-paste0("models/update/",sub_scs)
+    mod_sum <- aggregate.ssMod(sub_scs, sub_scs_wd)
+    
+    # Comparison SSB
+    
+    df <- mod_sum$SpawnBio
+    df <- df %>% rename_at(1:length(sub_scs),~sub_scs)
+    df_long <- df %>% pivot_longer(cols =sub_scs, names_to = "scenario", values_to = "value")
+    sub_df_long <- df_long %>% subset(scenario %in% sub_scs)  %>% dplyr::filter(!(scenario=="00_BC" & Yr>=297))
+    sub_df_long <- sub_df_long %>% subset(scenario %in% sub_scs) 
+    sub_df_long$scenario <- as.factor(as.character(sub_df_long$scenario))
+    levels(sub_df_long$scenario) <- droplevels(sub_df_long$scenario)
+    sub_df_long  <- sub_df_long %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))%>%
+      mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
+    
+    #SavePlot(paste0('Stepwise_update_SSB',max(i)),15,10)
+    scGrey<- levels(sub_df_long$scenario)[-length(levels(sub_df_long$scenario))]
+    scRed <- levels(sub_df_long$scenario)[length(levels(sub_df_long$scenario))]
+    scBlack <- levels(sub_df_long$scenario)[length(levels(sub_df_long$scenario))-1]  
+    
+    if(k>2){ 
+      myplots[[k-1]] <- ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+        geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGrey),size=1) +
+        geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=1.5) +
+        geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=1) +
+        scale_color_manual(values = c(gray.colors(length(i)-2,start=0.7,end=0.5),'black', 'red')) +xlim(1950,2023)+ylim(0,4.5e6)+
+        xlab("Year")+ ylab("SSB")+ggtitle(paste0("Run ",k))+
+        theme_fun()+ theme(legend.position = "none")
+    }else{
+      scGrey0<- levels(sub_df_long$scenario)[-length(levels(sub_df_long$scenario))]
+      scRed0 <- levels(sub_df_long$scenario)[length(levels(sub_df_long$scenario))]
+      scBlack0 <- levels(sub_df_long$scenario)[length(levels(sub_df_long$scenario))-1]  
+      myplots[[1]] <- ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+        #     geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGrey),size=1) +
+        geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack0),size=1.25)+ 
+        geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed0),size=1) +
+        scale_color_manual(values = c('black', 'red')) +xlim(1950,2023)+ylim(0,4.5e6)+
+        xlab("Year")+ ylab("SSB")+ggtitle(paste0("Run ",2))+
+        theme_fun()+ theme(legend.position = "none")
+    }
+  }
+  library(gridExtra)
+  wrap_plots(myplots)
+  save(myplots,file="multiplotSSB.Rdata")
+  grid.arrange(grobs = myplots, ncol = 4)
+  SavePlot(paste0('Stepwise_update_SSB_GRAY_',max(i),'_',nmplot),15,10)
+  #do.call("grid.arrange", arrangeGrob(grobs = myplots, ncol = 2))
+  
+  
+  #### RELATIVE TO BO ####
+  
+  nmplot<- "multiplot"
+  myplots <- list()
+  for(k in 6:17){
+    i <- 1:k
+    sub_scs <- scs[i]
+    sub_scs_wd <-paste0("models/update/",sub_scs)
+    mod_sum <- aggregate.ssMod(sub_scs, sub_scs_wd)
+    
+    # Comparison SSB
+    
+    
+    df <- mod_sum$SpawnBio
+    B0 <- as.vector(df[df$Label=="SSB_Virgin",-c(length(i)+1,length(i)+2)])
+    df[,-c(length(i)+1,length(i)+2)] <- df[,-c(length(i)+1,length(i)+2)]/B0
+    df <- df %>% rename_at(1:length(sub_scs),~sub_scs)
+    df_long <- df %>% pivot_longer(cols =sub_scs, names_to = "scenario", values_to = "value")
+    sub_df_long <- df_long %>% subset(scenario %in% sub_scs)  %>% dplyr::filter(!(scenario=="00_BC" & Yr>=297))
+    sub_df_long <- sub_df_long %>% subset(scenario %in% sub_scs) 
+    sub_df_long$scenario <- as.factor(as.character(sub_df_long$scenario))
+    levels(sub_df_long$scenario) <- droplevels(sub_df_long$scenario)
+    sub_df_long  <- sub_df_long %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))%>%
+      mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
+    
+    #SavePlot(paste0('Stepwise_update_SSB',max(i)),15,10)
+    
+    scGrey<- levels(sub_df_long$scenario)[-length(levels(sub_df_long$scenario))]
+    scRed <- levels(sub_df_long$scenario)[length(levels(sub_df_long$scenario))]
+    scBlack <- levels(sub_df_long$scenario)[length(levels(sub_df_long$scenario))-1]  
+    if(k>2){ 
+      myplots[[k-1]]<- ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+        geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGrey),size=1) +
+        geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=1.5) +
+        geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=1) +
+        scale_color_manual(values = c(gray.colors(length(i)-2,start=0.9,end=0.5),'black', 'red')) +xlim(1950,2023)+ylim(0,1.5)+
+        xlab("Year")+ ylab("SSB/B0")+ggtitle(paste0("Run ",k))+
+        theme_fun()+ theme(legend.position = "none")
+      
+    }else{
+      scGrey0<- levels(sub_df_long$scenario)[-length(levels(sub_df_long$scenario))]
+      scRed0 <- levels(sub_df_long$scenario)[length(levels(sub_df_long$scenario))]
+      scBlack0 <- levels(sub_df_long$scenario)[length(levels(sub_df_long$scenario))-1]  
+      
+      myplots[[1]]<-ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+        #     geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGrey),size=1) +
+        geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack0),size=1)+ 
+        geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed0),size=1.25) +
+        scale_color_manual(values = c('black', 'red')) +xlim(1950,2023)+ylim(0,1.5)+
+        xlab("Year")+ ylab("SSB/B0")+
+        theme_fun()+ggtitle(paste0("Run ",2))+
+        theme_fun()+ theme(legend.position = "none")
+    }
+    
+  }
+  library(gridExtra)
+  wrap_plots(myplots)
+  save(myplots,file="multiplotSSB_SSB0.Rdata")
+  grid.arrange(grobs = myplots, ncol = 4)
+  SavePlot(paste0('Stepwise_update_SSB_SSB0_GRAY_',max(i),'_',nmplot),15,10)
   

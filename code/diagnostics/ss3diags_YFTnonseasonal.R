@@ -19,7 +19,7 @@ Model = "4_Dwtag01"
 nm <- Model
 output.dir <- paste0(nm,"/plotsDiag")
 
-readss3 = TRUE
+readss3 = FALSE
 covar =FALSE # Not available for Annual model
 if(readss3==TRUE){
 mod =  ss3rep=SS_output(dir=Model,covar=covar,ncol=1000,forecast=FALSE)
@@ -44,12 +44,14 @@ save(mod,retros,file = paste0("Results/",Model,".rdata"))
 #><>><>><>><>><>><>><>><>><>><>><>><>><>><>><>><>><>><>><>><>
 
 # define last time step of observations
-end.time= 2033.75
+#end.time= 2033.75
+end.time= 2023.75
 time.steps = 0.25
 # For rep file (Runs Test (Len/Cpue) and JointResiduals)
-ss3rep = SSdiagsTime2Year(mod,time.step=0.25,end.time=2033.75)
+#ss3rep = SSdiagsTime2Year(mod,time.step=0.25,end.time=2033.75)
+ss3rep = SSdiagsTime2Year(mod,time.step=0.25,end.time=2023.75)
 # For SSsummarize() output (Retro + HCxval) 
-retroSummary = SSdiagsTime2Year(retros,time.step=0.25,end.time=2033.75)
+retroSummary = SSdiagsTime2Year(retros,time.step=0.25,end.time=2023.75)
 
 # NOW RUN DIAGS
 
@@ -69,8 +71,6 @@ sspar(mfrow=c(2,2),labs=T,plot.cex=1)
 SSplotRunstest(out,subplots = "cpue",add=T)
 mtext("Year",side=1,outer=T,cex=1,line=-0.8)
 dev.print(jpeg,paste0(output.dir,"/",plname,".jpg"), width = pwidth, height = pheight, res = res, units = "in")
-
-SScompsTA1.8
 
 
 plname = "YFT_runstests_length"
@@ -129,6 +129,26 @@ mtext("Eastern IO")
 mtext("Year",side=1,outer=T,cex=1,line=-0.8)
 
 dev.print(jpeg,paste0(output.dir,"/",plname,".jpg"), width = pwidth, height = pheight, res = res, units = "in")
+
+#two block cpue
+# plname = "YFT_RMSE by region"
+# pwidth = 8
+# pheight = 6
+# res=300
+# windows(width=pwidth,height=pheight)
+# sspar(mfrow=c(2,2),plot.cex = 0.7)
+# SSplotJABBAres(out,indexselect = c(1,4,5,7),add=T,cex.main = 0.8)
+# mtext("Northern IO")
+# SSplotJABBAres(out,indexselect = c(2,3,6),add=T,cex.main = 0.8)
+# mtext("Southern IO")
+# SSplotJABBAres(out,indexselect = c(1,2,5,6),add=T,cex.main = 0.8)
+# mtext("Western IO")
+# SSplotJABBAres(out,indexselect = c(3,4,7),add=T,cex.main = 0.8)
+# mtext("Eastern IO")
+# mtext("Year",side=1,outer=T,cex=1,line=-0.8)
+# 
+# dev.print(jpeg,paste0(output.dir,"/",plname,".jpg"), width = pwidth, height = pheight, res = res, units = "in")
+
 
 # if(covar==TRUE){
 # # Check Status 
@@ -197,12 +217,13 @@ mtext("Year",side=1,outer=T,cex=1,line=0.5)
 mtext("Index",side=2,outer=T,line=0.5,cex=1)
 dev.print(jpeg,paste0(output.dir,"/",plname,".jpg"), width = pwidth, height = pheight, res = res, units = "in")
 
-retroSummary$endyrs <- rep(2024,6)
-retroSummary$SpawnBio <- retroSummary$SpawnBio[retroSummary$SpawnBio$Yr<=2024,]
-retroSummary$SpawnBioLower <- retroSummary$SpawnBioLower[retroSummary$SpawnBioLower$Yr<=2024,]
-retroSummary$SpawnBioUpper <- retroSummary$SpawnBioUpper[retroSummary$SpawnBioUpper$Yr<=2024,]
-retroSummary$SpawnBioSD <- retroSummary$SpawnBioSD[retroSummary$SpawnBioSD$Yr<=308,]
+# retroSummary$endyrs <- rep(2024,6)
+# retroSummary$SpawnBio <- retroSummary$SpawnBio[retroSummary$SpawnBio$Yr<=2024,]
+# retroSummary$SpawnBioLower <- retroSummary$SpawnBioLower[retroSummary$SpawnBioLower$Yr<=2024,]
+# retroSummary$SpawnBioUpper <- retroSummary$SpawnBioUpper[retroSummary$SpawnBioUpper$Yr<=2024,]
+# retroSummary$SpawnBioSD <- retroSummary$SpawnBioSD[retroSummary$SpawnBioSD$Yr<=308,]
 
+retroSummary = SSdiagsTime2Year(retros,time.step=0.25,end.time=2033.75)
 # Retrospective
 plname = "YFT SSB retro and hindcasting"
 pwidth = 8
@@ -210,8 +231,8 @@ pheight = 6
 res=300
 windows(width=pwidth,height=pheight)
 sspar(mfrow=c(2,1),plot.cex = 0.7)
-SSplotRetro(retroSummary,add=T,forecast=T)
-SSplotRetro(retroSummary,add=T,forecast=T,xmin = 2000)
+SSplotRetro(retroSummary,add=T,forecast=T,endyrvec=c(2024:(2024-5)))
+SSplotRetro(retroSummary,add=T,forecast=T,xmin = 2000,endyrvec=c(2024:(2024-5)))
 #SSplotComparisons(retroSummary, endyrvec=2024:2013, legendlabels=paste("Data",0:-5,"years"), uncertainty = T,subplots = 2,add=F,new=F)
 #SSplotComparisons(retroSummary, endyrvec=2024:2013, legendlabels=paste("Data",0:-5,"years"), uncertainty = T,subplots = 4,add=F,new=F)
 dev.print(jpeg,paste0(output.dir,"/",plname,".jpg"), width = pwidth, height = pheight, res = res, units = "in")
