@@ -27,7 +27,7 @@ nfish_plus = 8
 # Plot catch per CPC, and Nsamp per CPC, and Mean length per CPC
 
 # Select fisheries to plot:
-sel_fisheries = c('HD_1a') # no filtering
+sel_fisheries = c('OT_4') # no filtering
 # sel_fisheries = c('LL_1b', 'LL_4') # do filtering
 
 # Year range:

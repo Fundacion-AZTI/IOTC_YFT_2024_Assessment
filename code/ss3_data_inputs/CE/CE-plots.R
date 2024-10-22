@@ -8,9 +8,6 @@ source(here('code', 'auxiliary_functions.R'))
 # Spatial configuration:
 spat_config = '4A_io'
 
-# Length bins
-L_labels  =  c(Paste("L0",seq(10,98,2)), Paste("L",seq(100,198,2))) 
-
 #Fishery definiton
 fish_info = get_fisheries(spat_config)
 
@@ -25,6 +22,7 @@ catch_dat = catch_dat %>% mutate(FisheryCode = str_sub(ModelFishery, start = 1, 
 # Plot data:
 plot_data = catch_dat %>% group_by(FisheryCode, Year) %>% summarise(Catch = sum(Catch)*1e-03)
 colnames(plot_data) = tolower(colnames(plot_data))
+plot_data$fisherycode = factor(plot_data$fisherycode, levels = rev(c('FS', 'LS', 'LL', 'LF', 'GI', 'HD', 'TR', 'BB', 'OT')))
 
 p1 = ggplot(data = plot_data, aes(x = year, y = catch, fill = fisherycode)) +
   geom_col() +
@@ -84,7 +82,7 @@ catch_grid = read.csv(file.path(shrpoint_path, 'data/processed', 'catch_grid.csv
 # Same processing as in CE-4A_io:
 catch_grid$Area = get_4Aarea_from_lonlat(catch_grid$long, catch_grid$lat)
 catch_grid = create_4Aarea_cols(catch_grid)
-filter_data = catch_grid %>% dplyr::filter(Year >= 1980) # relevant period
+filter_data = catch_grid %>% dplyr::filter(Year >= 2010) # relevant period
 plot_data = filter_data %>% group_by(Grid, lat, long, FisheryCode) %>% summarise(catch = sum(NCmtFish)) %>%
   inner_join(filter_data %>%
                group_by(Grid, lat, long) %>%
