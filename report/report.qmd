@@ -31,6 +31,7 @@ format:
     documentclass: scrartcl
     toc-title: 'Contents'
     keep-tex: true
+    fig-pos: H
     template-partials: 
       - title.tex
     include-in-header:
@@ -43,6 +44,9 @@ format:
         \usepackage{lineno}
         \usepackage{scrlayer-scrpage}
         \rohead{IOTC-2024-WPTT26-XX}
+        \usepackage{lscape}
+        \newcommand{\blandscape}{\begin{landscape}}
+        \newcommand{\elandscape}{\end{landscape}}
 geometry: "left=2.5cm,right=2.5cm,top=3cm,bottom=3cm"
 number-sections: true
 link-citations: true
@@ -742,8 +746,6 @@ We thank the various fisheries agencies and regional fisheries observers for the
 
 : Nine fishery groups and codes used in the current assessment. {#tbl-fishery-codes}
 
-{{< pagebreak >}}
-
 ```{r}
 #| label: tbl-fleet-4A
 #| tab-cap: "Fishery definition in the four-areas assessment configuration. The fishery label is derived from the fishery group and the model region."
@@ -751,8 +753,6 @@ my_tab = get_fisheries(config = '4A_io')
 colnames(my_tab) = c('Fishery number', 'Fishery label')
 knitr::kable(my_tab, align=rep('l', 2))
 ```
-
-{{< pagebreak >}}
 
 | Grid category | Resolution (latitude $\times$ longitude) |
 |-----------|------------------------------------------|
@@ -766,8 +766,6 @@ knitr::kable(my_tab, align=rep('l', 2))
 
 : Grid size categories in the *original* size dataset. {#tbl-grid-size}
 
-{{< pagebreak >}}
-
 ```{r}
 #| label: tbl-summperf
 #| tab-cap: "Stepwise implementation."
@@ -777,7 +775,7 @@ knitr::kable(mytab[,c(1,2)])
 
 {{< pagebreak >}}
 
-<!-- \blandscape -->
+\blandscape
 
 ```{r}
 #| label: tbl-diagnostics
@@ -786,7 +784,7 @@ diag_tab = read_xlsx(file.path(shrpoint_path, 'output/tables', 'Diagnostics_v2.x
 knitr::kable(diag_tab)
 ```
 
-<!-- \elandscape -->
+\elandscape
 
 {{< pagebreak >}}
 
@@ -799,7 +797,6 @@ knitr::kable(diag_tab)
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_IO_4ARegions.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-catch-grid
@@ -808,7 +805,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_IO_4AReg
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "catch_grid.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-agg-size
@@ -817,7 +813,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "catch_grid.p
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "agg_size.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-catch-bar
@@ -826,7 +821,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "agg_size.png
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_catch.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-size-grid
@@ -835,7 +829,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_catch.png
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "size_grid.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-map-grid-agg2
@@ -844,7 +837,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "size_grid.pn
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_size_grid_std_4A.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-comp-catch
@@ -853,7 +845,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_size_gri
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_catch.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-mlen
@@ -862,7 +853,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_catc
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "mlen.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-map-grid-agg1
@@ -871,7 +861,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "mlen.png"), 
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_size_grid_4A.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-imputation
@@ -880,7 +869,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_size_gri
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "imputation_grid_5.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-rq-size
@@ -889,7 +877,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "imputation_g
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "rq_size.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-comp-agg-size
@@ -898,7 +885,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "rq_size.png"
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_size.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-comp-mlen
@@ -907,7 +893,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_size
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_mlen.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-hd-cpc
@@ -917,8 +902,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "HD_catch-siz
 ```
 
 
-{{< pagebreak >}}
-
 ```{r}
 #| label: fig-ts-cpue
 #| fig-cap: "Scaled LL CPUE time serie per region. The shaded area represents the 95% confidence interval."
@@ -926,7 +909,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "HD_catch-siz
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_cpue_area.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-comp-cpue
@@ -935,7 +917,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_cpue_area
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_cpue.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-ts-ps-cpue
@@ -944,7 +925,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_cpue
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_ps_cpue.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-ts-llfs-cpue
@@ -953,7 +933,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_ps_cpue.p
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_llfs_cpue.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-caal-nsamp
@@ -962,7 +941,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_llfs_cpue
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "caal_nsamp.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-caal
@@ -971,7 +949,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "caal_nsamp.p
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "caal.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-tag-rec
@@ -980,7 +957,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "caal.png"), 
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "tag_nfish.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-tag-map
@@ -989,7 +965,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "tag_nfish.pn
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "tag_map.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-tag-rec-area
@@ -998,7 +973,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "tag_map.png"
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "tag_nfish_area.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-data-plot
@@ -1007,7 +981,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "tag_nfish_ar
 knitr::include_graphics(file.path(shrpoint_path, 'models/RefModels/2_TwoBlock_LLsel/plots', "data_plot.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-growth1
@@ -1016,7 +989,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'models/RefModels/2_TwoBlock_LL
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "growth_1.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-growth-sex
@@ -1025,7 +997,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "growth_1.png
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "growth_sex.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-lw
@@ -1034,7 +1005,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "growth_sex.p
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "LW.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-maturity
@@ -1043,7 +1013,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "LW.png"), re
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "maturity.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-natmort
@@ -1052,7 +1021,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "maturity.png
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "natmort.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-mov
@@ -1061,7 +1029,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "natmort.png"
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_IO_4ARegions_mov.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-ll-cpc
@@ -1070,25 +1037,24 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_IO_4AReg
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "LL_catch-size_CPC.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step1
+#| out-width: 100%
 #| fig-cap: "Plots of spawning stock biomass across iterative Stock Synthesis model runs. The red line shows the estimates from the current model run listed, the black line shows the estimates from the prior run, and the gray lines show the estimates from all previous runs in the stepwise build of the reference case model."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "Stepwise_update_SSB_GRAY_17_multiplot.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step2
+#| out-width: 100%
 #| fig-cap: "Plots of spawning stock biomass relative to virgin biomass (B0) across iterative Stock Synthesis model runs. The red line shows the estimates from the current model run listed, the black line shows the estimates from the prior run, and the gray lines show the estimates from all previous runs in the step-wise build of the reference case model."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "Stepwise_update_SSB_SSB0_GRAY_17_multiplot.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step3
@@ -1097,34 +1063,33 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel'
 knitr::include_graphics(file.path(shrpoint_path, 'models/update', "15_BiasCorrectionRamp_hess/plots/comp_lenfit__aggregated_across_time.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step4
+#| out-width: 100%
 #| fig-cap: "Comparison of spawning stock biomass and the spawning stock biomass relative to B0 trajectories from the base case from 2021 versus the alternative proposed reference models in 2024."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "Stepwise_update_SSB_and_SSB_B0_6_RefMOdels.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step5
+#| out-width: 100%
 #| fig-cap: "Fit to the regional longline CPUE indices, 1975–2023 from the RM2 model."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "CPUE_OBS_EXP.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step6
+#| out-width: 100%
 #| fig-cap: "Standardised residuals from the fits to the CPUE indices from the RM2."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "CPUE_Residuals.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step7
@@ -1133,7 +1098,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel'
 knitr::include_graphics(file.path(shrpoint_path, 'models/update', "16_LLsplit_LL1b_LL4_DN/plots/comp_lenfit__aggregated_across_time.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step8
@@ -1142,162 +1106,160 @@ knitr::include_graphics(file.path(shrpoint_path, 'models/update', "16_LLsplit_LL
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "aggregated_23_24.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step9
+#| out-width: 100%
 #| fig-cap: "A comparison of the observed (grey points) and predicted (red points and line) average fish length (FL, cm) by fishery for the RM2."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "MeanLength_And_predictions.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step10
+#| out-width: 100%
 #| fig-cap: "Relative residuals from the fits to the length compositions for LL R3 and R1b, R2 and R4 for previous and after year 2000 for the RM2 model."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "Residuals_LL_TwoBlock_LL_fishery.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step11
+#| out-width: 100%
 #| fig-cap: "A comparison of the observed (grey points) and predicted (red points and line) average fish length (FL, cm) by fishery for the RM1."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "MeanLength_And_predictions_OneBlock.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step12
+#| out-width: 100%
 #| fig-cap: "Relative residuals from the fits to the length compositions for PSFS in R1b and in R2, and PSLS fisheries in R1b and in R2 for the RM2 model."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "Residuals_PS_TwoBlock_LL_fishery.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step13
+#| out-width: 100%
 #| fig-cap: "The grey bars show the number of tag recapture aggregated across tag groups with time, and the line shows the prediction by RM2 model."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "Tag_recovered.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step14
+#| out-width: 100%
 #| fig-cap: "The grey bars the number of tag recaptures by fleet with time and the line the predicted by the RM2 model."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "Tag_Recapture_ByFleet.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step15
+#| out-width: 100%
 #| fig-cap: "Residuals for post-latency tag recaptures: (obs-exp)/sqrt(exp) by RM2 model."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "Residuals_Tag_Recapture.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step16
+#| out-width: 100%
 #| fig-cap: "The estimated age based selectivity functions (except for purse seine fisheries which are length-based) by RM2 model."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "Selectivity_by_Age.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step17
+#| out-width: 100%
 #| fig-cap: "The estimated size based selectivity functions (except for purse seine fisheries which are length-based) by RM2 model."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "Selectivity_by_Size.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step18
+#| out-width: 100%
 #| fig-cap: "Recruitment deviates from the SRR with 95% confidence interval from the RM2 model."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "RecDev2.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step19
+#| out-width: 100%
 #| fig-cap: "Proportion of the total quarterly recruitment assigned to region 1 (red) and region 4 (blue)."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "RecDev_by_Area.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step20
+#| out-width: 100%
 #| fig-cap: "Estimated age specific movement parameters for the RM2 model."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'models/update/16_LLsplit_LL1b_LL4_DN/plots', "move1_movement_rates_seas1.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step21
+#| out-width: 100%
 #| fig-cap: "Estimated spawning biomass trajectories for the individual model regions from the RM2 model."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "SSB_by_area.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step22
+#| out-width: 100%
 #| fig-cap: "Trends in annual fishing mortality by fleet and area."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "F_Area.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-step23
+#| out-width: 100%
 #| fig-cap: "Fishing mortality (quarterly, average) by age class estimated by the RM2 model."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures/LLdividedModel', "F_at_Age.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-retro
+#| out-width: 100%
 #| fig-cap: "Retrospective analysis for spawning biomass."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "Retro_model2.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-hind
+#| out-width: 100%
 #| fig-cap: "Hindcast analysis for model XXX."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "HIndcast_R1_s1234.png"), rel_path = FALSE)
 ```
 
-\newpage
-
-\newpage
+{{< pagebreak >}}
 
 # Appendix
 
@@ -1311,8 +1273,6 @@ In the *FS* fishery (purse seine free school), two different bimodal size struct
 
 The cluster analysis for the *LL* fishery (longline) explained less than 10% of the variance in the length frequency data (@fig-ll-clust1). Two clusters were identified in quarter 1, which were also found in quarter 4. These clusters were similar, with a mode $\sim$ 125 cm and lengths from 75 to 160 cm. In quarter 2 and 3, three clusters were identified in each of them. One of these clusters had a dominant mode at $\sim$ 110 cm. A wide range of sizes were also observed for these quarters. Spatially, there was a clear break at 55$^\circ$E (@fig-ll-clust2).
 
-{{< pagebreak >}}
-
 ### Figures
 
 ```{r}
@@ -1322,6 +1282,7 @@ The cluster analysis for the *LL* fishery (longline) explained less than 10% of 
 knitr::include_graphics(file.path(shrpoint_path, 'output/freqTree/LS', "lenfreq_cluster_qrt.png"), rel_path = FALSE)
 ```
 
+
 ```{r}
 #| label: fig-ls-clust2
 #| fig-cap: "Clustering of length compositions for the LS fishery shown over space. Panels correspond to quarters."
@@ -1329,7 +1290,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/freqTree/LS', "lenfreq_
 knitr::include_graphics(file.path(shrpoint_path, 'output/freqTree/LS', "lenfreq_cluster_grid.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-fs-clust1
@@ -1338,6 +1298,7 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/freqTree/LS', "lenfreq_
 knitr::include_graphics(file.path(shrpoint_path, 'output/freqTree/FS', "lenfreq_cluster_qrt.png"), rel_path = FALSE)
 ```
 
+
 ```{r}
 #| label: fig-fs-clust2
 #| fig-cap: "Clustering of length compositions for the FS fishery shown over space. Panels correspond to quarters."
@@ -1345,7 +1306,6 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/freqTree/FS', "lenfreq_
 knitr::include_graphics(file.path(shrpoint_path, 'output/freqTree/FS', "lenfreq_cluster_grid.png"), rel_path = FALSE)
 ```
 
-{{< pagebreak >}}
 
 ```{r}
 #| label: fig-ll-clust1
@@ -1354,24 +1314,13 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/freqTree/FS', "lenfreq_
 knitr::include_graphics(file.path(shrpoint_path, 'output/freqTree/LL', "lenfreq_cluster_qrt.png"), rel_path = FALSE)
 ```
 
+
 ```{r}
 #| label: fig-ll-clust2
 #| fig-cap: "Clustering of length compositions for the LL fishery shown over space. Panels correspond to quarters."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/freqTree/LL', "lenfreq_cluster_grid.png"), rel_path = FALSE)
 ```
-
-<!-- ## One-area model configuration -->
-
-<!-- Add text here. -->
-
-<!-- {{< pagebreak >}} -->
-
-<!-- ## Two-areas model configuration -->
-
-<!-- Add text here. -->
-
-<!-- {{< pagebreak >}} -->
 
 {{< pagebreak >}}
 

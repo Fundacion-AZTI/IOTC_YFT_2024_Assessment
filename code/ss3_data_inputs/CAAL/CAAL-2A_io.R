@@ -51,7 +51,7 @@ work = data	%>%
   mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), .before = 'Year') %>% 
   spread(Age_int, n_fish, fill = 0) %>% ungroup() %>%
   select(-c('Year', 'Quarter')) %>% mutate(HighBin = LowBin, .after = 'LowBin') %>%
-  mutate(Nsamp = rowSums(across(`0`:`28`)), .before = `0`)
+  mutate(Nsamp = rowSums(across(`0`:`40`)), .before = `0`)
 
 # Format for ss3:
 caal_df = work %>% dplyr::rename(FltSvy = ModelFleet, Lbin_lo = LowBin, Lbin_hi = HighBin)

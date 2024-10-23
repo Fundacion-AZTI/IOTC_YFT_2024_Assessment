@@ -20,14 +20,14 @@ fish_info = get_fisheries(spat_config)
 caal_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'caal.csv'))
 
 # Make plot by fleet (aggregate over the years):
-plot_data = caal_dat %>% ungroup() %>% mutate(across(-c(1:5))/rowSums(across(-c(1:5))))
-plot_data = plot_data %>% gather('Age', 'Prop', `0`:`28`) %>% mutate(Age = as.numeric(Age))
-plot_data = plot_data %>% dplyr::rename(fleet_number = ModelFleet)
+plot_data = caal_dat %>% ungroup() %>% mutate(across(-c(1:9))/rowSums(across(-c(1:9))))
+plot_data = plot_data %>% gather('Age', 'Prop', `0`:`40`) %>% mutate(Age = as.numeric(Age))
+plot_data = plot_data %>% dplyr::rename(fleet_number = FltSvy)
 plot_data = left_join(plot_data, fish_info)
 plot_data = plot_data %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2)) # for colors
 # plot_data = plot_data %>% dplyr::filter(!(Prop == 0))
 
-p1 = ggplot(plot_data, aes(x = Age, y = LowBin, fill = fisherycode)) + 
+p1 = ggplot(plot_data, aes(x = Age, y = Lbin_lo, fill = fisherycode)) + 
   geom_point(aes(size = Prop), pch = 21, color = 'black') +
   ylab("Length bin (cm)") + xlab('Age (quarters)') +
   scale_fill_manual(values = fleet_col) +
@@ -45,7 +45,7 @@ caal_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'ca
 
 # Make plot by fleet (aggregate over the years):
 plot_data = caal_dat
-plot_data = plot_data %>% dplyr::rename(fleet_number = ModelFleet)
+plot_data = plot_data %>% dplyr::rename(fleet_number = FltSvy)
 plot_data = left_join(plot_data, fish_info)
 plot_data = plot_data %>% mutate(fisherycode = str_sub(fleet_name, start = 1, end = 2)) # for colors
 plot_data$Year = floor(qtr2yearqtr(plot_data$Yr, initial = 1950, base = 13))
