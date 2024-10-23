@@ -125,3 +125,17 @@ If you are only interested in `4A_io` models, you can ignore the `2A_io` and `1A
 The raw age-length and tagging data are not publicy available, so it is not possible to generate them. 
 
 However, you can find the data in SS3 format for each model configuration in the `data/ss3_inputs` folder of this repository. Copy and paste them in `data/ss3_inputs` of the *working folder*. You could do this manually or by executing the R script `copy_tag_caal.R` located in `code/ss3_data_inputs`.
+
+## 9. Download the SS3 executable
+
+Download `ss3_win.exe` (v3.30.22.1) here: <https://github.com/nmfs-ost/ss3-source-code/releases>. You will need to download a different file if you are using MacOS or Linux. Then, save it in the `code` folder of this repository. 
+
+## 10. Get the SS3 base files
+
+These are SS3 input files. We start to do the stepwise implementation from this set of input files. For the 4A models, the base files come from the 2021 assessment.
+
+You can find the base files in this repository: `models/base`. Copy and paste them in `models/base` in the *working directory*.
+
+## 11. Start the stepwise implementation
+
+This is probably the most important step. Here, you will start creating the SS3 inputs with different configurations. You can find the code to do this in `code/ss3_configurations` of this repository. Read the comments in those scripts carefully.
