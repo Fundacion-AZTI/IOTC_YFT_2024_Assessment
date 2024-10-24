@@ -661,14 +661,9 @@ This document is still under development and some exploratory analysis will be a
 
 # Stock status
 
-Estimates of stock status were calculated for the five candidate for a reference case model. 
+Estimates of stock status were calculated for the five candidate reference models [@tbl-stockstatus]. MSY-based reference points were derived from the average F-at-age matrix that represents the most recent pattern of exploitation for the fishery. Note that the biomass at MSY is the benchmark used to evaluate stock status ($SSB_{MSY}$) and it was calculated using two methods: (i) estimated by SS3 from the SRR relationship and (ii) scaled to the recent 10 year recruitment deviates average. The first method is what has been generally used in the IOTC and the second, aims to update the benchmark to current conditions, and is indicated with an asterisk. The new benchmark will also be used to evaluate the impact of alternative catch limits in the *K2SM*. This adaptation aims to reflect the current conditions and productivity of yellowfin, including the apparent increase in recruitment, which should be followed by an increase in $B_{MSY}$ and $MSY$ as well.
 
-<!-- The relevant benchmarks are shown for individual models in Table XXX. -->
-MSY-based reference points were derived from the average F-at-age matrix that represents the most recent pattern of exploitation for the fishery. Note that the biomass at MSY is the benchmark used to evaluate stock status ($SSB_{MSY}$) and it was calculated using two methods: (i) estimated by SS3 from the SRR relationship and (ii) scaled to the recent 10 year recruitment deviates average. The first method is what has been generally used in the IOTC and the second, aims to update the benchmark to current conditions, and is indicated with an asterisk. The new benchmark will also be used to evaluate the impact of alternative catch limits in the *K2SM*. This adaptation aims to reflect the current conditions and productivity of yellowfin, including the apparent increase in recruitment, which should be followed by an increase in $B_{MSY}$ and $MSY$ as well.
-
-<!-- Figure XXX shows that  -->
-
-For all models, the unfished biomass has been increasing in recent years. This is a consequence of the estimated increase in recruitment (and recruitment deviates), which seem to be necessary for the model to explain the large catch observed since 2003 and therefore, the recent productivity ($MSY$) and biomass that produces $MSY$ need to be updated with the most recent conditions.
+@fig-stockstatus shows the stock status for the candidate reference models. For all models, the unfished biomass has been increasing in recent years. This is a consequence of the estimated increase in recruitment (and recruitment deviates), which seem to be necessary for the model to explain the large catch observed since 2003 and therefore, the recent productivity ($MSY$) and biomass that produces $MSY$ need to be updated with the most recent conditions.
 
 In general, the observed trends are very similar for the five candidate models with an appreciable difference between the models with the *LL* selectivity split (models 2, 4 and 5) and not split (models 1 and 3) estimated for the recent years. Overall, the five models estimate a steep decline after 1980s and recovery after 2008, and a steep increase between 2020 and 2023. Fishing mortality trends display a period of overfishing between 1995 and 2020 with a notable reduction in the last three years. 
 
@@ -785,6 +780,15 @@ knitr::kable(diag_tab)
 ```
 
 \elandscape
+
+{{< pagebreak >}}
+
+```{r}
+#| label: tbl-stockstatus
+#| tab-cap: "Stock status for the candidate reference models."
+diag_tab = read.csv(file.path(shrpoint_path, 'output/tables', 'Status_Table.csv'), sep = ';')
+knitr::kable(diag_tab)
+```
 
 {{< pagebreak >}}
 
@@ -1257,6 +1261,15 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "Retro_model2
 #| fig-cap: "Hindcast analysis for model XXX."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "HIndcast_R1_s1234.png"), rel_path = FALSE)
+```
+
+
+```{r}
+#| label: fig-stockstatus
+#| out-width: 100%
+#| fig-cap: "Stock status for candidate reference models."
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures/StockStatus', "Status.png"), rel_path = FALSE)
 ```
 
 {{< pagebreak >}}
