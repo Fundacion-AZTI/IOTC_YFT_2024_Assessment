@@ -17,7 +17,7 @@ The steps to run this repository are described below. The functioning of this re
 
 If you are a Github user, you can clone this repository by following [these instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository). Make sure to use the `reproducible` branch.
 
-If you are not familiar with Github, you can download this repository as ZIP file by following [these instructions](https://docs.github.com/en/get-started/start-your-journey/downloading-files-from-github#downloading-a-repositorys-files). Save the downloaded folder somewhere locally. 
+If you are not familiar with Github, you can download this repository as ZIP file by following [these instructions](https://docs.github.com/en/get-started/start-your-journey/downloading-files-from-github#downloading-a-repositorys-files). Save the downloaded folder (called **working folder** hereafter) somewhere locally. 
 
 ## 2. Install R packages
 
@@ -41,59 +41,16 @@ devtools::install_github('HaikunXu/RegressionTree', ref='main')
 
 ## 3. Open the R project
 
-There is an R project in the repository folder called `IOTC_YFT_2024_Assessment.Rproj`. We suggest to open it from RStudio. This will automatically set your working directory to the repository folder and load the R packages listed in `.Rprofile`. 
+There is an R project in the working folder called `IOTC_YFT_2024_Assessment.Rproj`. We suggest to open it from RStudio. This will automatically set your R working directory to the working folder and load the R packages listed in `.Rprofile`. 
 
-If you want to use a different visual interface that does not allow to work with R projects, you will need set the working directory mannually to the repository folder. Also, you will need to load all the R packages in `.Rprofile`.
+If you want to use a different visual interface that does not allow to work with R projects, you will need to set the working directory manually to the working folder. Also, you will need to load all the R packages in `.Rprofile`.
 
-## 4. Specify the working folder
 
-The *working folder* is a folder where the raw and processed data will be saved, and the SS3 configuration files will be created and run. Note that this is different than the *repository folder*.
+## 4. Create the working folder structure
 
-Create the *working folder* somewhere on your local computer, and then specify the path in `sharepoint_path.R`. For example:
+Some folders will need to be created in the working folder. This is automatically done by running `create_subfolders.R`. 
 
-```{r}
-shrpoint_path = 'C:/Use/2024_YFT_IOTC'
-```
-
-## 5. Create the working folder structure
-
-Some folders will need to be created in the *working folder*. This is automatically done by running `create_subfolders.R`. After running it, the *working folder* should look like:
-
-``` bash
-├───data
-│   ├───processed
-│   ├───raw
-│   └───ss3_inputs
-│       ├───1A_io
-│       │   ├───aaf
-│       │   └───agg
-│       ├───2A_io
-│       │   ├───aaf
-│       │   └───agg
-│       └───4A_io
-├───models
-│   ├───base
-│   │   ├───1A_io
-│   │   ├───2A_io
-│   │   └───4A_io
-│   ├───configurations
-│   │   ├───1A_io
-│   │   │   ├───aaf
-│   │   │   └───agg
-│   │   ├───2A_io
-│   │   │   ├───aaf
-│   │   │   └───agg
-│   │   └───4A_io
-│   │       └───sensitivity
-│   ├───diagnostics
-│   ├───forecast
-│   └───reference_models
-└───output
-    ├───figures
-    └───tables
-```
-
-This assessment implements three spatial configurations: 
+The folder structure in the working folder follows the three spatial configurations evaluated in this assessment: 
 
 - `4A_io`: four areas, main configuration
 - `2A_io`: two areas 
@@ -122,19 +79,17 @@ If you are only interested in `4A_io` models, you can ignore the `2A_io` and `1A
 
 ## 8. Age-length and tagging data
 
-The raw age-length and tagging data are not publicy available, so it is not possible to generate them. 
+The raw age-length and tagging data are not publicly available, so it is not possible to generate them. 
 
-However, you can find the data in SS3 format for each model configuration in the `data/ss3_inputs` folder of this repository. Copy and paste them in `data/ss3_inputs` of the *working folder*. You could do this manually or by executing the R script `copy_tag_caal.R` located in `code/ss3_data_inputs`.
+However, you can find the data in SS3 format for each model configuration in the `data/ss3_inputs` folder. 
 
 ## 9. Download the SS3 executable
 
-Download `ss3_win.exe` (v3.30.22.1) here: <https://github.com/nmfs-ost/ss3-source-code/releases>. You will need to download a different file if you are using MacOS or Linux. Then, save it in the `code` folder of this repository. 
+Download `ss3_win.exe` (v3.30.22.1) here: <https://github.com/nmfs-ost/ss3-source-code/releases>. You will need to download a different file if you are using MacOS or Linux. Then, save it in the `code` folder.
 
 ## 10. Get the SS3 base files
 
-These are SS3 input files. We start to do the stepwise implementation from this set of input files. For the 4A models, the base files come from the 2021 assessment.
-
-You can find the base files in this repository: `models/base`. Copy and paste them in `models/base` in the *working directory*.
+These are SS3 input files. We start to do the stepwise implementation from this set of input files. For the 4A models, the base files come from the 2021 assessment. You can find the base files in this repository: `models/base`.
 
 ## 11. Start the stepwise implementation
 

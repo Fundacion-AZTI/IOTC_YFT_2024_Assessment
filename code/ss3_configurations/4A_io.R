@@ -76,7 +76,7 @@ dir.create(tmp_dir)
 
 # Assign fleet names
 fish_names = get_fisheries(spat_config)$fleet_name
-dat_tmp$fleetinfo$fleetname <- paste0(1:25,"_",c(fish_names, c(fish_names[c(7,10,11,13)])))
+dat_tmp$fleetinfo$fleetname <- c(fish_names, paste0('CPUE_', fish_names[c(7,10,11,13)]))
 # Updated catch data frame:
 catch_df = read.csv(file.path(shrpoint_path, SS_data, 'catch.csv'))
 dat_tmp$catch = updated_catch
@@ -674,7 +674,8 @@ if(make_plots) {
 
 # -------------------------------------------------------------------------
 
-# 17_biasCorrecRamp
+# 17_OneBlock_LLsel
+# This is RM1: bias correction ramp implemented
 
 # Read previous input files:
 dat_tmp = SS_readdat(file = file.path(tmp_dir, 'data.ss'))
@@ -706,3 +707,219 @@ if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
 }
+
+# -------------------------------------------------------------------------
+
+# 18_TwoBlock_LLsel
+# This is RM2
+
+# Read previous input files:
+dat_tmp = SS_readdat(file = file.path(tmp_dir, 'data.ss'))
+ctl_tmp = SS_readctl(file = file.path(tmp_dir, 'control.ss'), datlist = dat_tmp)
+fore_tmp = SS_readforecast(file = file.path(tmp_dir, 'forecast.ss'))
+start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
+
+# Config def:
+config_name = '18_TwoBlock_LLsel'
+tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+tmp_dir_rm2 = tmp_dir # save for remaining configs
+dir.create(tmp_dir)
+
+# Modify data file
+dat_tmp$Nfleet = dat_tmp$Nfleet + 3 # fisheries
+dat_tmp$Nfleets = dat_tmp$Nfleet + 4 # fisheries and indices
+base_LL_names = dat_tmp$fleetinfo$fleetname[c(7, 10, 13)]
+dat_tmp$fleetinfo$fleetname[c(7, 10, 13)] = paste0(base_LL_names, '_P2000')
+dat_tmp$fleetinfo = dat_tmp$fleetinfo %>% add_row(data.frame(type = 1, surveytiming = -1, area = c(1,2,4), 
+                                                  units = 1, need_catch_mult = 0, 
+                                                  fleetname = paste0(base_LL_names, '_A2000')), .after = 21)
+dat_tmp$fleetnames = dat_tmp$fleetinfo$fleetname
+# start from qtr = 213 (2000) to change fleet
+dat_tmp$catch = dat_tmp$catch %>% mutate(fleet = if_else(fleet == 7 & year >= 213, 22, fleet)) # LL1b
+dat_tmp$catch = dat_tmp$catch %>% mutate(fleet = if_else(fleet == 10 & year >= 213, 23, fleet)) # LL2
+dat_tmp$catch = dat_tmp$catch %>% mutate(fleet = if_else(fleet == 13 & year >= 213, 24, fleet)) # LL4
+dat_tmp$CPUEinfo = dat_tmp$CPUEinfo %>% add_row(data.frame(fleet = 22:24, units = 1, errtype = 0, SD_report = 0), .after = 21)
+dat_tmp$CPUE$index = dat_tmp$CPUE$index + 3
+dat_tmp$len_info = dat_tmp$len_info %>% add_row(dat_tmp$len_info[c(7, 10, 13), ], .after = 21)
+dat_tmp$lencomp = dat_tmp$lencomp %>% mutate(fleet = if_else(fleet == 7 & year >= 213, 22, fleet)) # LL1b
+dat_tmp$lencomp = dat_tmp$lencomp %>% mutate(fleet = if_else(fleet == 10 & year >= 213, 23, fleet)) # LL2
+dat_tmp$lencomp = dat_tmp$lencomp %>% mutate(fleet = if_else(fleet == 13 & year >= 213, 24, fleet)) # LL4
+dat_tmp$tag_recaps = dat_tmp$tag_recaps %>% mutate(fleet = if_else(fleet == 7 & year >= 213, 22, fleet)) # LL1b
+dat_tmp$tag_recaps = dat_tmp$tag_recaps %>% mutate(fleet = if_else(fleet == 10 & year >= 213, 23, fleet)) # LL2
+dat_tmp$tag_recaps = dat_tmp$tag_recaps %>% mutate(fleet = if_else(fleet == 13 & year >= 213, 24, fleet)) # LL4
+
+# Modify control file
+ctl_tmp$Block_Design[[1]][4] = 349
+ctl_tmp$Block_Design[[4]][4] = 349
+ctl_tmp$Q_options$fleet = ctl_tmp$Q_options$fleet + 3
+ctl_tmp$Q_options$link_info = ctl_tmp$Q_options$link_info + 3
+ctl_tmp$size_selex_types = ctl_tmp$size_selex_types %>% add_row(ctl_tmp$size_selex_types[c(7, 10, 13), ], .after = 21)
+ctl_tmp$age_selex_types = ctl_tmp$age_selex_types %>% add_row(ctl_tmp$age_selex_types[c(7, 10, 13), ], .after = 21)
+ctl_tmp$age_selex_types$Pattern[c(7,13)] = 20 # double normal
+
+# First, move LL age selex logistic to the end (after 2000)
+ctl_tmp$age_selex_parms = ctl_tmp$age_selex_parms %>% add_row(ctl_tmp$age_selex_parms[c(23:24,31:32,41:42), ])
+# Add selex double normal for LL 1b before 2000
+ctl_tmp$age_selex_parms = ctl_tmp$age_selex_parms %>% slice(-c(23,24)) # remove old 
+tmp_sel_pars = data.frame(LO = c(2,-2,-8,-20,-12,-32), HI = c(19,0,0,0,-1,-3),
+                          INIT = c(9.2,-0.85,-3,-10,-6,-15.6), 
+                          PRIOR = c(9.2,-0.85,-5.6,-19,-6,-15.6),
+                          PR_SD = c(1.8,0.17,1.12,3.8,1.2,3.12),
+                          PR_type = 6, PHASE = c(3,-5,4,4,-5,5),
+                          env_varlink=0, dev_link=0, dev_minyr=0,dev_maxyr=0,
+                          dev_PH=0,Block=0,Block_Fxn=0)
+colnames(tmp_sel_pars) = colnames(ctl_tmp$age_selex_parms)
+ctl_tmp$age_selex_parms = ctl_tmp$age_selex_parms %>% add_row(tmp_sel_pars, .after = 22)
+# Add selex double normal for LL 4 before 2000
+ctl_tmp$age_selex_parms = ctl_tmp$age_selex_parms %>% slice(-c(45,46)) # remove old 
+tmp_sel_pars = data.frame(LO = c(1,-2,-40,-20,-12,-25), HI = c(15,0,0,0,-1,-3),
+                          INIT = c(7.07,-0.68,-21,-1,-6,-12), 
+                          PRIOR = c(7.07,-0.68,-21,-6,-6,-12),
+                          PR_SD = c(1.41,0.14,4.2,0.2,1.2,2.4),
+                          PR_type = 6, PHASE = c(3,-5,4,4,-5,5),
+                          env_varlink=0, dev_link=0, dev_minyr=0,dev_maxyr=0,
+                          dev_PH=0,Block=0,Block_Fxn=0)
+colnames(tmp_sel_pars) = colnames(ctl_tmp$age_selex_parms)
+ctl_tmp$age_selex_parms = ctl_tmp$age_selex_parms %>% add_row(tmp_sel_pars, .after = 44)
+
+# Tagging params
+ctl_tmp$TG_Report_fleet = ctl_tmp$TG_Report_fleet %>% add_row(ctl_tmp$TG_Report_fleet[c(7, 10, 13), ])
+ctl_tmp$TG_Report_fleet_decay = ctl_tmp$TG_Report_fleet_decay %>% add_row(ctl_tmp$TG_Report_fleet_decay[c(7, 10, 13), ])
+
+# Write SS files:
+SS_writedat(dat_tmp, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+SS_writectl(ctl_tmp, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
+SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
+
+# Run model:
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(make_plots) {
+  tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
+  r4ss::SS_plots(tmp_out)
+}
+
+# -------------------------------------------------------------------------
+
+# 19_TwoBlockCPUE
+# This is RM3, run from RM2
+
+# Read previous input files:
+dat_tmp = SS_readdat(file = file.path(tmp_dir_rm2, 'data.ss'))
+ctl_tmp = SS_readctl(file = file.path(tmp_dir_rm2, 'control.ss'), datlist = dat_tmp)
+fore_tmp = SS_readforecast(file = file.path(tmp_dir_rm2, 'forecast.ss'))
+start_tmp = SS_readstarter(file = file.path(tmp_dir_rm2, 'starter.ss'))
+
+# Config def:
+config_name = '19_TwoBlockCPUE'
+tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+dir.create(tmp_dir)
+
+# Modify data file
+dat_tmp$Nfleets = dat_tmp$Nfleet + 3 # fisheries and indices
+base_LL_names = dat_tmp$fleetinfo$fleetname[c(25,26,28)]
+dat_tmp$fleetinfo$fleetname[c(25,26,28)] = paste0(base_LL_names, '_P2000')
+dat_tmp$fleetinfo = dat_tmp$fleetinfo %>% add_row(data.frame(type = 3, surveytiming = 1, area = c(1,2,4), 
+                                                             units = 2, need_catch_mult = 0, 
+                                                             fleetname = paste0(base_LL_names, '_A2000')))
+dat_tmp$fleetnames = dat_tmp$fleetinfo$fleetname
+# start from qtr = 213 (2000) to change fleet
+dat_tmp$CPUEinfo = dat_tmp$CPUEinfo %>% add_row(data.frame(fleet = 29:31, units = 0, errtype = 0, SD_report = 0))
+dat_tmp$CPUE = dat_tmp$CPUE %>% mutate(fleet = if_else(fleet == 25 & year >= 213, 29, fleet)) # LL1b
+dat_tmp$CPUE = dat_tmp$CPUE %>% mutate(fleet = if_else(fleet == 26 & year >= 213, 30, fleet)) # LL2
+dat_tmp$CPUE = dat_tmp$CPUE %>% mutate(fleet = if_else(fleet == 28 & year >= 213, 31, fleet)) # LL4
+dat_tmp$len_info = dat_tmp$len_info %>% add_row(dat_tmp$len_info[c(25, 26, 28), ])
+
+# Modify control file
+ctl_tmp$Q_options = ctl_tmp$Q_options %>% add_row(data.frame(fleet = 29:31, link = 2, link_info = 25, extra_se = 0, biasadj = 1, float = 0))
+ctl_tmp$Q_parms = ctl_tmp$Q_parms %>% add_row(ctl_tmp$Q_parms[2:4, ])
+ctl_tmp$size_selex_types = ctl_tmp$size_selex_types %>% add_row(ctl_tmp$size_selex_types[c(25, 26, 28), ])
+ctl_tmp$age_selex_types = ctl_tmp$age_selex_types %>% add_row(data.frame(Pattern = 15, Discard = 0, Male = 0, Special = 22:24))
+
+# Write SS files:
+SS_writedat(dat_tmp, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+SS_writectl(ctl_tmp, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
+SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
+
+# Run model:
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(make_plots) {
+  tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
+  r4ss::SS_plots(tmp_out)
+}
+
+
+
+# -------------------------------------------------------------------------
+
+# 20_Dwtag01
+# This is RM4, run from RM2
+
+# Read previous input files:
+dat_tmp = SS_readdat(file = file.path(tmp_dir_rm2, 'data.ss'))
+ctl_tmp = SS_readctl(file = file.path(tmp_dir_rm2, 'control.ss'), datlist = dat_tmp)
+fore_tmp = SS_readforecast(file = file.path(tmp_dir_rm2, 'forecast.ss'))
+start_tmp = SS_readstarter(file = file.path(tmp_dir_rm2, 'starter.ss'))
+
+# Config def:
+config_name = '20_Dwtag01'
+tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+dir.create(tmp_dir)
+
+# Downweight tagging data
+ctl_tmp$lambdas = rbind(#data.frame(like_comp = 5, fleet = 1:16, phase = 2, value = 0, sizefreq_method = 1), # age
+  data.frame(like_comp = 15, fleet = 1:dat_1$N_tag_groups, phase = 2, value = 0.1, sizefreq_method = 1), # tag
+  data.frame(like_comp = 16, fleet = 1:dat_1$N_tag_groups, phase = 2, value = 0.1, sizefreq_method = 1), # tag negative binom
+  ctl_1$lambdas)
+ctl_tmp$N_lambdas = nrow(ctl_tmp$lambdas)
+
+# Write SS files:
+SS_writedat(dat_tmp, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+SS_writectl(ctl_tmp, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
+SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
+
+# Run model:
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(make_plots) {
+  tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
+  r4ss::SS_plots(tmp_out)
+}
+
+
+# -------------------------------------------------------------------------
+
+# 21_EffortCreep
+# This is RM5, run from RM2
+
+# Read previous input files:
+dat_tmp = SS_readdat(file = file.path(tmp_dir_rm2, 'data.ss'))
+ctl_tmp = SS_readctl(file = file.path(tmp_dir_rm2, 'control.ss'), datlist = dat_tmp)
+fore_tmp = SS_readforecast(file = file.path(tmp_dir_rm2, 'forecast.ss'))
+start_tmp = SS_readstarter(file = file.path(tmp_dir_rm2, 'starter.ss'))
+
+# Config def:
+config_name = '21_EffortCreep'
+tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+dir.create(tmp_dir)
+
+# Apply effort creep 0.5%:
+cpue_dat_effcreep = apply_eff_creep(dat_tmp$CPUE, yr_col = 'year', fleet_col = 'index',
+                                    cpue_col = 'obs', cv_col = 'se_log', rate = 0.005)
+cpue_dat_effcreep = cpue_dat_effcreep %>% add_column(month = 1, .after = 1)
+dat_tmp$CPUE = cpue_dat_effcreep
+
+# Write SS files:
+SS_writedat(dat_tmp, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+SS_writectl(ctl_tmp, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
+SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
+
+# Run model:
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(make_plots) {
+  tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
+  r4ss::SS_plots(tmp_out)
+}
+
