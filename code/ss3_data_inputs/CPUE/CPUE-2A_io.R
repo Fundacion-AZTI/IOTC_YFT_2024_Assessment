@@ -74,7 +74,7 @@ cpue_df = cpue_df %>% dplyr::rename(year = qtr, seas = season, index = fleet, ob
 cpue_df$seas = 1
 
 # Save data:
-write.csv(cpue_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'cpue.csv'), row.names = FALSE)
+write.csv(cpue_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'cpue-ll.csv'), row.names = FALSE)
 
 # -------------------------------------------------------------------------
 # -------------------------------------------------------------------------
