@@ -590,6 +590,11 @@ maturity_Zudaire = function(len_vec, alpha = -9.25, beta = 0.091) {
 
 
 # -------------------------------------------------------------------------
+# K vector to approximate Farley et al 2023 in SS3
+k_vec_Farley = c(0.48, 0.467, 1.376, 1.263, rep(1, times = 9))
+
+
+# -------------------------------------------------------------------------
 # Several growth-related functions:
 
 growth2stage.f<- function(age, param)
