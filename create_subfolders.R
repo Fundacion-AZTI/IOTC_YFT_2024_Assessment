@@ -19,10 +19,3 @@ dir.create(file.path(shrpoint_path, "models", "configurations", "2A_io", "agg"),
 dir.create(file.path(shrpoint_path, "models", "configurations", "2A_io", "aaf"), showWarnings = FALSE, recursive = TRUE)
 dir.create(file.path(shrpoint_path, "models", "configurations", "1A_io", "agg"), showWarnings = FALSE, recursive = TRUE)
 dir.create(file.path(shrpoint_path, "models", "configurations", "1A_io", "aaf"), showWarnings = FALSE, recursive = TRUE)
-dir.create(file.path(shrpoint_path, "models", "reference_models"), showWarnings = FALSE, recursive = TRUE)
-dir.create(file.path(shrpoint_path, "models", "diagnostics"), showWarnings = FALSE, recursive = TRUE)
-dir.create(file.path(shrpoint_path, "models", "forecast"), showWarnings = FALSE, recursive = TRUE)
-
-# Outputs
-dir.create(file.path(shrpoint_path, "output", "figures"), showWarnings = FALSE, recursive = TRUE) 
-dir.create(file.path(shrpoint_path, "output", "tables"), showWarnings = FALSE, recursive = TRUE) 
