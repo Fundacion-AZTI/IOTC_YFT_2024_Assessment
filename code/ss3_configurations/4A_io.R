@@ -2,6 +2,7 @@ rm(list = ls())
 
 # Sharepoint path:
 source('sharepoint_path.R')
+source('code/auxiliary_functions.R')
 
 # Spatial config
 spat_config = '4A_io'
@@ -17,7 +18,7 @@ SS_data = file.path('data/ss3_inputs', spat_config)
 
 # Specify if you just want to create folders with SS3 inputs, or 
 # also run SS3 models and make plots
-# Consider that running all models and making plots may increase the computational time considerably
+# Consider that running all models and making plots may considerably increase the computational time 
 run_model = FALSE
 make_plots = FALSE
 
@@ -25,7 +26,7 @@ make_plots = FALSE
 
 # Read base SS inputs
 base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
-base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
 base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
 base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
 
@@ -44,7 +45,7 @@ start_tmp = base_start
 # Config def:
 config_name = '1_BaseCase'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Write SS files:
 SS_writedat(dat_tmp, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
@@ -53,7 +54,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -65,21 +66,21 @@ if(make_plots) {
 
 # Read previous input files:
 dat_tmp = SS_readdat(file = file.path(tmp_dir, 'data.ss'))
-ctl_tmp = SS_readctl(file = file.path(tmp_dir, 'control.ss'), datlist = dat_tmp)
+ctl_tmp = SS_readctl(file = file.path(tmp_dir, 'control.ss_new'), datlist = dat_tmp)
 fore_tmp = SS_readforecast(file = file.path(tmp_dir, 'forecast.ss'))
 start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 
 # Config def:
 config_name = '2_updateCatch'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Assign fleet names
 fish_names = get_fisheries(spat_config)$fleet_name
 dat_tmp$fleetinfo$fleetname <- c(fish_names, paste0('CPUE_', fish_names[c(7,10,11,13)]))
 # Updated catch data frame:
 catch_df = read.csv(file.path(shrpoint_path, SS_data, 'catch.csv'))
-dat_tmp$catch = updated_catch
+dat_tmp$catch = catch_df
 dat_tmp$endyr = 308 # last year = 2023
 # Change also forecast file:
 fore_tmp$Bmark_years<- c(308,308,301,308,301,308,296,308,13,308)
@@ -95,7 +96,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -115,10 +116,10 @@ start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 # Config def:
 config_name = '3_updateCPUE'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 #update cpue
-cpue_df = read.csv(file.path(shrpoint_path, SS_data, 'cpue-ll.csv'))
+cpue_df = read.csv(file.path(shrpoint_path, SS_data, 'cpue-ll-qt.csv'))
 cpue_df$se_log = 0.2 # assuming cv = 0.2
 dat_tmp$CPUE <- cpue_df
 
@@ -129,7 +130,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -148,7 +149,7 @@ start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 # Config def:
 config_name = '4_updateLength'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 #update length
 length_df = read.csv(file.path(shrpoint_path, SS_data, 'size-original.csv'))
@@ -162,7 +163,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -182,7 +183,7 @@ start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 # Config def:
 config_name = '5_updateWarnings'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # fleets info: surveytime read as: 1 normally is -1 for fishing fleet:
 dat_tmp$fleetinfo$surveytiming[1:dat_tmp$Nfleet] <- -1
@@ -194,7 +195,7 @@ ctl_tmp$Block_Design[[4]][4] <- dat_tmp$endyr+1
 # 1st iteration warning: catch logL > 50% total logL; check configuration; suggest start with larger R0
 ctl_tmp$SR_parms["SR_LN(R0)","INIT"] <- 12 
 # wanning:Note 2 Information:  N parameters that are on or within 1% of min-max bound: 1; check results, variance may be suspect
-ctl_tmp$age_selex_parms["AgeSel_P_1_14_OT_4(14)","LO"] <- 0
+ctl_tmp$age_selex_parms["AgeSel_P_1_OT_4(14)","LO"] <- 0
 
 # Write SS files:
 SS_writedat(dat_tmp, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
@@ -203,7 +204,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -223,7 +224,7 @@ start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 # Config def:
 config_name = '6_updateM'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Update M:
 ctl_tmp$natM_type <- 2
@@ -240,7 +241,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -260,7 +261,7 @@ start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 # Config def:
 config_name = '7_updateGrowth'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Update growth:
 dat_tmp$Nages <- 40
@@ -286,7 +287,7 @@ ctl_tmp$MG_parms["Age_K_9_Fem_GP_1","INIT"] <- k_vec_Farley[9]
 ctl_tmp$MG_parms["Age_K_10_Fem_GP_1","INIT"] <- k_vec_Farley[10]
 ctl_tmp$MG_parms["Age_K_11_Fem_GP_1","INIT"] <- k_vec_Farley[11]
 ctl_tmp$MG_parms["Age_K_12_Fem_GP_1","INIT"] <- k_vec_Farley[12]
-ctl_tmp$MG_parms["Age_K_12_Fem_GP_1","INIT"] <- k_vec_Farley[13]
+ctl_tmp$MG_parms["Age_K_13_Fem_GP_1","INIT"] <- k_vec_Farley[13]
 
 # Write SS files:
 SS_writedat(dat_tmp, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
@@ -295,7 +296,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -315,7 +316,7 @@ start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 # Config def:
 config_name = '8_updateGrowthTagging'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Update tagging data as well:
 tag_rel_farley = read.csv(file.path(shrpoint_path, SS_data, 'tag-release.csv'))
@@ -338,7 +339,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -358,7 +359,7 @@ start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 # Config def:
 config_name = '9_updateMaturity'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Update maturity length based:
 ctl_tmp$maturity_option <- 1
@@ -380,7 +381,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -400,11 +401,11 @@ start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 # Config def:
 config_name = '10_updatePSSelectivity'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Update selectivity:
-ctl_tmp$size_selex_parms["SizeSel_Spline_Code_6_FS_1b(6)",1:3] <- c(0,2,2)
-ctl_tmp$size_selex_parms["SizeSel_Spline_Code_8_LS_1b(8)",1:3] <- c(0,2,2)
+ctl_tmp$size_selex_parms["SizeSel_Spline_Code_FS_1b(6)",1:3] <- c(0,2,2)
+ctl_tmp$size_selex_parms["SizeSel_Spline_Code_LS_1b(8)",1:3] <- c(0,2,2)
 
 # Write SS files:
 SS_writedat(dat_tmp, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
@@ -413,38 +414,15 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model (this is mandatory to estimate nodes):
-r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-maxfn 0 -phase 50 -nohess')
+r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-maxfn 0 -phase 50 -nohess')
 
 # Now update nodes:
 new_ctltmp = SS_readctl(file = file.path(tmp_dir, 'control.ss_new'), datlist = dat_tmp)
-# Fishery 6:
-ctl_tmp$size_selex_parms["SizeSel_Spline_Code_6_FS_1b(6)",1:3] <- c(0,2,0)
-ctl_tmp$size_selex_parms["SizeSel_Spline_GradLo_6_FS_1b(6)",] <- new_ctltmp$size_selex_parms["SizeSel_Spline_GradLo_6_FS_1b(6)",]
-ctl_tmp$size_selex_parms["SizeSel_Spline_GradHi_6_FS_1b(6)",] <-  new_ctltmp$size_selex_parms["SizeSel_Spline_GradHi_6_FS_1b(6)",]
-ctl_tmp$size_selex_parms["SizeSel_Spline_Knot_1_6_FS_1b(6)",] <- new_ctltmp$size_selex_parms["SizeSel_Spline_Knot_1_6_FS_1b(6)",]
-ctl_tmp$size_selex_parms["SizeSel_Spline_Knot_2_6_FS_1b(6)",] <- new_ctltmp$size_selex_parms["SizeSel_Spline_Knot_2_6_FS_1b(6)",]
-ctl_tmp$size_selex_parms["SizeSel_Spline_Knot_3_6_FS_1b(6)",] <- new_ctltmp$size_selex_parms["SizeSel_Spline_Knot_3_6_FS_1b(6)",]
-ctl_tmp$size_selex_parms["SizeSel_Spline_Knot_4_6_FS_1b(6)",] <- new_ctltmp$size_selex_parms["SizeSel_Spline_Knot_4_6_FS_1b(6)",]
-ctl_tmp$size_selex_parms["SizeSel_Spline_Knot_5_6_FS_1b(6)",] <- new_ctltmp$size_selex_parms["SizeSel_Spline_Knot_5_6_FS_1b(6)",]
-ctl_tmp$size_selex_parms["SizeSel_Spine_Val_1_6_FS_1b(6)",] <- new_ctltmp$size_selex_parms["SizeSel_Spine_Val_1_6_FS_1b(6)",] 
-ctl_tmp$size_selex_parms["SizeSel_Spine_Val_2_6_FS_1b(6)",] <- new_ctltmp$size_selex_parms["SizeSel_Spine_Val_2_6_FS_1b(6)",] 
-ctl_tmp$size_selex_parms["SizeSel_Spine_Val_3_6_FS_1b(6)",] <- new_ctltmp$size_selex_parms["SizeSel_Spine_Val_3_6_FS_1b(6)",] 
-ctl_tmp$size_selex_parms["SizeSel_Spine_Val_4_6_FS_1b(6)",] <- new_ctltmp$size_selex_parms["SizeSel_Spine_Val_4_6_FS_1b(6)",] 
-ctl_tmp$size_selex_parms["SizeSel_Spine_Val_5_6_FS_1b(6)",] <- new_ctltmp$size_selex_parms["SizeSel_Spine_Val_5_6_FS_1b(6)",]
-# Fishery 8
-ctl_tmp$size_selex_parms["SizeSel_Spline_Code_8_LS_1b(8)",1:3] <- c(0,2,0)
-ctl_tmp$size_selex_parms["SizeSel_Spline_GradLo_8_LS_1b(8)",] <- new_ctltmp$size_selex_parms["SizeSel_Spline_GradLo_8_LS_1b(8)",]
-ctl_tmp$size_selex_parms["SizeSel_Spline_GradHi_8_LS_1b(8)",] <-  new_ctltmp$size_selex_parms["SizeSel_Spline_GradHi_8_LS_1b(8)",]
-ctl_tmp$size_selex_parms["SizeSel_Spline_Knot_1_8_LS_1b(8)",] <- new_ctltmp$size_selex_parms["SizeSel_Spline_Knot_1_8_LS_1b(8)",]
-ctl_tmp$size_selex_parms["SizeSel_Spline_Knot_2_8_LS_1b(8)",] <- new_ctltmp$size_selex_parms["SizeSel_Spline_Knot_2_8_LS_1b(8)",]
-ctl_tmp$size_selex_parms["SizeSel_Spline_Knot_3_8_LS_1b(8)",] <- new_ctltmp$size_selex_parms["SizeSel_Spline_Knot_3_8_LS_1b(8)",]
-ctl_tmp$size_selex_parms["SizeSel_Spline_Knot_4_8_LS_1b(8)",] <- new_ctltmp$size_selex_parms["SizeSel_Spline_Knot_4_8_LS_1b(8)",]
-ctl_tmp$size_selex_parms["SizeSel_Spline_Knot_5_8_LS_1b(8)",] <- new_ctltmp$size_selex_parms["SizeSel_Spline_Knot_5_8_LS_1b(8)",]
-ctl_tmp$size_selex_parms["SizeSel_Spine_Val_1_8_LS_1b(8)",] <- new_ctltmp$size_selex_parms["SizeSel_Spine_Val_1_8_LS_1b(8)",] 
-ctl_tmp$size_selex_parms["SizeSel_Spine_Val_2_8_LS_1b(8)",] <- new_ctltmp$size_selex_parms["SizeSel_Spine_Val_2_8_LS_1b(8)",] 
-ctl_tmp$size_selex_parms["SizeSel_Spine_Val_3_8_LS_1b(8)",] <- new_ctltmp$size_selex_parms["SizeSel_Spine_Val_3_8_LS_1b(8)",] 
-ctl_tmp$size_selex_parms["SizeSel_Spine_Val_4_8_LS_1b(8)",] <- new_ctltmp$size_selex_parms["SizeSel_Spine_Val_4_8_LS_1b(8)",] 
-ctl_tmp$size_selex_parms["SizeSel_Spine_Val_5_8_LS_1b(8)",] <- new_ctltmp$size_selex_parms["SizeSel_Spine_Val_5_8_LS_1b(8)",]
+# Fishery 6 and 8:
+ctl_tmp$size_selex_parms["SizeSel_Spline_Code_FS_1b(6)",1:3] <- c(0,2,0)
+ctl_tmp$size_selex_parms["SizeSel_Spline_Code_LS_1b(8)",1:3] <- c(0,2,0)
+# replace parameters for both fisheries:
+ctl_tmp$size_selex_parms[c(2:13, 15:26), ] = new_ctltmp$size_selex_parms[c(2:13, 15:26), ]
 
 # Write SS files:
 SS_writedat(dat_tmp, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
@@ -453,7 +431,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess', skipfinished = FALSE)
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -466,14 +444,14 @@ if(make_plots) {
 
 # Read previous input files:
 dat_tmp = SS_readdat(file = file.path(tmp_dir, 'data.ss'))
-ctl_tmp = SS_readctl(file = file.path(tmp_dir, 'control.ss'), datlist = dat_tmp)
+ctl_tmp = SS_readctl(file = file.path(tmp_dir, 'control.ss_new'), datlist = dat_tmp)
 fore_tmp = SS_readforecast(file = file.path(tmp_dir, 'forecast.ss'))
 start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 
 # Config def:
 config_name = '11_updateBoundaries'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Boundaries:
 idx <- 1:length(ctl_tmp$age_selex_parms$LO)
@@ -482,7 +460,7 @@ for(i in idx){
   sd <- abs(0.2*pr)
   ctl_tmp$age_selex_parms[i,c(1:5)] <- c(min(pr-4*sd,pr+4*sd),max(pr-4*sd,pr+4*sd),pr,pr,sd)
 }
-idxRep <- grep(paste0("1_GI_1a", collapse="|"), row.names(ctl_tmp$age_selex_parms), value=FALSE)
+idxRep <- grep(paste0("GI_1a", collapse="|"), row.names(ctl_tmp$age_selex_parms), value=FALSE)
 ctl_tmp$age_selex_parms[idxRep[3],1:2] <- c(-2,2)
 
 # Write SS files:
@@ -492,7 +470,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -512,7 +490,7 @@ start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 # Config def:
 config_name = '12_updateRecDevs'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Recdevs:
 ctl_tmp$MG_parms["RecrDist_GP_1_area_4_month_1",11] <- 300
@@ -527,7 +505,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -547,7 +525,7 @@ start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 # Config def:
 config_name = '13_addRepQual'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Use RQ (2 or 5, based on RQ):
 length_df = read.csv(file.path(shrpoint_path, SS_data, 'size-original.csv'))
@@ -561,7 +539,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -581,7 +559,7 @@ start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 # Config def:
 config_name = '14_useCPW5x5'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Use cwp5x5 regular grid
 length_df = read.csv(file.path(shrpoint_path, SS_data, 'size-cwp55.csv'))
@@ -595,7 +573,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -615,14 +593,14 @@ start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 # Config def:
 config_name = '15_CWP5x5RepQual'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Use cwp5x5 and repquality
 length_df = read.csv(file.path(shrpoint_path, SS_data, 'size-cwp55.csv'))
 dat_tmp$lencomp = length_df
 dat_tmp$lencomp$Nsamp = ifelse(length_df$Nsamp <= 2, 5, 2)
 # Change some selex params:
-idxRep <- grep(paste0("1_GI_1a", collapse="|"), row.names(ctl_tmp$age_selex_parms), value=FALSE)
+idxRep <- grep(paste0("GI_1a", collapse="|"), row.names(ctl_tmp$age_selex_parms), value=FALSE)
 ctl_tmp$age_selex_parms[idxRep[3],1:2] <- c(-2.5,2)
 
 # Write SS files:
@@ -632,7 +610,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -652,7 +630,7 @@ start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 # Config def:
 config_name = '16_freeLL3par2'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Free parameter:
 idxRep <- grep(paste0("LL_3",collapse="|"), row.names(ctl_tmp$age_selex_parms), value=FALSE)
@@ -665,7 +643,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -679,14 +657,14 @@ if(make_plots) {
 
 # Read previous input files:
 dat_tmp = SS_readdat(file = file.path(tmp_dir, 'data.ss'))
-ctl_tmp = SS_readctl(file = file.path(tmp_dir, 'control.ss'), datlist = dat_tmp)
+ctl_tmp = SS_readctl(file = file.path(tmp_dir, 'control.ss_new'), datlist = dat_tmp)
 fore_tmp = SS_readforecast(file = file.path(tmp_dir, 'forecast.ss'))
 start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 
 # Config def:
-config_name = '17_biasCorrecRamp'
+config_name = '17_OneBlock_LLsel'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Bias ramp:
 ctl_tmp$last_early_yr_nobias_adj  <- 69.5
@@ -702,7 +680,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -715,7 +693,7 @@ if(make_plots) {
 
 # Read previous input files:
 dat_tmp = SS_readdat(file = file.path(tmp_dir, 'data.ss'))
-ctl_tmp = SS_readctl(file = file.path(tmp_dir, 'control.ss'), datlist = dat_tmp)
+ctl_tmp = SS_readctl(file = file.path(tmp_dir, 'control.ss_new'), datlist = dat_tmp)
 fore_tmp = SS_readforecast(file = file.path(tmp_dir, 'forecast.ss'))
 start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 
@@ -723,7 +701,7 @@ start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 config_name = '18_TwoBlock_LLsel'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
 tmp_dir_rm2 = tmp_dir # save for remaining configs
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Modify data file
 dat_tmp$Nfleet = dat_tmp$Nfleet + 3 # fisheries
@@ -744,6 +722,8 @@ dat_tmp$len_info = dat_tmp$len_info %>% add_row(dat_tmp$len_info[c(7, 10, 13), ]
 dat_tmp$lencomp = dat_tmp$lencomp %>% mutate(fleet = if_else(fleet == 7 & year >= 213, 22, fleet)) # LL1b
 dat_tmp$lencomp = dat_tmp$lencomp %>% mutate(fleet = if_else(fleet == 10 & year >= 213, 23, fleet)) # LL2
 dat_tmp$lencomp = dat_tmp$lencomp %>% mutate(fleet = if_else(fleet == 13 & year >= 213, 24, fleet)) # LL4
+# Update Nsamp = 5 for all LL (see all fleet in the next lines)
+dat_tmp$lencomp$Nsamp[dat_tmp$lencomp$fleet %in% c(3,7,10,11,13)] = 5
 dat_tmp$tag_recaps = dat_tmp$tag_recaps %>% mutate(fleet = if_else(fleet == 7 & year >= 213, 22, fleet)) # LL1b
 dat_tmp$tag_recaps = dat_tmp$tag_recaps %>% mutate(fleet = if_else(fleet == 10 & year >= 213, 23, fleet)) # LL2
 dat_tmp$tag_recaps = dat_tmp$tag_recaps %>% mutate(fleet = if_else(fleet == 13 & year >= 213, 24, fleet)) # LL4
@@ -752,7 +732,7 @@ dat_tmp$tag_recaps = dat_tmp$tag_recaps %>% mutate(fleet = if_else(fleet == 13 &
 ctl_tmp$Block_Design[[1]][4] = 349
 ctl_tmp$Block_Design[[4]][4] = 349
 ctl_tmp$Q_options$fleet = ctl_tmp$Q_options$fleet + 3
-ctl_tmp$Q_options$link_info = ctl_tmp$Q_options$link_info + 3
+ctl_tmp$Q_options$link_info[2:4] = ctl_tmp$Q_options$link_info[2:4] + 3
 ctl_tmp$size_selex_types = ctl_tmp$size_selex_types %>% add_row(ctl_tmp$size_selex_types[c(7, 10, 13), ], .after = 21)
 ctl_tmp$age_selex_types = ctl_tmp$age_selex_types %>% add_row(ctl_tmp$age_selex_types[c(7, 10, 13), ], .after = 21)
 ctl_tmp$age_selex_types$Pattern[c(7,13)] = 20 # double normal
@@ -793,7 +773,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -813,10 +793,10 @@ start_tmp = SS_readstarter(file = file.path(tmp_dir_rm2, 'starter.ss'))
 # Config def:
 config_name = '19_TwoBlockCPUE'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Modify data file
-dat_tmp$Nfleets = dat_tmp$Nfleet + 3 # fisheries and indices
+dat_tmp$Nfleets = dat_tmp$Nfleets + 3 # fisheries and indices
 base_LL_names = dat_tmp$fleetinfo$fleetname[c(25,26,28)]
 dat_tmp$fleetinfo$fleetname[c(25,26,28)] = paste0(base_LL_names, '_P2000')
 dat_tmp$fleetinfo = dat_tmp$fleetinfo %>% add_row(data.frame(type = 3, surveytiming = 1, area = c(1,2,4), 
@@ -825,9 +805,9 @@ dat_tmp$fleetinfo = dat_tmp$fleetinfo %>% add_row(data.frame(type = 3, surveytim
 dat_tmp$fleetnames = dat_tmp$fleetinfo$fleetname
 # start from qtr = 213 (2000) to change fleet
 dat_tmp$CPUEinfo = dat_tmp$CPUEinfo %>% add_row(data.frame(fleet = 29:31, units = 0, errtype = 0, SD_report = 0))
-dat_tmp$CPUE = dat_tmp$CPUE %>% mutate(fleet = if_else(fleet == 25 & year >= 213, 29, fleet)) # LL1b
-dat_tmp$CPUE = dat_tmp$CPUE %>% mutate(fleet = if_else(fleet == 26 & year >= 213, 30, fleet)) # LL2
-dat_tmp$CPUE = dat_tmp$CPUE %>% mutate(fleet = if_else(fleet == 28 & year >= 213, 31, fleet)) # LL4
+dat_tmp$CPUE = dat_tmp$CPUE %>% mutate(index = if_else(index == 25 & year >= 213, 29, index)) # LL1b
+dat_tmp$CPUE = dat_tmp$CPUE %>% mutate(index = if_else(index == 26 & year >= 213, 30, index)) # LL2
+dat_tmp$CPUE = dat_tmp$CPUE %>% mutate(index = if_else(index == 28 & year >= 213, 31, index)) # LL4
 dat_tmp$len_info = dat_tmp$len_info %>% add_row(dat_tmp$len_info[c(25, 26, 28), ])
 
 # Modify control file
@@ -843,7 +823,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -865,13 +845,13 @@ start_tmp = SS_readstarter(file = file.path(tmp_dir_rm2, 'starter.ss'))
 # Config def:
 config_name = '20_Dwtag01'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Downweight tagging data
 ctl_tmp$lambdas = rbind(#data.frame(like_comp = 5, fleet = 1:16, phase = 2, value = 0, sizefreq_method = 1), # age
-  data.frame(like_comp = 15, fleet = 1:dat_1$N_tag_groups, phase = 2, value = 0.1, sizefreq_method = 1), # tag
-  data.frame(like_comp = 16, fleet = 1:dat_1$N_tag_groups, phase = 2, value = 0.1, sizefreq_method = 1), # tag negative binom
-  ctl_1$lambdas)
+  data.frame(like_comp = 15, fleet = 1:dat_tmp$N_tag_groups, phase = 2, value = 0.1, sizefreq_method = 1), # tag
+  data.frame(like_comp = 16, fleet = 1:dat_tmp$N_tag_groups, phase = 2, value = 0.1, sizefreq_method = 1), # tag negative binom
+  ctl_tmp$lambdas)
 ctl_tmp$N_lambdas = nrow(ctl_tmp$lambdas)
 
 # Write SS files:
@@ -881,7 +861,7 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
@@ -902,12 +882,12 @@ start_tmp = SS_readstarter(file = file.path(tmp_dir_rm2, 'starter.ss'))
 # Config def:
 config_name = '21_EffortCreep'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir)
+dir.create(tmp_dir, showWarnings = FALSE)
 
 # Apply effort creep 0.5%:
 cpue_dat_effcreep = apply_eff_creep(dat_tmp$CPUE, yr_col = 'year', fleet_col = 'index',
                                     cpue_col = 'obs', cv_col = 'se_log', rate = 0.005)
-cpue_dat_effcreep = cpue_dat_effcreep %>% add_column(month = 1, .after = 1)
+cpue_dat_effcreep = cpue_dat_effcreep %>% mutate(month = 1, .after = 1)
 dat_tmp$CPUE = cpue_dat_effcreep
 
 # Write SS files:
@@ -917,9 +897,8 @@ SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
 SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
 
 # Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path('code', 'ss3_win.exe'), extras = '-nohess')
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'code', 'ss3_win.exe'), extras = '-nohess')
 if(make_plots) {
   tmp_out = r4ss::SS_output(tmp_dir, covar = FALSE)
   r4ss::SS_plots(tmp_out)
 }
-
