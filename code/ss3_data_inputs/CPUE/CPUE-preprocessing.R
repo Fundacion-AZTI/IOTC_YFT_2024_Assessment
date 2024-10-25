@@ -17,7 +17,7 @@ for(k in seq_along(cpue_type)) {
 
   # Read raw data in:
   if(cpue_type[k] == 'qt') {
-    dat <- read_xlsx(file.path(shrpoint_path, 'data/raw/indices/LL/Joint_YFT_CPUE_2024.xlsx'), sheet="4 area QT", skip=1)
+    dat <- read_xlsx(file.path(shrpoint_path, 'data/raw/YFT/LL/Joint_YFT_CPUE_2024.xlsx'), sheet="4 area QT", skip=1)
     # Organize data by region:
     dat_R1 <- dat[,1:10]
     dat_R2 <- dat[,12:21]
@@ -25,7 +25,7 @@ for(k in seq_along(cpue_type)) {
     dat_R4 <- dat[,34:43]
   }
   if(cpue_type[k] == 'yr') {
-    dat <- read_xlsx(file.path(shrpoint_path, 'data/raw/indices/LL/Joint_YFT_CPUE_2024.xlsx'), sheet="4 area YR", skip=1)
+    dat <- read_xlsx(file.path(shrpoint_path, 'data/raw/YFT/LL/Joint_YFT_CPUE_2024.xlsx'), sheet="4 area YR", skip=1)
     # Organize data by region:
     dat_R1 <- dat[,1:7]
     dat_R2 <- dat[,9:17]

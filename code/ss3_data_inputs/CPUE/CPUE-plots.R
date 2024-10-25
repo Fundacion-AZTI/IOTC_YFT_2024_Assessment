@@ -38,7 +38,7 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_cpue_area', img_type)), plo
 # Free school and FOB PS CPUE --------------------------------------------------
 
 # Free school CPUE:
-cpue_dat = read.csv(file.path(shrpoint_path, 'data/raw/indices/PS FSC/2024-cpue-standardization-iotc-yft-fsc.quarter-indices.just-essentials.csv'), sep = ';')
+cpue_dat = read.csv(file.path(shrpoint_path, 'data/raw/YFT/PS FSC/2024-cpue-standardization-iotc-yft-fsc.quarter-indices.just-essentials.csv'), sep = ';')
 cpue_dat = cpue_dat %>% mutate(time = year + (quarter-1)/4)
 cpue_dat = cpue_dat %>% dplyr::rename(obs = yft_adult_rate_Mean)
 cpue_dat = cpue_dat %>% mutate(sd = obs*yft_adult_rate_cv)
@@ -53,7 +53,7 @@ p1 = ggplot(data = plot_data, aes(x = time, y = obs)) +
   xlab(NULL) + ylab("FS CPUE")
 
 # FOB CPUE:
-cpue_dat = read.csv(file.path(shrpoint_path, 'data/raw/indices/PSLS/st-GLMM_FOB.csv'))
+cpue_dat = read.csv(file.path(shrpoint_path, 'data/raw/YFT/PSLS/st-GLMM_FOB.csv'))
 cpue_dat = cpue_dat %>% mutate(time = Time)
 cpue_dat = cpue_dat %>% dplyr::rename(obs = Est)
 cpue_dat = cpue_dat %>% mutate(sd = SE)
@@ -83,7 +83,7 @@ cpue_ll = cpue_ll %>% dplyr::filter(fleet == 22) %>% mutate(area = '1b') %>% mut
 cpue_ll$obs = cpue_ll$obs/mean(cpue_ll$obs) # rescale
 
 # Free school CPUE:
-cpue_fs = read.csv(file.path(shrpoint_path, 'data/raw/indices/PS FSC/2024-cpue-standardization-iotc-yft-fsc.quarter-indices.just-essentials.csv'), sep = ';')
+cpue_fs = read.csv(file.path(shrpoint_path, 'data/raw/YFT/PS FSC/2024-cpue-standardization-iotc-yft-fsc.quarter-indices.just-essentials.csv'), sep = ';')
 cpue_fs = cpue_fs %>% mutate(time = year + (quarter-1)/4) %>% dplyr::rename(obs = yft_adult_rate_Mean) %>% 
                 mutate(sd = obs*yft_adult_rate_cv, type = 'FS CPUE')
 cpue_fs$obs = cpue_fs$obs/mean(cpue_fs$obs) # rescale

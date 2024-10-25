@@ -31,7 +31,7 @@ base_fore$Forecast = -1 # dont do forecast for now
 # -------------------------------------------------------------------------
 # Start implementing AGG configurations ---------------------------------------
 
-# 1: catch + cpue + length + caal ------------------------------------------------
+# 1: catch + cpue + length  ------------------------------------------------
 
 config_name = '1_base'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
@@ -44,7 +44,7 @@ fore_1 = base_fore
 start_1 = base_start
 
 # Turn off age and tag:
-ctl_1$lambdas = rbind(#data.frame(like_comp = 5, fleet = 1:16, phase = 2, value = 0, sizefreq_method = 1), # age
+ctl_1$lambdas = rbind(data.frame(like_comp = 5, fleet = 1:dat_1$Nfleet, phase = 2, value = 0, sizefreq_method = 1), # age
                       data.frame(like_comp = 15, fleet = 1:dat_1$N_tag_groups, phase = 2, value = 0, sizefreq_method = 1), # tag
                       data.frame(like_comp = 16, fleet = 1:dat_1$N_tag_groups, phase = 2, value = 0, sizefreq_method = 1), # tag negative binom
                       ctl_1$lambdas)
