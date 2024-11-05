@@ -6,7 +6,7 @@
 library(r4ss)
 library(ss3diags)
 
-wd <- "D:/OneDrive - AZTI/General - IOTC_YFT_2024/models/retrospectives_ref_models/models"
+wd <- "D:/OneDrive - AZTI/General - IOTC_YFT_2024/models/FinalGrid"
 setwd(wd)
 
 #setwd("C:/Users/henni/Dropbox/YFT_IO")
@@ -15,23 +15,23 @@ setwd(wd)
 # load ss outputs
 #--------------------------------------
 
-Model = "4_Dwtag01"
+Model = "21_SplitCPUE_tag1_EC1_h0.8"
 nm <- Model
 output.dir <- paste0(nm,"/plotsDiag")
 
-readss3 = FALSE
+readss3 = TRUE
 covar =FALSE # Not available for Annual model
 if(readss3==TRUE){
-mod =  ss3rep=SS_output(dir=Model,covar=covar,ncol=1000,forecast=FALSE)
+mod =  ss3rep=SS_output(dir=paste0(Model),covar=covar,forecast=FALSE)
 # Adjust retro steps here
-subdirs = paste0("retrospectives/retro",c(0,-seq(4,20,4))) # Difine SS3 model folders
+subdirs = paste0("retros/retro",c(0,-seq(4,20,4))) # Difine SS3 model folders
 # Compile models
 retroModels <- SSgetoutput(dirvec=file.path(getwd(),Model,subdirs),getcovar=FALSE,forecast=FALSE)
 # Summarize outputs
 retros <- SSsummarize(retroModels)
 # Adjust model names here
 #dir.create(file.path(getwd(),"Results"),showWarnings = F)
-save(mod,retros,file = paste0("Results/",Model,".rdata"))
+save(mod,retros,file = paste0(Model,"/Results/",Model,".rdata"))
 } else {
   load(paste0("Results/",Model,".rdata"))
 }
@@ -67,7 +67,7 @@ pwidth = 8
 pheight = 6
 res=300
 windows(width=pwidth,height=pheight)
-sspar(mfrow=c(2,2),labs=T,plot.cex=1)
+sspar(mfrow=c(3,3),labs=T,plot.cex=1)
 SSplotRunstest(out,subplots = "cpue",add=T)
 mtext("Year",side=1,outer=T,cex=1,line=-0.8)
 dev.print(jpeg,paste0(output.dir,"/",plname,".jpg"), width = pwidth, height = pheight, res = res, units = "in")
@@ -112,42 +112,42 @@ dev.print(jpeg,paste0(output.dir,"/",plname,".jpg"), width = pwidth, height = ph
 #mtext("Eastern IO")
 
 
-plname = "YFT_RMSE by region"
-pwidth = 8
-pheight = 6
-res=300
-windows(width=pwidth,height=pheight)
-sspar(mfrow=c(2,2),plot.cex = 0.7)
-SSplotJABBAres(out,indexselect = c(1,4),add=T,cex.main = 0.8)
-mtext("Northern IO")
-SSplotJABBAres(out,indexselect = c(2,3),add=T,cex.main = 0.8)
-mtext("Southern IO")
-SSplotJABBAres(out,indexselect = c(1,2),add=T,cex.main = 0.8)
-mtext("Western IO")
-SSplotJABBAres(out,indexselect = c(3,4),add=T,cex.main = 0.8)
-mtext("Eastern IO")
-mtext("Year",side=1,outer=T,cex=1,line=-0.8)
-
-dev.print(jpeg,paste0(output.dir,"/",plname,".jpg"), width = pwidth, height = pheight, res = res, units = "in")
-
-#two block cpue
 # plname = "YFT_RMSE by region"
 # pwidth = 8
 # pheight = 6
 # res=300
 # windows(width=pwidth,height=pheight)
 # sspar(mfrow=c(2,2),plot.cex = 0.7)
-# SSplotJABBAres(out,indexselect = c(1,4,5,7),add=T,cex.main = 0.8)
+# SSplotJABBAres(out,indexselect = c(1,4),add=T,cex.main = 0.8)
 # mtext("Northern IO")
-# SSplotJABBAres(out,indexselect = c(2,3,6),add=T,cex.main = 0.8)
+# SSplotJABBAres(out,indexselect = c(2,3),add=T,cex.main = 0.8)
 # mtext("Southern IO")
-# SSplotJABBAres(out,indexselect = c(1,2,5,6),add=T,cex.main = 0.8)
+# SSplotJABBAres(out,indexselect = c(1,2),add=T,cex.main = 0.8)
 # mtext("Western IO")
-# SSplotJABBAres(out,indexselect = c(3,4,7),add=T,cex.main = 0.8)
+# SSplotJABBAres(out,indexselect = c(3,4),add=T,cex.main = 0.8)
 # mtext("Eastern IO")
 # mtext("Year",side=1,outer=T,cex=1,line=-0.8)
 # 
 # dev.print(jpeg,paste0(output.dir,"/",plname,".jpg"), width = pwidth, height = pheight, res = res, units = "in")
+
+#two block cpue
+ plname = "YFT_RMSE by region"
+pwidth = 8
+pheight = 6
+res=300
+windows(width=pwidth,height=pheight)
+sspar(mfrow=c(2,2),plot.cex = 0.7)
+SSplotJABBAres(out,indexselect = c(1,4,5,7),add=T,cex.main = 0.8)
+mtext("Northern IO")
+SSplotJABBAres(out,indexselect = c(2,3,6),add=T,cex.main = 0.8)
+mtext("Southern IO")
+SSplotJABBAres(out,indexselect = c(1,2,5,6),add=T,cex.main = 0.8)
+mtext("Western IO")
+SSplotJABBAres(out,indexselect = c(3,4,7),add=T,cex.main = 0.8)
+mtext("Eastern IO")
+mtext("Year",side=1,outer=T,cex=1,line=-0.8)
+
+dev.print(jpeg,paste0(output.dir,"/",plname,".jpg"), width = pwidth, height = pheight, res = res, units = "in")
 
 
 # if(covar==TRUE){

@@ -2849,7 +2849,7 @@ summary(dat_1$CPUE)
  
  
  
- 
+ #.........................................................
  #### Remove bias correction last years #####
  
  config_name = '23B_BCR1'
@@ -2885,4 +2885,1131 @@ summary(dat_1$CPUE)
  
  # Run model:
  r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ 
+ #### sensitivity last 8 rec dev #####
+ 
+ config_name = '23_Last8recdev_RemLC_PS_B300'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ #
+ start_1$init_values_src <- 0
+ #
+
+ dat_1$lencomp <- base_dat$lencomp[!(base_dat$lencomp$year>300 & base_dat$lencomp$fleet %in% c(8,17,20)),]
+ write.csv(dat_1$lencomp,file="test.csv")
+ # Write SS files:
+ file.copy(file.path(shrpoint_path, SS_base, 'ss3.par'), file.path(tmp_dir, 'ss3.par'))
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ 
+ 
+ #......................................
+ 
+ 
+ ##### EFFORT CREEP  ####
+ 
+ #.................................................
+ 
+ 
+ config_name = '22_TwoBlockCPUE_min'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/MinLKL/2_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss_new'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ #
+ start_1$init_values_src <- 0
+ 
+ dat_1$Nfleets <- 31
+ newfleets <- base_dat$fleetinfo[base_dat$fleetinfo$fleetname %in% base_dat$fleetinfo$fleetname[c(25,26,28)],]
+ newfleets$fleetname <- c("29_CPUE_LL_1b_A2000","30_CPUE_LL_2_A2000","31_CPUE_LL_4_A2000")
+ row.names(newfleets) <- c("29","30","31")
+ 
+ #fleetinfo
+ 
+ dat_1$fleetinfo$fleetname[c(25,26,28)] <- paste0(c(25,26,28),"_CPUE_",c("LL_1b","LL_2","LL_4"),"_P2000")
+ 
+ dat_1$fleetinfo <- rbind(base_dat$fleetinfo[1:24,],
+                          dat_1$fleetinfo[25:28,],
+                          newfleets)
+ 
+ row.names(dat_1$fleetinfo)[29:31] <- as.character(29:31)
+ #fleetinfo1
+ 
+ newfleets <- dat_1$fleetinfo1[,c(25,26,28)]
+ names(newfleets)<- dat_1$fleetinfo$fleetname[29:31]
+ 
+ dat_1$fleetinfo1 <- cbind( base_dat$fleetinfo1[,1:28],newfleets)
+ names(dat_1$fleetinfo1) <- dat_1$fleetinfo$fleetname
+ 
+ 
+ 
+ #fleetinfo2
+ 
+ newfleets <- dat_1$fleetinfo2[,c(25,26,28)]
+ names(newfleets)<- dat_1$fleetinfo$fleetname[c(29:31)]
+ 
+ dat_1$fleetinfo2 <- cbind(base_dat$fleetinfo2[,1:28],
+                           newfleets)
+ names(dat_1$fleetinfo2) <- dat_1$fleetinfo$fleetname
+ 
+ 
+ #cpue
+ CPUEinfonew <- base_dat$CPUEinfo[c(25,26,28),]
+ CPUEinfonew$fleet <- 29:31
+ row.names(CPUEinfonew) <- dat_1$fleetinfo$fleetname[29:31]
+ 
+ #CPUEinfonew2 <- base_dat$CPUEinfo[22:25,]
+ #CPUEinfonew2$fleet <- 25:28
+ 
+ dat_1$CPUEinfo<- rbind(base_dat$CPUEinfo[1:28,],
+                        CPUEinfonew)
+ row.names(dat_1$CPUEinfo) <- dat_1$fleetinfo$fleetname
+ 
+ dat_1$CPUE$index[dat_1$CPUE$index==25 & dat_1$CPUE$year>=213] <- 29
+ dat_1$CPUE$index[dat_1$CPUE$index==26  & dat_1$CPUE$year>=213] <- 30
+ dat_1$CPUE$index[dat_1$CPUE$index==28  & dat_1$CPUE$year>=213] <- 31
+ 
+ #len_info
+ 
+ newfleets <- base_dat$len_info[c(25,26,28),]
+ row.names(newfleets) <- dat_1$fleetinfo$fleetname[29:31]
+ row.names(base_dat$len_info)
+ dat_1$len_info<- rbind(base_dat$len_info, newfleets) 
+ row.names(dat_1$len_info) <- dat_1$fleetinfo$fleetname
+ 
+ 
+ 
+ #CONTROL
+ 
+ #Q_options
+ newfleets <- base_ctl$Q_options[2:4,]
+ newfleets$fleet <- 29:31
+ ctl_1$Q_options <- rbind(base_ctl$Q_options[1:4,],
+                          newfleets)
+ # ctl_1$Q_options$fleet <- c(25:28)
+ #ctl_1$Q_options$link_info[2:4] <- 25
+ row.names(ctl_1$Q_options) <- dat_1$fleetinfo$fleetname[25:31]
+ #Q_parms
+ newfleets <- ctl_1$Q_parms[2:4,]
+ ctl_1$Q_parms <- rbind(base_ctl$Q_parms, newfleets)
+ row.names(ctl_1$Q_parms) <- paste0("LNQ_base_",dat_1$fleetinfo$fleetname[25:31], "(",25:31,")")
+ ctl_1$Q_parms
+ 
+ #size_selex_types
+ newfleets <-rbind(base_ctl$size_selex_types[c(25,26,28),])
+ row.names(newfleets) <- dat_1$fleetinfo$fleetname[c(29:31)]
+ 
+ ctl_1$size_selex_types <- rbind(base_ctl$size_selex_types,
+                                 newfleets)
+ row.names(ctl_1$size_selex_types) <- dat_1$fleetinfo$fleetname
+ 
+ #age_selex_types
+ 
+ newfleets <-rbind(base_ctl$age_selex_types[c(25,26,28),])
+ row.names(newfleets) <- dat_1$fleetinfo$fleetname[c(29:31)]
+ 
+ ctl_1$age_selex_types <- rbind(base_ctl$age_selex_types,
+                                newfleets)
+ row.names(ctl_1$age_selex_types) <- dat_1$fleetinfo$fleetname
+ ctl_1$age_selex_types[29:31,4] <- c(22,23,24)
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ #### EFFORT CREEP MIN ####
+ 
+ config_name = '19_EffortCreep_min'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/MinLKL/2_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ cpue_dat_effcreep = apply_eff_creep(base_dat$CPUE, yr_col = 'year', fleet_col = 'index',
+                                     cpue_col = 'obs', cv_col = 'se_log', rate = 0.005)
+ cpue_dat_effcreep$month <- 1
+ dat_1$CPUE <-  cpue_dat_effcreep[,c(1,5,2:4)]
+ summary(dat_1$CPUE)
+ 
+ 
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ 
+ 
+ #...................................................
+ #### CPUE_LL_yr ####
+ 
+ config_name = '24_CPUE_LL_yr'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/MinLKL/2_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ cpue_df = read.csv(file.path(shrpoint_path, SS_data, 'cpue-ll-yr.csv'))
+ 
+ cpue_df$index[cpue_df$index==25] <- 28
+ cpue_df$index[cpue_df$index==24] <- 27
+ cpue_df$index[cpue_df$index==23] <- 26
+ cpue_df$index[cpue_df$index==22] <- 25
+ cpue_df$se_log <- 0.2
+ dat_1$CPUE <- cpue_df
+ 
+ 
+ 
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ 
+ 
+ 
+ #...................................................
+ #### CPUE_LL_yr_constant ####
+ 
+ config_name = '24_CPUE_LL_yr_const'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/MinLKL/2_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ cpue_df = read.csv(file.path(shrpoint_path, SS_data, 'cpue-ll-yr-constant.csv'))
+ 
+ cpue_df$index[cpue_df$index==25] <- 28
+ cpue_df$index[cpue_df$index==24] <- 27
+ cpue_df$index[cpue_df$index==23] <- 26
+ cpue_df$index[cpue_df$index==22] <- 25
+ cpue_df$se_log <- 0.2
+ dat_1$CPUE <- cpue_df
+ 
+ 
+ 
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ 
+ 
+ #...................................................
+ #### CPUE_LL_yr_seasonal ####
+ 
+ config_name = '24_CPUE_LL_yr_seas'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/MinLKL/2_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ cpue_df = read.csv(file.path(shrpoint_path, SS_data, 'cpue-ll-yr-seasonal.csv'))
+ 
+ cpue_df$index[cpue_df$index==25] <- 28
+ cpue_df$index[cpue_df$index==24] <- 27
+ cpue_df$index[cpue_df$index==23] <- 26
+ cpue_df$index[cpue_df$index==22] <- 25
+ cpue_df$se_log <- 0.2
+ dat_1$CPUE <- cpue_df
+ 
+ 
+ 
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ 
+ 
+ #...................................................
+ #### CPUE_LL_qt_avgyr ####
+ 
+ config_name = '24_CPUE_LL_qt_avgyr'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/MinLKL/2_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ cpue_df = read.csv(file.path(shrpoint_path, SS_data, 'cpue-ll-qt-avgyr.csv'))
+ 
+ cpue_df$index[cpue_df$index==25] <- 28
+ cpue_df$index[cpue_df$index==24] <- 27
+ cpue_df$index[cpue_df$index==23] <- 26
+ cpue_df$index[cpue_df$index==22] <- 25
+ cpue_df$se_log <- 0.2
+ dat_1$CPUE <- cpue_df
+ 
+ 
+ 
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ 
+ 
+ #...................................................
+ #### CPUE_LL_qt_avgyr ####
+ 
+ config_name = '24_CPUE_LL_qt_seas1'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/MinLKL/2_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ cpue_df = read.csv(file.path(shrpoint_path, SS_data, 'cpue-ll-qt-seas1.csv'))
+ 
+ cpue_df$index[cpue_df$index==25] <- 28
+ cpue_df$index[cpue_df$index==24] <- 27
+ cpue_df$index[cpue_df$index==23] <- 26
+ cpue_df$index[cpue_df$index==22] <- 25
+ cpue_df$se_log <- 0.2
+ dat_1$CPUE <- cpue_df
+ 
+ 
+ 
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ 
+ 
+ #...................................................
+ #### CPUE_LL_yr_seasonal ####
+ 
+ config_name = '22_TwoBlockCPUE_min_LL_yr_seas'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/22_TwoBlockCPUE_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ cpue_df = read.csv(file.path(shrpoint_path, SS_data, 'cpue-ll-yr-seasonal.csv'))
+ 
+ cpue_df$index[cpue_df$index==25 & cpue_df$year>=213] <- 31
+ cpue_df$index[cpue_df$index==25 & cpue_df$year<213] <- 28
+ cpue_df$index[cpue_df$index==24] <- 27
+ cpue_df$index[cpue_df$index==23 & cpue_df$year>=213] <- 30
+ cpue_df$index[cpue_df$index==23 & cpue_df$year<213] <- 26
+ cpue_df$index[cpue_df$index==22 & cpue_df$year>=213] <- 29
+ cpue_df$index[cpue_df$index==22 & cpue_df$year<213] <- 25
+  cpue_df$se_log <- 0.2
+  
+ dat_1$CPUE <- cpue_df
+ 
+ 
+ write.csv(cpue_df, file="test.csv")
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ #................................................................
+ 
+ 
+ #...................................................
+ #### CPUE_LL_yr_seasonal ####
+ 
+ config_name = '24_CPUE_LL_yr_seas_R1agg'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/MinLKL/2_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ cpue_df = read.csv(file.path(shrpoint_path, SS_data, 'cpue-ll-yr-seasonal.csv'))
+ 
+ cpue_df$index[cpue_df$index==25] <- 28
+ cpue_df$index[cpue_df$index==24] <- 27
+ cpue_df$index[cpue_df$index==23] <- 26
+ cpue_df$index[cpue_df$index==22] <- 25
+ cpue_df$se_log <- 0.2
+ names(cpue_df) <- names(dat_1$CPUE)
+CPUEmod <-  rbind(dat_1$CPUE[dat_1$CPUE$index==25,],cpue_df[cpue_df$index!=25,])
+ dat_1$CPUE <- CPUEmod
+ 
+ 
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ 
+ 
+ #...................................................
+ #### CPUE_LL_yr_seasonal ####
+ 
+ config_name = '24_CPUE_LL_yr_seas_R1_R4agg'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/MinLKL/2_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ cpue_df = read.csv(file.path(shrpoint_path, SS_data, 'cpue-ll-yr-seasonal.csv'))
+ 
+ cpue_df$index[cpue_df$index==25] <- 28
+ cpue_df$index[cpue_df$index==24] <- 27
+ cpue_df$index[cpue_df$index==23] <- 26
+ cpue_df$index[cpue_df$index==22] <- 25
+ cpue_df$se_log <- 0.2
+ names(cpue_df) <- names(dat_1$CPUE)
+ CPUEmod <-  rbind(dat_1$CPUE[dat_1$CPUE$index==25,],cpue_df[cpue_df$index %in% c(26,27),],dat_1$CPUE[dat_1$CPUE$index==28,])
+ dat_1$CPUE <- CPUEmod
+ 
+ 
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ 
+ #### CPUE_LL_yr_seasonal ####
+ 
+ config_name = '24_CPUE_LL_yr_seas_R1_R4_R3agg'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/MinLKL/2_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ cpue_df = read.csv(file.path(shrpoint_path, SS_data, 'cpue-ll-yr-seasonal.csv'))
+ 
+ cpue_df$index[cpue_df$index==25] <- 28
+ cpue_df$index[cpue_df$index==24] <- 27
+ cpue_df$index[cpue_df$index==23] <- 26
+ cpue_df$index[cpue_df$index==22] <- 25
+ cpue_df$se_log <- 0.2
+ names(cpue_df) <- names(dat_1$CPUE)
+ CPUEmod <-  rbind(dat_1$CPUE[dat_1$CPUE$index==25,],cpue_df[cpue_df$index==26,],dat_1$CPUE[dat_1$CPUE$index %in% c(27,28),])
+ dat_1$CPUE <- CPUEmod
+ 
+ 
+ 
+ # Write SS files:
+ 
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ 
+ ### Update catch data until 2022 --------------------------------------------
+ 
+ config_name = 'SENSITIVITIES/RM2_Indonesia'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ #base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ catch_df = read.csv(file.path(shrpoint_path, SS_data, 'catch-IDN.csv'))
+ 
+ #catch
+ 
+
+ catch_df$fleet[catch_df$fleet==13 & catch_df$year>=213] <- 24
+ catch_df$fleet[catch_df$fleet==10 & catch_df$year>=213] <- 23
+ catch_df$fleet[catch_df$index==7 & catch_df$year>=213] <- 22
+
+ dat_1$catch<- catch_df[-c(2:21),]
+ #sum(dat_1$catch$catch)
+ 
+ # Write SS files:
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
+ 
+ ##### REMOVE BB FLEETS ####
+ 
+ 
+ #### sensitivity last 8 rec dev #####
+ 
+ config_name = '23_Last8recdev_RemLC_PS_BB_B300'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ #
+ start_1$init_values_src <- 0
+ #
+ 
+ dat_1$lencomp <- base_dat$lencomp[!(base_dat$lencomp$year>300 & base_dat$lencomp$fleet %in% c(5,8,17,20)),]
+
+ # Write SS files:
+ file.copy(file.path(shrpoint_path, SS_base, 'ss3.par'), file.path(tmp_dir, 'ss3.par'))
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ #---------------------------------------------------------------
+ #### sensitivity last 8 rec dev #####
+ 
+ config_name = '23_Last8recdev_RemLC_PS_BB_TR_B300'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ #
+ start_1$init_values_src <- 0
+ #
+ 
+ dat_1$lencomp <- base_dat$lencomp[!(base_dat$lencomp$year>300 & base_dat$lencomp$fleet %in% c(5,8,9,17,20)),]
+ 
+ # Write SS files:
+ file.copy(file.path(shrpoint_path, SS_base, 'ss3.par'), file.path(tmp_dir, 'ss3.par'))
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ #........................................................
+ 
+ config_name = '23_Last8recdev_RemLC_PS_BB_TR_GI_B300'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ #
+ start_1$init_values_src <- 0
+ #
+ 
+ dat_1$lencomp <- base_dat$lencomp[!(base_dat$lencomp$year>300 & base_dat$lencomp$fleet %in% c(1,5,8,9,17,20)),]
+ 
+ # Write SS files:
+ file.copy(file.path(shrpoint_path, SS_base, 'ss3.par'), file.path(tmp_dir, 'ss3.par'))
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ # Run model:
+ r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+ 
+ 
+ #........................................................
+ 
+ config_name = '23_Last8recdev_RemLC_PS_BB_TR_GI_PS_B300'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ #
+ start_1$init_values_src <- 0
+ #
+ 
+ dat_1$lencomp <- base_dat$lencomp[!(base_dat$lencomp$year>300 & base_dat$lencomp$fleet %in% c(1,5,6,8,9,16,17,19,20)),]
+ 
+ # Write SS files:
+ file.copy(file.path(shrpoint_path, SS_base, 'ss3.par'), file.path(tmp_dir, 'ss3.par'))
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ 
+ #........................................................
+ 
+ config_name = '23_Last8recdev_RemLC_PS_BB_TR_GI_PS_OT_LL_B300'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ #
+ start_1$init_values_src <- 0
+ #
+ 
+ dat_1$lencomp <- base_dat$lencomp[!(base_dat$lencomp$year>300 & base_dat$lencomp$fleet %in% c(1,5,6,8,9,12,16,17,19,20,21,22,23)),]
+ 
+ # Write SS files:
+ file.copy(file.path(shrpoint_path, SS_base, 'ss3.par'), file.path(tmp_dir, 'ss3.par'))
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ 
+ 
+ 
+ #........................................................
+ 
+ config_name = '23_Last8recdev_RemLC_PS_BB_TR_GI_PS_OT_B300'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ #
+ start_1$init_values_src <- 0
+ #
+ 
+ dat_1$lencomp <- base_dat$lencomp[!(base_dat$lencomp$year>300 & base_dat$lencomp$fleet %in% c(1,5,6,8,9,12,16,17,19,20)),]
+ 
+ # Write SS files:
+ file.copy(file.path(shrpoint_path, SS_base, 'ss3.par'), file.path(tmp_dir, 'ss3.par'))
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ #........................................................
+ 
+ config_name = '23_Last8recdev_RemLC_PS_BB_TR_GI_PS_OT_LL_B300'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ #
+ start_1$init_values_src <- 0
+ #
+ 
+ dat_1$lencomp <- base_dat$lencomp[!(base_dat$lencomp$year>300 & base_dat$lencomp$fleet %in% c(1,5,6,8,9,12,16,17,19,20,21,22,23,13)),]
+ 
+ # Write SS files:
+ file.copy(file.path(shrpoint_path, SS_base, 'ss3.par'), file.path(tmp_dir, 'ss3.par'))
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ 
+ 
+ 
+ #........................................................
+ 
+ config_name = '23_Last8recdev_RemLC_LL_4_14_B300'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ #
+ start_1$init_values_src <- 0
+ #
+ 
+ dat_1$lencomp <- base_dat$lencomp[!(base_dat$lencomp$year>300 & base_dat$lencomp$fleet %in% c(1,4,14,5,6,8,9,12,16,17,19,20,21,22,23,13)),]
+ 
+ # Write SS files:
+ file.copy(file.path(shrpoint_path, SS_base, 'ss3.par'), file.path(tmp_dir, 'ss3.par'))
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ ####
+ config_name = '23_Last8recdev_RemLC_LL_B300_fl2_4_11'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ #
+ start_1$init_values_src <- 0
+ #
+ 
+ dat_1$lencomp <- base_dat$lencomp[!(base_dat$lencomp$year>300 & base_dat$lencomp$fleet %in% c(1,2,5,6,8,9,12,16,17,19,20,21,22,23,13)),]
+ 
+ # Write SS files:
+ file.copy(file.path(shrpoint_path, SS_base, 'ss3.par'), file.path(tmp_dir, 'ss3.par'))
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ 
+ 
+ 
+ #........................................................
+ 
+ config_name = '23_Last8recdev_RemLC_LL_4_11_14_B300'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ #
+ start_1$init_values_src <- 0
+ #
+ 
+ dat_1$lencomp <- base_dat$lencomp[!(base_dat$lencomp$year>300 & base_dat$lencomp$fleet %in% c(1,4,14,5,6,8,9,12,16,17,19,20,21,22,23,13)),]
+ 
+ # Write SS files:
+ file.copy(file.path(shrpoint_path, SS_base, 'ss3.par'), file.path(tmp_dir, 'ss3.par'))
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+ 
+ 
+ 
+ 
+ ####
+ config_name = '23_Last8recdev_RemLC_LL_B300_fl2_4_11_14_24'
+ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+ dir.create(tmp_dir)
+ 
+ 
+ # Temporary files:
+ # SS base files path (in Sharepoint):
+ SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN_min'
+ # Temporary files:
+ 
+ base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+ base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+ base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+ 
+ 
+ dat_1 = base_dat
+ ctl_1 = base_ctl
+ fore_1 = base_fore
+ start_1 = base_start
+ 
+ #
+ start_1$init_values_src <- 0
+ #
+ 
+ dat_1$lencomp <- base_dat$lencomp[!(base_dat$lencomp$year>300 & base_dat$lencomp$fleet %in% c(4,11,14,24,1,2,5,6,8,9,12,16,17,19,20,21,22,23,13)),]
+ 
+ # Write SS files:
+ file.copy(file.path(shrpoint_path, SS_base, 'ss3.par'), file.path(tmp_dir, 'ss3.par'))
+ SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+ SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+ SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
  

@@ -23,7 +23,7 @@ fish_names = gsub(pattern = ' ', replacement = '_', x = fish_names)
 fleetnames <- paste0(1:25,"_",c(fish_names,c(fish_names[c(7,10,11,13)])))
 
 
-scs <- "16_LLsplit_LL1b_LL4_DN"
+scs <- "16_LLsplit_LL1b_LL4_DN_min"
 scs_wd <-paste0("models/update/",scs)
 
   sc_ss3 <- SS_output(dir=scs_wd,  repfile = "Report.sso",covar=T)
@@ -51,7 +51,7 @@ scs_wd <-paste0("models/update/",scs)
     scale_color_manual(values = c('red', 'black')) +xlim(1972,2024)+
     xlab("Year")+ ylab("Log(RecDev)")+
     theme_fun()
-  SavePlot("RecDev_RefModel",15,10)
+  SavePlot("RecDev_RefModel_FINAL",10,5)
   
   #### ABSOLUTE VALUES OF RECRUITMENT ####
   
@@ -69,79 +69,84 @@ scs_wd <-paste0("models/update/",scs)
     geom_line(lty=3,size=0.6,color="blue") +
     geom_point(size=1.3,color="blue") +
     xlim(1950,2024)+
-    xlab("Year")+ ylab("Age-0 recruits (1.000s")+
+    xlab("Year")+ ylab("Age-0 recruits (1.000s)")+
     theme_fun()
-  SavePlot("Reecruitment",15,10)
+  SavePlot("Recruitment_FINAL",10,5)
   
   
-  #### PLOT RECRUITMENT DEVIATES between areas ####
-  
-  sub_scs <- scs[1]
-  sub_scs_wd <-paste0("models/update/",sub_scs)
-  # mod_sum <- aggregate.ssMod(sub_scs, sub_scs_wd)
-  
-  debug(SSplotTimeseries)
-  SSplotTimeseries(sc_ss3,subplot=13)
-  ### Comparison f
-  df <- sc_ss3$RecrDistpars
-  df$RecDev <- "MainRecDev"
-  df$RecDev[df$Yr>300] <- "LateRecDev"
-  
-  sub_df_long  <- df %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))%>%
-    mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))%>% subset(Yr<309)
-  
-  ggplot(sub_df_long,aes(x=yrqtr,y=dev,group =RecDev,colour = RecDev))+geom_point( size = 2)+
-    geom_line( )+xlim(1972,2025)+
-    geom_hline(yintercept=0,lty=2)+
-    scale_color_discrete(labels=levels(sub_df_long$RecDev))+
-    xlab("Year")+ ylab("Log(RecDev)")+theme_fun()
-  
-  
-  #....................................................
-  
-  #### PLOT RECRUITMENT DEVIATES between areas ####
-  
-  load(list=ls(),file="RecDev_byArea.RData")
-  
-  
-  load("RecDev_byArea.RData")
-  
-  yrvalsOriginal <- yrvals
-  yrvals <- qtr2yearqtr(yrvals,1950,13)
-  ts0 <- ts
-  ts[["YrSeas"]]<- qtr2yearqtr(ts0[["YrSeas"]],1950,13)
-  
-  
-  iseas<-1
-  s <- birthseas[iseas]
-  mycol <- seascols[iseas]
-  mytype <- "o"
-  points(ts[["YrSeas"]][plot1], yvals[plot1], 
-         pch = 19, col = mycol)
-  lines(ts[["YrSeas"]][plot2], yvals[plot2], type = mytype, 
-        col = mycol)
-  points(ts[["YrSeas"]][plot3], yvals[plot3], 
-         pch = 19, col = mycol)
-  
-  load(file="RecDev_byArea_2.RData")
-  ts1 <- ts
-  ts[["YrSeas"]]<- qtr2yearqtr(ts1[["YrSeas"]],1950,13)
-  
-  points(ts[["YrSeas"]][plot1], yvals[plot1], 
-         pch = 19, col = mycol)
-  lines(ts[["YrSeas"]][plot2], yvals[plot2], 
-        type = mytype, col = mycol)
-  points(ts[["YrSeas"]][plot3], yvals[plot3], 
-         pch = 19, col = mycol)
-  
-  
-  if (nareas > 1 & subplot %in% c(2, 3, 5, 6, 8, 10, 12, 
-                                  13)) {
-    legend("topright", legend = areanames[areas[c(1,4)]], lty = 1, 
-           pch = 1, col = areacols[areas[c(1,4)]], bty = "n")
-  }
-  
-  SavePlot("RecDev_by_Area",15,10)
+ #  #### PLOT RECRUITMENT DEVIATES between areas ####
+ #  
+ #  sub_scs <- scs[1]
+ #  sub_scs_wd <-paste0("models/update/",sub_scs)
+ # 
+ #  debug(SSplotTimeseries)
+ # 
+ #  SSplotTimeseries(sc_ss3,subplot=13)
+ #  debug(biofunc)
+ #  ### Comparison f
+ #  df <- sc_ss3$RecrDistpars
+ #  df$RecDev <- "MainRecDev"
+ #  df$RecDev[df$Yr>300] <- "LateRecDev"
+ #  
+ #  sub_df_long  <- df %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))%>%
+ #    mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))%>% subset(Yr<309)
+ #  
+ #  ggplot(sub_df_long,aes(x=yrqtr,y=dev,group =RecDev,colour = RecDev))+geom_point( size = 2)+
+ #    geom_line( )+xlim(1972,2025)+
+ #    geom_hline(yintercept=0,lty=2)+
+ #    scale_color_discrete(labels=levels(sub_df_long$RecDev))+
+ #    xlab("Year")+ ylab("Log(RecDev)")+theme_fun()
+ #  
+ #  
+ #  #....................................................
+ #  
+ #  #### PLOT RECRUITMENT DEVIATES between areas ####
+ #  
+ # # load(list=ls(),file="RecDev_byArea.RData")
+ #  
+ #  
+ #  load("output/figures/LLdividedModel/RecDev_byArea.RData")
+ #  
+ #  yrvalsOriginal <- yrvals
+ #  yrvals <- qtr2yearqtr(yrvals,1950,13)
+ #  ts0 <- ts
+ #  ts[["YrSeas"]]<- qtr2yearqtr(ts0[["YrSeas"]],1950,13)
+ #  plot(yrvals, yvals[plot1 | plot2 | plot3], type = "n", 
+ #       xlab = xlab, ylim = c(0, 1.05 * ymax), yaxs = "i", 
+ #       ylab = ylab, main = ifelse(mainTitle, main, ""), 
+ #       cex.main = cex.main)
+ #  
+ #  
+ #  iseas<-1
+ #  s <- birthseas[iseas]
+ #  mycol <- seascols[iseas]
+ #  mytype <- "o"
+ #  points(ts[["YrSeas"]][plot1], yvals[plot1], 
+ #         pch = 19, col = mycol)
+ #  lines(ts[["YrSeas"]][plot2], yvals[plot2], type = mytype, 
+ #        col = mycol)
+ #  points(ts[["YrSeas"]][plot3], yvals[plot3], 
+ #         pch = 19, col = mycol)
+ #  
+ #  load(file="output/figures/LLdividedModel/RecDev_byArea_2.RData")
+ #  ts1 <- ts
+ #  ts[["YrSeas"]]<- qtr2yearqtr(ts1[["YrSeas"]],1950,13)
+ #  
+ #  points(ts[["YrSeas"]][plot1], yvals[plot1], 
+ #         pch = 19, col = mycol)
+ #  lines(ts[["YrSeas"]][plot2], yvals[plot2], 
+ #        type = mytype, col = mycol)
+ #  points(ts[["YrSeas"]][plot3], yvals[plot3], 
+ #         pch = 19, col = mycol)
+ #  
+ #  
+ #  if (nareas > 1 & subplot %in% c(2, 3, 5, 6, 8, 10, 12, 
+ #                                  13)) {
+ #    legend("topright", legend = areanames[areas[c(1,4)]], lty = 1, 
+ #           pch = 1, col = areacols[areas[c(1,4)]], bty = "n")
+ #  }
+ #  
+ #  SavePlot("RecDev_by_Area",10,5)
   
   
   #### PFISHING MORTALITY BY REGION ####
@@ -289,12 +294,15 @@ df$Yrss <- qtr2yearqtr(df$Yr,1950,13) # sub_df_long  <- df %>%   mutate(yrqtr=qt
   #   scale_color_discrete(labels=levels(sub_df_long$RecDev))+
   xlab("Age")+ ylab("F_at_age")+theme_fun()
   
-  dfnewAll<- aggregate(F_at_age~ Age,data= dfnewArea,sum)
-  ggplot( dfnewAll,aes(x=Age,y=F_at_age))+geom_point( size = 2)+
-    geom_line( )+
-    #   scale_color_discrete(labels=levels(sub_df_long$RecDev))+
-    xlab("Age")+ ylab("F_at_age")+theme_fun()
-  SavePlot("F_at_Age",15,10)
+  SavePlot("F_at_Age_BYarea",10,5)
+  
+  #NOT CORRECT F by area can not be aggregated
+  # dfnewAll<- aggregate(F_at_age~ Age,data= dfnewArea,sum)
+  # ggplot( dfnewAll,aes(x=Age,y=F_at_age))+geom_point( size = 2)+
+  #   geom_line( )+
+  #   #   scale_color_discrete(labels=levels(sub_df_long$RecDev))+
+  #   xlab("Age")+ ylab("F_at_age")+theme_fun()
+  # SavePlot("F_at_Age",15,10)
   
   
   #### CPUE OBSERVED VS PREDICTED ####
