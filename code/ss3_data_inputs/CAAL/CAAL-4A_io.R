@@ -51,7 +51,12 @@ work = data	%>%
   mutate(Yr = yearqtr2qtr(Year,Quarter,1950,13), .before = 'Year') %>% 
   spread(Age_int, n_fish, fill = 0) %>% ungroup() %>%
   select(-c('Year', 'Quarter')) %>% mutate(HighBin = LowBin, .after = 'LowBin') %>%
-  mutate(Nsamp = rowSums(across(`0`:`28`)), .before = `0`)
+  mutate(Nsamp = rowSums(across(`0`:`40`)), .before = `0`)
+
+# Format for ss3:
+caal_df = work %>% dplyr::rename(FltSvy = ModelFleet, Lbin_lo = LowBin, Lbin_hi = HighBin)
+caal_df = caal_df %>% mutate(Seas = 1, .after = Yr)
+caal_df = caal_df %>% mutate(Gender = 0, Part = 0, Ageerr = 1, .after = FltSvy)
 
 # Save SS catch input
-write.csv(work, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'caal.csv'), row.names = FALSE)
+write.csv(caal_df, file = file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'caal.csv'), row.names = FALSE)

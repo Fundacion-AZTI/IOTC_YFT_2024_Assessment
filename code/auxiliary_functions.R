@@ -1,10 +1,17 @@
 # -------------------------------------------------------------------------
 # Transform from SS model time step (quarter) to year-quarter:
-ssts2yq = function(qtr,initial = 1950, base = 13) {
+ssts2yq = function(qtr, initial = 1950, base = 13) {
   yearqtr = (qtr-base)/4+initial+1/8
   return(yearqtr)
 }
 
+# -------------------------------------------------------------------------
+# Transform from SS model time step (quarter) to quarter:
+ssts2q = function(qtr, initial = 1950, base = 13) {
+  yearqtr = ssts2yq(qtr)
+  out = floor((yearqtr %% 1)*12/3) + 1
+  return(out)
+}
 
 # -------------------------------------------------------------------------
 # Add land map to a existing sf plot:
@@ -243,6 +250,12 @@ trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 Paste <- function (..., sep = "")  paste(..., sep = sep)
 Sum <- function (..., na.rm = T)  sum(..., na.rm = na.rm)
 
+# Function to calculate proportion per quarter for CPUE:
+prop_quarter_cpue = function(x) {
+  out_df = x
+  out_df$obs = out_df$obs/mean(out_df$obs) # mean 1
+  return(out_df)
+}
 
 # -------------------------------------------------------------------------
 # Filter 4A LF data for SS input:
@@ -587,6 +600,10 @@ maturity_Zudaire = function(len_vec, alpha = -9.25, beta = 0.091) {
   mat = exp(alpha + beta*len_vec)/(1+exp(alpha + beta*len_vec))
   return(mat)
 }
+
+# -------------------------------------------------------------------------
+# K vector to approximate Farley et al 2023 in SS3
+k_vec_Farley = c(0.48, 0.467, 1.376, 1.263, rep(1, times = 9))
 
 
 # -------------------------------------------------------------------------

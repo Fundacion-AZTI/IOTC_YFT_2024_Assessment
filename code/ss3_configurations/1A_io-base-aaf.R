@@ -9,8 +9,8 @@ spat_config = '1A_io'
 spat_subconfig = 'aaf'
 
 # SS base files path (in Sharepoint):
-# Make sure to use some updated 4A model using Farley's growth:
-SS_base = 'models/update/sensitivities_15/15_recDev2021_cv_CAAL_growth'
+# Use RM2 (16_LLsplit_LL1b_LL4_DN_min)
+SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN_min'
 
 # SS input data path (in Sharepoint):
 SS_data = file.path('data/ss3_inputs', spat_config, spat_subconfig)
@@ -27,26 +27,11 @@ base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss
 # -------------------------------------------------------------------------
 # Read data inputs:
 
-# Catch:
-catch_df = read_csv(file.path(shrpoint_path, SS_data, 'catch.csv'))
-catch_df = catch_df[,c('qtr', 'Quarter', 'ModelFleet', 'Catch')]
-colnames(catch_df) = c('year', 'seas', 'fleet', 'catch')
-catch_df = catch_df %>% mutate(catch_se = 0.01, seas = 1)
-catch_df = bind_rows(tibble::tibble(year = -999, seas = 1, fleet = sort(unique(catch_df$fleet)), catch = 0, catch_se = 0.01),
-                     catch_df)
-
 # CPUE:
-cpue_df = read_csv(file.path(shrpoint_path, SS_data, 'cpue.csv'))
-
-# Size:
-size_df = read_csv(file.path(shrpoint_path, SS_data, 'size-original.csv'))
-size_df = size_df %>% dplyr::rename(FltSvy = ModelFleet)
+cpue_df = read_csv(file.path(shrpoint_path, SS_data, 'cpue-ll-qt.csv'))
 
 # CAAL:
 caal_df = read_csv(file.path(shrpoint_path, SS_data, 'caal.csv'))
-caal_df = caal_df %>% dplyr::rename(FltSvy = ModelFleet, Lbin_lo = LowBin, Lbin_hi = HighBin)
-caal_df = caal_df %>% mutate(Seas = 1, .after = Yr)
-caal_df = caal_df %>% mutate(Gender = 0, Part = 0, Ageerr = 1, .after = FltSvy)
 
 # Tagging:
 tagrel_df = read_csv(file.path(shrpoint_path, SS_data, 'tag-release.csv'))
@@ -56,41 +41,54 @@ tagrec_df = read_csv(file.path(shrpoint_path, SS_data, 'tag-recapture.csv'))
 # -------------------------------------------------------------------------
 # Adapt from 4A to 1A-aaf:
 
+# Starter:
+new_start = base_start
+new_start$init_values_src = 0 # control
+
 # Data file:
 new_dat = base_dat
 # Get fishery names:
 fish_names = get_fisheries('4A_io')$fleet_name
 # Basic info:
-new_dat$endyr = 308
-new_dat$Nfleet = length(fish_names) # fisheries
-new_dat$Nfleets = new_dat$Nfleet + 1 # 21 + 2
+new_dat$Nfleets = new_dat$Nfleet + 1 # only one index
 new_dat$N_areas = 1
 # Fleet info:
 tmp_dat = base_dat$fleetinfo
 tmp_dat = tmp_dat[1:new_dat$Nfleets,]
-tmp_dat$fleetname = c(fish_names, 'LLi_1')
+tmp_dat$fleetname[nrow(tmp_dat)] = c('CPUE_LL')
 tmp_dat$area = 1
 new_dat$fleetinfo = tmp_dat
-# Catch df:
-new_dat$catch = as.data.frame(catch_df)
+# Catch df: same as base model
 # CPUE info:
 tmp_dat = base_dat$CPUEinfo
 tmp_dat = tmp_dat[1:new_dat$Nfleets,]
 new_dat$CPUEinfo = tmp_dat
 # CPUE df:
+cpue_df$index = new_dat$Nfleets
 new_dat$CPUE = as.data.frame(cpue_df)
 # Len info:
 tmp_dat = base_dat$len_info
 tmp_dat = tmp_dat[1:new_dat$Nfleets,]
 new_dat$len_info = tmp_dat
-# Len df
-new_dat$lencomp = as.data.frame(size_df)
-new_dat$lencomp$Nsamp = scales::rescale(new_dat$lencomp$Nsamp*-1, to = c(1,5)) # check this later
+# Len df: same as base model
 # Age info:
-tmp_dat = base_dat$age_info
-tmp_dat = tmp_dat[1:new_dat$Nfleets,]
+tmp_dat = new_dat$len_info
+tmp_dat$mintailcomp = -1
+tmp_dat$addtocomp = 1e-07
+tmp_dat$minsamplesize = 0.001
 new_dat$age_info = tmp_dat
+new_dat$agebin_vector = as.numeric(colnames(caal_df %>% select(`0`:`40`)))
+new_dat$N_agebins = ncol(caal_df %>% select(`0`:`40`))
+new_dat$N_ageerror_definitions = 1
+tmp_dat = matrix(NA, nrow = 2, ncol = new_dat$Nages + 1)
+tmp_dat[1,] = 0:new_dat$Nages + 0.5
+tmp_dat[2,] = 0.001
+new_dat$ageerror = as.data.frame(tmp_dat)
+new_dat$Lbin_method = 3
 # caal df:
+caal_df = caal_df %>% mutate(FltSvy = if_else(FltSvy == 7 & Yr >= 213, 22, FltSvy)) # LL1b
+caal_df = caal_df %>% mutate(FltSvy = if_else(FltSvy == 10 & Yr >= 213, 23, FltSvy)) # LL2
+caal_df = caal_df %>% mutate(FltSvy = if_else(FltSvy == 13 & Yr >= 213, 24, FltSvy)) # LL4
 new_dat$agecomp = as.data.frame(caal_df)
 # tag info:
 new_dat$N_tag_groups = max(tagrel_df$tag)
@@ -98,6 +96,9 @@ new_dat$N_recap_events = nrow(tagrec_df)
 # tag df:
 new_dat$tag_releases = as.data.frame(tagrel_df)
 new_dat$tag_recaps = as.data.frame(tagrec_df)
+new_dat$tag_recaps = new_dat$tag_recaps %>% mutate(fleet = if_else(fleet == 7 & yr >= 213, 22, fleet)) # LL1b
+new_dat$tag_recaps = new_dat$tag_recaps %>% mutate(fleet = if_else(fleet == 10 & yr >= 213, 23, fleet)) # LL2
+new_dat$tag_recaps = new_dat$tag_recaps %>% mutate(fleet = if_else(fleet == 13 & yr >= 213, 24, fleet)) # LL4
 
 # Control file:
 new_ctl = base_ctl
@@ -110,7 +111,6 @@ new_ctl$MG_parms = new_ctl$MG_parms %>% dplyr::filter(!row_number() %in% c(25:26
 # Q params:
 tmp_ctl = base_ctl$Q_options
 tmp_ctl = tmp_ctl[1, ]
-tmp_ctl$fleet = new_dat$Nfleet + 1
 new_ctl$Q_options = tmp_ctl
 new_ctl$Q_parms = base_ctl$Q_parms[1, ]
 # Selectivity info:
@@ -132,7 +132,7 @@ new_ctl$TG_overdispersion = base_ctl$TG_overdispersion[1:new_dat$N_tag_groups, ]
 
 # -------------------------------------------------------------------------
 # Write adapted files:
-SS_writestarter(mylist = base_start, dir = file.path(shrpoint_path, 'models/base', spat_config, spat_subconfig), overwrite = TRUE)
+SS_writestarter(mylist = new_start, dir = file.path(shrpoint_path, 'models/base', spat_config, spat_subconfig), overwrite = TRUE)
 SS_writeforecast(mylist = base_fore, dir = file.path(shrpoint_path, 'models/base', spat_config, spat_subconfig), overwrite = TRUE)
 SS_writedat(datlist = new_dat, outfile = file.path(shrpoint_path, 'models/base', spat_config, spat_subconfig, 'data.ss'), overwrite = TRUE)
 SS_writectl(ctllist = new_ctl, outfile = file.path(shrpoint_path, 'models/base', spat_config, spat_subconfig, 'control.ss'), overwrite = TRUE)

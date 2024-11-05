@@ -45,9 +45,10 @@ age_data = age_data %>% mutate(LowBin = cut(FL, breaks = seq(from = 10, to = 198
 table(age_data$LowBin)
 
 # Create Age column:
-age_data = age_data %>% mutate(Age_1 = if_else(Age >= 7, 7, Age)) # specify 7 to fish older than 7
-age_data = age_data %>% mutate(Age_int = cut(Age_1, breaks = seq(from = 0, to = 7.25, by = 0.25), right = FALSE,
-                                             labels = seq(from = 0, to = 28, by = 1)))
+max_age = 10 # plus group in model
+age_data = age_data %>% mutate(Age_1 = if_else(Age >= max_age, max_age, Age)) # specify 7 to fish older than 7
+age_data = age_data %>% mutate(Age_int = cut(Age_1, breaks = seq(from = 0, to = max_age + 0.25, by = 0.25), right = FALSE,
+                                             labels = seq(from = 0, to = max_age*4, by = 1)))
 table(age_data$Age_int)
 sum(is.na(age_data$Age_int))
 

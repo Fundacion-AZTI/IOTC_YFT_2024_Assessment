@@ -38,7 +38,7 @@ ggsave(file.path(shrpoint_path, plot_dir, paste0('ts_cpue_area', img_type)), plo
 # Free school and FOB PS CPUE --------------------------------------------------
 
 # Free school CPUE:
-cpue_dat = read.csv(file.path(shrpoint_path, 'data/raw/indices/PS FSC/2024-cpue-standardization-iotc-yft-fsc.quarter-indices.just-essentials.csv'), sep = ';')
+cpue_dat = read.csv(file.path(shrpoint_path, 'data/raw/YFT/PS FSC/2024-cpue-standardization-iotc-yft-fsc.quarter-indices.just-essentials.csv'), sep = ';')
 cpue_dat = cpue_dat %>% mutate(time = year + (quarter-1)/4)
 cpue_dat = cpue_dat %>% dplyr::rename(obs = yft_adult_rate_Mean)
 cpue_dat = cpue_dat %>% mutate(sd = obs*yft_adult_rate_cv)
@@ -53,7 +53,7 @@ p1 = ggplot(data = plot_data, aes(x = time, y = obs)) +
   xlab(NULL) + ylab("FS CPUE")
 
 # FOB CPUE:
-cpue_dat = read.csv(file.path(shrpoint_path, 'data/raw/indices/PSLS/st-GLMM_FOB.csv'))
+cpue_dat = read.csv(file.path(shrpoint_path, 'data/raw/YFT/PSLS/st-GLMM_FOB.csv'))
 cpue_dat = cpue_dat %>% mutate(time = Time)
 cpue_dat = cpue_dat %>% dplyr::rename(obs = Est)
 cpue_dat = cpue_dat %>% mutate(sd = SE)
@@ -83,7 +83,7 @@ cpue_ll = cpue_ll %>% dplyr::filter(fleet == 22) %>% mutate(area = '1b') %>% mut
 cpue_ll$obs = cpue_ll$obs/mean(cpue_ll$obs) # rescale
 
 # Free school CPUE:
-cpue_fs = read.csv(file.path(shrpoint_path, 'data/raw/indices/PS FSC/2024-cpue-standardization-iotc-yft-fsc.quarter-indices.just-essentials.csv'), sep = ';')
+cpue_fs = read.csv(file.path(shrpoint_path, 'data/raw/YFT/PS FSC/2024-cpue-standardization-iotc-yft-fsc.quarter-indices.just-essentials.csv'), sep = ';')
 cpue_fs = cpue_fs %>% mutate(time = year + (quarter-1)/4) %>% dplyr::rename(obs = yft_adult_rate_Mean) %>% 
                 mutate(sd = obs*yft_adult_rate_cv, type = 'FS CPUE')
 cpue_fs$obs = cpue_fs$obs/mean(cpue_fs$obs) # rescale
@@ -170,3 +170,42 @@ p1 = ggplot(data = merged_cpue, aes(x = time, y = obs)) +
   facet_wrap( ~ fleet_name, ncol = 2)
 ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_cpue_effcreep_1prc', img_type)), plot = p1,
        width = img_width, height = 170, units = 'mm', dpi = img_res)
+
+
+# -------------------------------------------------------------------------
+
+# Compare yearly vs quartely LL indices
+
+# Read data:
+dat_qt1 = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'cpue-ll-qt.csv'))
+dat_qt2 = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'cpue-ll-qt-seas1.csv'))
+dat_qt3 = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'cpue-ll-qt-avgyr.csv'))
+dat_yr1 = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'cpue-ll-yr.csv'))
+dat_yr2 = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'cpue-ll-yr-constant.csv'))
+dat_yr3 = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'cpue-ll-yr-seasonal.csv'))
+
+# Merge:
+plot_data = rbind(dat_qt1 %>% mutate(type = 'Qt', tstep = 'In model: every quarter'), 
+                  dat_qt2 %>% mutate(type = 'Qt-season1', tstep = 'In model: only quarter 1'),
+                  dat_qt3 %>% mutate(type = 'Qt-averageYr', tstep = 'In model: only quarter 1'),
+                  dat_yr1 %>% mutate(type = 'Yr', tstep = 'In model: only quarter 1'), 
+                  dat_yr2 %>% mutate(type = 'Yr-constant', tstep = 'In model: every quarter'),
+                  dat_yr3 %>% mutate(type = 'Yr-seasonal', tstep = 'In model: every quarter'))
+plot_data = plot_data %>% mutate(fleet_name = if_else(index == 22, 'LL 1b', 
+                                                      if_else(index == 23, 'LL 2', 
+                                                                  if_else(index == 24, 'LL 3', 'LL 4'))))
+plot_data$time = ssts2yq(plot_data$year) # transform to yr-qt
+
+# Make plot:
+p1 = ggplot(data = plot_data, aes(x = time, y = obs)) +
+  geom_line(aes(color = type)) +
+  ylab("Scaled CPUE") + xlab(NULL) +
+  scale_color_brewer(palette = "Dark2") +
+  theme(axis.text.y = element_text(angle = 90, vjust = 0.5, hjust=0.5),
+        legend.position = 'bottom') +
+  scale_y_continuous(breaks = breaks_extended(3)) +
+  guides(color = guide_legend(title = NULL, nrow = 1)) +
+  facet_grid(fleet_name ~ tstep, scales = 'free_y')
+ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_cpue_treatment', img_type)), plot = p1,
+       width = img_width*0.8, height = 150, units = 'mm', dpi = img_res)
+
