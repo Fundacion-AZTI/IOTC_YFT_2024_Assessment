@@ -220,6 +220,7 @@ for(j in 1:n_groups) {
 # -------------------------------------------------------------------------
 # Catch + Nsamp + grid covered by CPC
 # Create folder
+do_filter = FALSE
 dir.create(file.path(shrpoint_path, plot_dir, 'exploration/catch_len_samp_cpc'))
 
 # Color vector:
@@ -233,7 +234,7 @@ colnames(catch_grid)[c(6)] = c('FisheryCode')
 # Find 4A fisheries catch:
 catch_grid$Area = get_4Aarea_from_lonlat(catch_grid$Lon, catch_grid$Lat)
 catch_grid = create_4Aarea_cols(catch_grid)
-catch_df = catch_grid %>% dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName))
+catch_df = catch_grid %>% dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName, sep = '_'))
 catch_df = catch_df %>% group_by(Grid_id, Year, Fleet, ModelFishery) %>% summarise(Catch = sum(Ncmtfish))
 
 # Read merge size data:
@@ -244,8 +245,8 @@ colnames(size_grid)[c(6)] = c('FisheryCode')
 # Find 4A fisheries catch:
 size_grid$Area = get_4Aarea_from_lonlat(size_grid$Lon, size_grid$Lat)
 size_grid = create_4Aarea_cols(size_grid)
-size_df = size_grid %>% dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName))
-size_df = filter_LF_4A_type2(size_df, filter_nsamp = FALSE) # to make sure we use same data as in the assessment
+size_df = size_grid %>% dplyr::mutate(ModelFishery = paste(FisheryCode, AssessmentAreaName, sep = '_'))
+if(do_filter) size_df = filter_LF_4A_type2(size_df, filter_nsamp = FALSE) # to make sure we use same data as in the assessment
 size_df = size_df %>% group_by(Grid_id, Year, Fleet, ModelFishery) %>% summarise(Nsamp = sum(Nfish_samp))
 
 # Find SS fisheries:
