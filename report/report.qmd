@@ -828,7 +828,7 @@ knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_catch.png
 
 ```{r}
 #| label: fig-size-grid
-#| fig-cap: "Spatial distribution of size compositions per fishery group. The size compositions were aggregated over time. Fishery group codes are described in @tbl-fishery-codes."
+#| fig-cap: "Spatial distribution of size compositions per fishery group. The size compositions were aggregated over time from 2010 to 2023. Fishery group codes are described in @tbl-fishery-codes."
 #| fig-align: center
 knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "size_grid.png"), rel_path = FALSE)
 ```

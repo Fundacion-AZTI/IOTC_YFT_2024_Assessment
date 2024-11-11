@@ -19,17 +19,17 @@ ModelFisheries = fish_info$fleet_name
 
 # -------------------------------------------------------------------------
 # First, make sure that the ORIG dataset provided at annual scale is the same as the base database:
-# IDN_ori = read_xlsx(file.path(shrpoint_path, 'data/raw', "IDN_raised_data_ORIG_20241017.xlsx"))
-# IDN_ori = IDN_ori %>% select(-c(`Grand Total`))
-# IDN_ori = gather(IDN_ori, 'Year', 'Catch', `1950`:`2023`)
-# IDN_ori = IDN_ori %>% mutate(Year = as.integer(Year)) %>% 
-#             dplyr::rename(Gear = GEAR_CODE, SchoolType = CATCH_SCHOOL_TYPE_CODE, FisheryCode = FISHERY_CODE)
-# # Remove ART IND types:
-# IDN_ori = IDN_ori %>% group_by(Year, Gear, FisheryCode, SchoolType) %>% summarise(Catch = sum(Catch)) %>% 
-#             na.omit # remove missing information
-# # Order dataframe to compare:
-# IDN_ori = IDN_ori %>% arrange(Year, Gear, FisheryCode, SchoolType)
-# 
+IDN_ori = read_xlsx(file.path(shrpoint_path, 'data/raw', "IDN_raised_data_ORIG_20241017.xlsx"))
+IDN_ori = IDN_ori %>% select(-c(`Grand Total`))
+IDN_ori = gather(IDN_ori, 'Year', 'Catch', `1950`:`2023`)
+IDN_ori = IDN_ori %>% mutate(Year = as.integer(Year)) %>%
+            dplyr::rename(Gear = GEAR_CODE, SchoolType = CATCH_SCHOOL_TYPE_CODE, FisheryCode = FISHERY_CODE)
+# Remove ART IND types:
+IDN_ori = IDN_ori %>% group_by(Year, Gear, FisheryCode, SchoolType) %>% summarise(Catch = sum(Catch)) %>%
+            na.omit # remove missing information
+# Order dataframe to compare:
+IDN_ori = IDN_ori %>% arrange(Year, Gear, FisheryCode, SchoolType)
+
 # # Read traditional CE data after preprocessing:
 # Data = read.csv(file.path(shrpoint_path, 'data/processed', 'catch_grid.csv'))
 # IDN_base = Data %>% dplyr::filter(Fleet == 'IDN') %>% 
@@ -61,7 +61,7 @@ p1 = ggplot(data = plot_data, aes(x = Year, y = Catch, color = type)) +
   theme(legend.position = c(0.85, 0.15),
         axis.text.y = element_text(angle = 90, vjust = 0.5, hjust=0.5)) +
   guides(color = guide_legend(title = NULL)) +
-  facet_wrap(~FisheryCode) 
+  facet_wrap(~FisheryCode, scales = 'free_y') 
 ggsave(file.path(shrpoint_path, plot_dir, paste0('IDN_catch_comp', img_type)), 
        plot = p1, width = img_width, height = 170, units = 'mm', dpi = img_res)
 
@@ -139,6 +139,6 @@ p1 = ggplot(data = merged_catch, aes(x = time, y = catch*1e-03)) +
         legend.position = c(0.6, 0.05)) +
   scale_y_continuous(breaks = breaks_extended(3)) +
   guides(color = guide_legend(title = NULL)) +
-  facet_wrap( ~ fleet_name, scales = 'free_y', ncol = 4)
+  facet_wrap( ~ fleet_name, scales = 'free_y', ncol = 5)
 ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_catch_IDN', img_type)), plot = p1,
-       width = img_width, height = 200, units = 'mm', dpi = img_res)
+       width = img_width, height = 160, units = 'mm', dpi = img_res)

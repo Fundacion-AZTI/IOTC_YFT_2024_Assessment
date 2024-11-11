@@ -94,6 +94,8 @@ p3 = ggplot(size_dat, aes(x = time2, y = fleet_name, fill = fisherycode)) +
   theme_classic() +
   theme(legend.position = 'none') +
   ggtitle(label = 'Simple aggregation')
+ggsave(file.path(shrpoint_path, plot_dir, paste0('rq_size_simpagg', img_type)), plot = p3,
+       width = img_width, height = 130, units = 'mm', dpi = img_res)
 
 # Catch raised aggregation
 size_dat = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'size-cwp55.csv'))
@@ -190,7 +192,7 @@ colnames(size_grid)[c(6)] = c('FisheryCode')
 size_grid$Area = get_4Aarea_from_lonlat(size_grid$Lon, size_grid$Lat)
 size_grid = create_4Aarea_cols(size_grid)
 
-filter_data = size_grid %>% dplyr::filter(Year >= 1980) # relevant period
+filter_data = size_grid %>% dplyr::filter(Year >= 2010) # relevant period
 plot_data = filter_data %>% group_by(Grid_id, Lat, Lon, FisheryCode) %>% dplyr::summarise_at(L_labels,list(Sum))
 plot_data = plot_data %>% dplyr::filter(Lat >= min(yLim), Lat <= max(yLim), 
                                         Lon >= min(xLim), Lon <= max(xLim))
