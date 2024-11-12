@@ -31,11 +31,11 @@ for(i in 1:length(grid)){
     dir.create(dirFore.j2)
 
     tmp_dir= paste0("projections/",nms[i])
-   # tmp_dir <- "Fore0.6_test"
+    tmp_dir <- "fore-scale20_0.6"
     ss3 <- SS_output(dir=tmp_dir,  forecast=TRUE,repfile = paste0("Reportc",forecatch[j],".sso"))
-   # ss3 <- SS_output(dir=tmp_dir,  forecast=TRUE)
- #  SS_plots(ss3,uncertainty=T,png=T,forecastplot=T, fitrange = TRUE, 
- #           parrows=5, parcols=4, showdev= TRUE)
+    ss3 <- SS_output(dir=tmp_dir,  forecast=TRUE)
+   SS_plots(ss3,uncertainty=T,png=T,forecastplot=T, fitrange = TRUE, 
+            parrows=5, parcols=4, showdev= TRUE)
     mod.sum[[j]] <- ss3
     SSplotCatch(mod.sum[[j]],forecastplot = TRUE,
                 print=FALSE,plotdir=paste0("output/figures/PROJECTIONS/",grid[i],paste0("/Fore",forecatch[j])),

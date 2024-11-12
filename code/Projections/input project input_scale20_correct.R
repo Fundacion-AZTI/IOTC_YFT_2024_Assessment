@@ -167,12 +167,12 @@ kbPrj=transform(kbprjs,tac)
 k2sm =  kbPrj 
 nTAC = length(tacs)
 
-my.path <- "projectionMVN_scale20"
+my.path <- "projections/projectionMVN_scale20_correct"
 # Prepare matrices using library(kob)
 t.=ddply(k2sm,.(year,tac), with, kobe:::smry(stock,harvest))
 t.[t.$tac==0.9,]
 Par = list(mfrow=c(2,1),mar = c(2, 3, 1., 0.1),oma=c(1.5, 0, 0, 6), mgp =c(2.,0.5,0), tck = -0.02,cex=0.8)
-png(file = paste0("projectionMVN_scale20","/ProjFLR_",assessment,".png"), width = 5, height = 5, 
+png(file = paste0("projections/projectionMVN_scale20_correct","/ProjFLR_",assessment,".png"), width = 5, height = 5, 
     res = 200, units = "in")
 par(Par)
 # Stock

@@ -117,7 +117,7 @@ for (i in 1:length(grid)){
 
 
 ####RUN PROJECTIONS   #####
-nms <- list.dirs(path="projections/FinalGrid",full.names=FALSE)[-c(1,2,3,4,5)]
+#nms <- list.dirs(path="projections/FinalGrid",full.names=FALSE)[-c(1,2,3,4,5)]
 nms
 grid <- nms
 
