@@ -9,8 +9,8 @@ spat_config = '2A_io'
 spat_subconfig = 'aaf'
 
 # SS base files path (in Sharepoint):
-# Use RM2 (16_LLsplit_LL1b_LL4_DN_min)
-SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN_min'
+# Use RM3 
+SS_base = 'models/RefModels/3_SplitCPUE_tag1_EC0_h08/nohess'
 
 # SS input data path (in Sharepoint):
 SS_data = file.path('data/ss3_inputs', spat_config, spat_subconfig)
@@ -49,25 +49,28 @@ new_dat = base_dat
 # Get fishery names:
 fish_names = get_fisheries('4A_io')$fleet_name
 # Basic info:
-new_dat$Nfleets = new_dat$Nfleet + 2 # only two indices
+new_dat$Nfleets = new_dat$Nfleet + 4 # four indices
 new_dat$N_areas = 2
 # Fleet info:
 tmp_dat = base_dat$fleetinfo
-tmp_dat = tmp_dat[1:new_dat$Nfleets,]
-tmp_dat$fleetname[(new_dat$Nfleet+1):nrow(tmp_dat)] = c('CPUE_LL1', 'CPUE_LL2')
+tmp_dat = tmp_dat[c(1:new_dat$Nfleet, 25, 28, 29, 31),]
+tmp_dat$fleetname[(new_dat$Nfleet+1):nrow(tmp_dat)] = c('CPUE_LL1_A2000', 'CPUE_LL2_A2000', 'CPUE_LL1_P2000', 'CPUE_LL2_P2000')
 tmp_dat = tmp_dat %>% mutate(area = if_else(area > 2, 2, 1))
 new_dat$fleetinfo = tmp_dat
 # Catch df:
 # CPUE info:
 tmp_dat = base_dat$CPUEinfo
-tmp_dat = tmp_dat[1:new_dat$Nfleets,]
+tmp_dat = tmp_dat[c(1:new_dat$Nfleet, 25, 28, 29, 31),]
+tmp_dat$fleet = 1:new_dat$Nfleets
 new_dat$CPUEinfo = tmp_dat
 # CPUE df:
-cpue_df$index = cpue_df$index + 8
-new_dat$CPUE = as.data.frame(cpue_df)
+tmp_cpue = cpue_df
+tmp_cpue$index = tmp_cpue$index + 8
+tmp_cpue = tmp_cpue %>% mutate(index = if_else(year >= 213, index + 2, index)) # LL1b
+new_dat$CPUE = as.data.frame(tmp_cpue)
 # Len info:
 tmp_dat = base_dat$len_info
-tmp_dat = tmp_dat[1:new_dat$Nfleets,]
+tmp_dat = tmp_dat[c(1:new_dat$Nfleet, 25, 28, 29, 31),]
 new_dat$len_info = tmp_dat
 # Len df
 # Age info:
@@ -109,16 +112,16 @@ new_ctl$MG_parms = new_ctl$MG_parms %>% dplyr::filter(!row_number() %in% c(30:31
 # change F_method later
 # Q params:
 tmp_ctl = base_ctl$Q_options
-tmp_ctl = tmp_ctl[1:2, ]
+tmp_ctl = tmp_ctl[c(1,4,5,7), ]
+tmp_ctl$fleet = 25:28
 new_ctl$Q_options = tmp_ctl
-new_ctl$Q_parms = base_ctl$Q_parms[1:2, ]
+new_ctl$Q_parms = base_ctl$Q_parms[c(1,4,5,7), ]
 # Selectivity info:
 tmp_ctl = base_ctl$size_selex_types
-tmp_ctl = tmp_ctl[1:new_dat$Nfleets,]
+tmp_ctl = tmp_ctl[c(1:new_dat$Nfleet, 25, 28, 29, 31),]
 new_ctl$size_selex_types = tmp_ctl
 tmp_ctl = base_ctl$age_selex_types
-tmp_ctl = tmp_ctl[1:new_dat$Nfleets,]
-tmp_ctl$Special[nrow(tmp_ctl)] = 13 # use LL4 selex
+tmp_ctl = tmp_ctl[c(1:new_dat$Nfleet, 25, 28, 29, 31),]
 new_ctl$age_selex_types = tmp_ctl
 # Tagging params:
 new_ctl$TG_Loss_init = base_ctl$TG_Loss_init[1:new_dat$N_tag_groups, ]

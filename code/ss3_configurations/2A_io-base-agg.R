@@ -9,8 +9,8 @@ spat_config = '2A_io'
 spat_subconfig = 'agg'
 
 # SS base files path (in Sharepoint):
-# Use RM2 (16_LLsplit_LL1b_LL4_DN_min)
-SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN_min'
+# Use RM3 
+SS_base = 'models/RefModels/3_SplitCPUE_tag1_EC0_h08/nohess'
 
 # SS input data path (in Sharepoint):
 SS_data = file.path('data/ss3_inputs', spat_config, spat_subconfig)
@@ -55,14 +55,14 @@ new_dat = base_dat
 # Get fishery names:
 fish_names = get_fisheries(spat_config)$fleet_name
 # Basic info:
-new_dat$endyr = 308
 new_dat$Nfleet = length(fish_names) + 2 # fisheries + LL1A2000 + LL2A2000
-new_dat$Nfleets = new_dat$Nfleet + 2 # 16 + 2 CPUEs
+new_dat$Nfleets = new_dat$Nfleet + 4 # 4 CPUEs
 new_dat$N_areas = 2
 # Fleet info:
 tmp_dat = base_dat$fleetinfo
-tmp_dat = tmp_dat[c(1:9,13,12,14:15,19:22,24:25,28),]
-tmp_dat$fleetname = c(fish_names, 'LL_1b_A2000', 'LL_2_A2000', 'CPUE_LL_1', 'CPUE_LL_2')
+tmp_dat = tmp_dat[c(1:9,13,12,14:15,19:22,24:25,28:29,31),]
+tmp_dat$fleetname = c(fish_names, 'LL_1b_A2000', 'LL_2_A2000', 'CPUE_LL_1_P2000', 'CPUE_LL_2_P2000',
+                      'CPUE_LL_1_A2000', 'CPUE_LL_2_A2000')
 tmp_dat = tmp_dat %>% mutate(area = if_else(area > 2, 2, 1))
 new_dat$fleetinfo = tmp_dat
 # Catch df:
@@ -72,15 +72,17 @@ tmp_catch = tmp_catch %>% mutate(fleet = if_else(fleet == 10 & year >= 213, 18, 
 new_dat$catch = as.data.frame(tmp_catch)
 # CPUE info:
 tmp_dat = base_dat$CPUEinfo
-tmp_dat = tmp_dat[c(1:9,13,12,14:15,19:22,24:25,28),]
+tmp_dat = tmp_dat[c(1:9,13,12,14:15,19:22,24:25,28:29,31),]
 tmp_dat$fleet = 1:new_dat$Nfleets
 new_dat$CPUEinfo = tmp_dat
 # CPUE df:
-cpue_df$index = cpue_df$index + 2
-new_dat$CPUE = as.data.frame(cpue_df)
+tmp_cpue = cpue_df
+tmp_cpue$index = tmp_cpue$index + 2
+tmp_cpue = tmp_cpue %>% mutate(index = if_else(year >= 213, index + 2, index)) # LL1b
+new_dat$CPUE = as.data.frame(tmp_cpue)
 # Len info:
 tmp_dat = base_dat$len_info
-tmp_dat = tmp_dat[c(1:9,13,12,14:15,19:22,24:25,28),]
+tmp_dat = tmp_dat[c(1:9,13,12,14:15,19:22,24:25,28:29,31),]
 new_dat$len_info = tmp_dat
 # Len df
 tmp_size = size_df
@@ -88,6 +90,7 @@ tmp_size = tmp_size %>% mutate(FltSvy = if_else(FltSvy == 7 & Yr >= 213, 17, Flt
 tmp_size = tmp_size %>% mutate(FltSvy = if_else(FltSvy == 10 & Yr >= 213, 18, FltSvy)) # LL2
 new_dat$lencomp = as.data.frame(tmp_size)
 new_dat$lencomp$Nsamp = ifelse(new_dat$lencomp$Nsamp <= 2, 5, 2)
+new_dat$lencomp$Nsamp[new_dat$lencomp$FltSvy %in% c(7,10)] = 5 # only before 2000, why?
 # Age info:
 tmp_dat = new_dat$len_info
 tmp_dat$mintailcomp = -1
@@ -125,18 +128,18 @@ new_ctl$MG_parms = new_ctl$MG_parms %>% dplyr::filter(!row_number() %in% c(30:31
 # change F_method later
 # Q params:
 tmp_ctl = base_ctl$Q_options
-tmp_ctl = tmp_ctl[c(1,4), ]
-tmp_ctl$fleet = c(19, 20)
-tmp_ctl$link_info[2] = 19
+tmp_ctl = tmp_ctl[c(1,4:5,7), ]
+tmp_ctl$fleet = 19:22
+tmp_ctl$link_info[2:4] = 19
 new_ctl$Q_options = tmp_ctl
-new_ctl$Q_parms = base_ctl$Q_parms[1:2, ]
+new_ctl$Q_parms = base_ctl$Q_parms[c(1,4:5,7), ]
 # Selectivity info:
 tmp_ctl = base_ctl$size_selex_types
-tmp_ctl = tmp_ctl[c(1:9, 13,12,14:15,19:22, 24:25, 28),]
+tmp_ctl = tmp_ctl[c(1:9,13,12,14:15,19:22,24:25,28:29,31),]
 new_ctl$size_selex_types = tmp_ctl
 tmp_ctl = base_ctl$age_selex_types
-tmp_ctl = tmp_ctl[c(1:9, 13,12,14:15,19:22, 24:25, 28),]
-tmp_ctl$Special[nrow(tmp_ctl)] = 10
+tmp_ctl = tmp_ctl[c(1:9,13,12,14:15,19:22,24:25,28:29,31),]
+tmp_ctl$Special[19:22] = c(7,10,17,18)
 new_ctl$age_selex_types = tmp_ctl
 # Selectivity parameters:
 tmp_selex = new_ctl$age_selex_parms %>% dplyr::filter(!row_number() %in% c(35:38, 61:62))

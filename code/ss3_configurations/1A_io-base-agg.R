@@ -9,8 +9,8 @@ spat_config = '1A_io'
 spat_subconfig = 'agg'
 
 # SS base files path (in Sharepoint):
-# Use RM2 (16_LLsplit_LL1b_LL4_DN_min)
-SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN_min'
+# Use RM3 
+SS_base = 'models/RefModels/3_SplitCPUE_tag1_EC0_h08/nohess'
 
 # SS input data path (in Sharepoint):
 SS_data = file.path('data/ss3_inputs', spat_config, spat_subconfig)
@@ -55,37 +55,38 @@ new_dat = base_dat
 # Get fishery names:
 fish_names = get_fisheries(spat_config)$fleet_name
 # Basic info:
-new_dat$endyr = 308
 new_dat$Nfleet = length(fish_names) + 1 # fisheries
-new_dat$Nfleets = new_dat$Nfleet + 1 # plus one CPUE
+new_dat$Nfleets = new_dat$Nfleet + 2 # plus two CPUEs: before and after 2000
 new_dat$N_areas = 1
 # Fleet info:
 tmp_dat = base_dat$fleetinfo
-tmp_dat = tmp_dat[c(1:9,12,14,21:22,25),]
-tmp_dat$fleetname = c(fish_names, 'LL_1b_A2000', 'CPUE_LL_1')
+tmp_dat = tmp_dat[c(1:9,12,14,21:22,25,29),]
+tmp_dat$fleetname = c(fish_names, 'LL_1b_A2000', 'CPUE_LL', 'CPUE_LL_A2000')
 tmp_dat$area = 1
 new_dat$fleetinfo = tmp_dat
 # Catch df:
 tmp_catch = catch_df
 tmp_catch = tmp_catch %>% mutate(fleet = if_else(fleet == 7 & year >= 213, 13, fleet)) # LL1b
-new_dat$catch = as.data.frame(catch_df)
+new_dat$catch = as.data.frame(tmp_catch)
 # CPUE info:
 tmp_dat = base_dat$CPUEinfo
-tmp_dat = tmp_dat[c(1:9,12,14,21:22,25),]
+tmp_dat = tmp_dat[c(1:9,12,14,21:22,25,29),]
 tmp_dat$fleet = 1:new_dat$Nfleets
 new_dat$CPUEinfo = tmp_dat
 # CPUE df:
-cpue_df$index = cpue_df$index + 1
-new_dat$CPUE = as.data.frame(cpue_df)
+tmp_cpue = cpue_df
+tmp_cpue = tmp_cpue %>% mutate(index = if_else(year >= 213, 15, 14)) # LL1b
+new_dat$CPUE = as.data.frame(tmp_cpue)
 # Len info:
 tmp_dat = base_dat$len_info
-tmp_dat = tmp_dat[c(1:9,12,14,21:22,25),]
+tmp_dat = tmp_dat[c(1:9,12,14,21:22,25,29),]
 new_dat$len_info = tmp_dat
 # Len df
 tmp_size = size_df
-tmp_size = tmp_size %>% mutate(FltSvy = if_else(FltSvy == 7 & Yr >= 213, 13, FltSvy)) # LL1b
+tmp_size = tmp_size %>% mutate(FltSvy = if_else(FltSvy == 7 & Yr >= 213, 13, FltSvy)) # LL1b after 2000
 new_dat$lencomp = as.data.frame(tmp_size)
 new_dat$lencomp$Nsamp = ifelse(new_dat$lencomp$Nsamp <= 2, 5, 2)
+new_dat$lencomp$Nsamp[new_dat$lencomp$FltSvy %in% c(7)] = 5 # only before 2000, why?
 # Age info:
 tmp_dat = new_dat$len_info
 tmp_dat$mintailcomp = -1
@@ -101,7 +102,7 @@ tmp_dat[2,] = 0.001
 new_dat$ageerror = as.data.frame(tmp_dat)
 new_dat$Lbin_method = 3
 # caal df:
-caal_df = caal_df %>% mutate(FltSvy = if_else(FltSvy == 7 & Yr >= 213, 13, FltSvy)) # LL1b
+caal_df = caal_df %>% mutate(FltSvy = if_else(FltSvy == 7 & Yr >= 213, 13, FltSvy)) # LL1b after 2000
 new_dat$agecomp = as.data.frame(caal_df)
 # tag info:
 new_dat$N_tag_groups = max(tagrel_df$tag)
@@ -109,7 +110,7 @@ new_dat$N_recap_events = nrow(tagrec_df)
 # tag df:
 new_dat$tag_releases = as.data.frame(tagrel_df)
 new_dat$tag_recaps = as.data.frame(tagrec_df)
-new_dat$tag_recaps = new_dat$tag_recaps %>% mutate(fleet = if_else(fleet == 7 & yr >= 213, 13, fleet)) # LL1b
+new_dat$tag_recaps = new_dat$tag_recaps %>% mutate(fleet = if_else(fleet == 7 & yr >= 213, 13, fleet)) # LL1b after 2000
 
 # Control file:
 new_ctl = base_ctl
@@ -121,16 +122,18 @@ new_ctl$MG_parms = new_ctl$MG_parms %>% dplyr::filter(!row_number() %in% c(25:26
 # change F_method later
 # Q params:
 tmp_ctl = base_ctl$Q_options
-tmp_ctl = tmp_ctl[1, ]
-tmp_ctl$fleet = 14
+tmp_ctl = tmp_ctl[c(1,5), ]
+tmp_ctl$fleet = 14:15
+tmp_ctl$link_info[2] = 14
 new_ctl$Q_options = tmp_ctl
-new_ctl$Q_parms = base_ctl$Q_parms[1, ]
+new_ctl$Q_parms = base_ctl$Q_parms[c(1,5), ]
 # Selectivity info:
 tmp_ctl = base_ctl$size_selex_types
-tmp_ctl = tmp_ctl[c(1:9,12,14,21:22,25),]
+tmp_ctl = tmp_ctl[c(1:9,12,14,21:22,25,29),]
 new_ctl$size_selex_types = tmp_ctl
 tmp_ctl = base_ctl$age_selex_types
-tmp_ctl = tmp_ctl[c(1:9,12,14,21:22,25),]
+tmp_ctl = tmp_ctl[c(1:9,12,14,21:22,25,29),]
+tmp_ctl$Special[15] = 13 # mirror LL after 2000
 new_ctl$age_selex_types = tmp_ctl
 # Selectivity parameters:
 new_ctl$age_selex_parms = new_ctl$age_selex_parms %>% dplyr::filter(!row_number() %in% c(35:38, 45:50, 61:64))

@@ -7,10 +7,13 @@ source('code/auxiliary_functions.R')
 # Run or just create folders?
 run_model = TRUE
 # Make plots?
-make_plot = TRUE
+make_plot = FALSE
 
 # Spatial configuration:
 spat_config = '1A_io'
+
+# IMPORTANT: select what spatial aggregation type want to use:
+# spat_subconfig = 'agg'
 spat_subconfig = 'aaf'
 
 # SS base files path (in Sharepoint):
@@ -45,9 +48,9 @@ start_tmp = base_start
 
 # Turn off age and tag:
 ctl_tmp$lambdas = rbind(data.frame(like_comp = 5, fleet = 1:dat_tmp$Nfleet, phase = 2, value = 0, sizefreq_method = 1), # age
-                        data.frame(like_comp = 15, fleet = 1:dat_tmp$N_tag_groups, phase = 2, value = 0, sizefreq_method = 1), # tag
-                        data.frame(like_comp = 16, fleet = 1:dat_tmp$N_tag_groups, phase = 2, value = 0, sizefreq_method = 1), # tag negative binom
-                        ctl_tmp$lambdas)
+                      data.frame(like_comp = 15, fleet = 1:dat_tmp$N_tag_groups, phase = 2, value = 0, sizefreq_method = 1), # tag
+                      data.frame(like_comp = 16, fleet = 1:dat_tmp$N_tag_groups, phase = 2, value = 0, sizefreq_method = 1), # tag negative binom
+                      ctl_tmp$lambdas)
 ctl_tmp$N_lambdas = nrow(ctl_tmp$lambdas)
 ctl_tmp$TG_Report_fleet[,7] = -6 # fix all tag params
 
@@ -66,7 +69,38 @@ if(make_plot) {
 }
 
 
-# 2: add CAAL data ------------------------------------------------------
+# 2: add tagging 0.1 -------------------------------------------------
+
+# Read previous input files:
+dat_tmp = SS_readdat(file = file.path(tmp_dir, 'data.ss'))
+ctl_tmp = SS_readctl(file = file.path(tmp_dir, 'control.ss'), datlist = dat_tmp)
+fore_tmp = SS_readforecast(file = file.path(tmp_dir, 'forecast.ss'))
+start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
+
+# Config name
+config_name = '2_addTag'
+tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+dir.create(tmp_dir, showWarnings = FALSE)
+
+# Activate tagging:
+ctl_tmp$lambdas$value[ctl_tmp$lambdas$like_comp %in% c(15,16)] = 0.1
+ctl_tmp$TG_Report_fleet = base_ctl$TG_Report_fleet # estimate tag params again
+
+# Write SS files:
+SS_writedat(dat_tmp, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+SS_writectl(ctl_tmp, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
+SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
+
+# Run model:
+if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
+# Plot results
+if(make_plot) {
+  tmp_mod = SS_output(dir = tmp_dir, covar = FALSE, forecast = FALSE)
+  SS_plots(tmp_mod)
+}
+
+# 3: add CAAL data ------------------------------------------------------
 
 # Read previous input files:
 dat_tmp = SS_readdat(file = file.path(tmp_dir, 'data.ss'))
@@ -75,7 +109,7 @@ fore_tmp = SS_readforecast(file = file.path(tmp_dir, 'forecast.ss'))
 start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
 
 # Config def
-config_name = '2_addCAAL'
+config_name = '3_addCAAL'
 tmp_dir = file.path(shrpoint_path, SS_config, config_name)
 dir.create(tmp_dir, showWarnings = FALSE)
 
@@ -95,68 +129,3 @@ if(make_plot) {
   tmp_mod = SS_output(dir = tmp_dir, covar = FALSE, forecast = FALSE)
   SS_plots(tmp_mod)
 }
-
-# 3: add tagging -------------------------------------------------
-
-# Read previous input files:
-dat_tmp = SS_readdat(file = file.path(tmp_dir, 'data.ss'))
-ctl_tmp = SS_readctl(file = file.path(tmp_dir, 'control.ss'), datlist = dat_tmp)
-fore_tmp = SS_readforecast(file = file.path(tmp_dir, 'forecast.ss'))
-start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
-
-# Config name
-config_name = '3_addTag'
-tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir, showWarnings = FALSE)
-
-# Activate tagging:
-ctl_tmp$lambdas$value[ctl_tmp$lambdas$like_comp %in% c(5,15,16)] = 1
-
-# Write SS files:
-SS_writedat(dat_tmp, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
-SS_writectl(ctl_tmp, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
-SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
-SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
-
-# Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
-# Plot results
-if(make_plot) {
-  tmp_mod = SS_output(dir = tmp_dir, covar = FALSE, forecast = FALSE)
-  SS_plots(tmp_mod)
-}
-
-# 4: use CPUE yr-seasonal and no tag ------------------------------------------------------
-
-# Read previous input files:
-dat_tmp = SS_readdat(file = file.path(tmp_dir, 'data.ss'))
-ctl_tmp = SS_readctl(file = file.path(tmp_dir, 'control.ss'), datlist = dat_tmp)
-fore_tmp = SS_readforecast(file = file.path(tmp_dir, 'forecast.ss'))
-start_tmp = SS_readstarter(file = file.path(tmp_dir, 'starter.ss'))
-
-# Config def
-config_name = '4_useCPUEyr_noTag'
-tmp_dir = file.path(shrpoint_path, SS_config, config_name)
-dir.create(tmp_dir, showWarnings = FALSE)
-
-# Use CPUE yr:
-cpue_df = read.csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, spat_subconfig, 'cpue-ll-yr-seasonal.csv'))
-cpue_df$index = 25
-dat_tmp$CPUE = cpue_df
-# Activate tagging:
-ctl_tmp$lambdas$value[ctl_tmp$lambdas$like_comp %in% c(15,16)] = 0
-
-# Write SS files:
-SS_writedat(dat_tmp, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
-SS_writectl(ctl_tmp, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
-SS_writeforecast(fore_tmp, dir = tmp_dir, overwrite = T)
-SS_writestarter(start_tmp, dir = tmp_dir, overwrite = T)
-
-# Run model:
-if(run_model) r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-nohess')
-# Plot results
-if(make_plot) {
-  tmp_mod = SS_output(dir = tmp_dir, covar = FALSE, forecast = FALSE)
-  SS_plots(tmp_mod)
-}
-
