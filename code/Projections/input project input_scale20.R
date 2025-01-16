@@ -256,7 +256,7 @@ for(k in 1:3){
 # Do posterior check for 2020 of combined KOBE
 #--------------------------------------------------------
 
-plot.yr = 2027
+plot.yr = 2026
 get_plot =paste0(my.path,"/KobePRJ_",plot.yr,".png")
 yr.prj = kbprjs[kbprjs$year==plot.yr,]
 kpd = data.frame(yr.prj[4:5],run=ifelse(yr.prj$tac>=100,paste0("z",yr.prj$tac),paste0("a",yr.prj$tac)))

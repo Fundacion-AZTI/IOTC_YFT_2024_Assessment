@@ -1224,7 +1224,207 @@ Fmsy <- as.vector(mod_sum$quants[mod_sum$quants$Label=="annF_MSY",-c(6,7,8)])
   scs <- c("0_BC_2021", "15_SplitCPUE_tag1_EC0_h0.8","18_SplitCPUE_tag01_EC0_h0.8",'21_SplitCPUE_tag1_EC1_h0.8')
   i <- c(1:4)
   sub_scs <- scs[i]
-  sub_scs_wd <-paste0("models/FinalGrid/",sub_scs)
+  sub_scs_wd <-paste0("models/TentativeGrid/",sub_scs)
+  mod_sum <- aggregate.ssMod(sub_scs, sub_scs_wd)
+  save(mod_sum,file="figure73.RData")
+  
+  ### Comparison f
+  df <- mod_sum$Fvalue
+  df <- df %>% rename_at(1:length(sub_scs),~sub_scs)
+  df_long <- df %>% pivot_longer(cols =sub_scs, names_to = "scenario", values_to = "value")
+  sub_df_long <- df_long %>% subset(scenario %in% sub_scs)  %>% dplyr::filter(!(scenario=="0_BC_2021" & Yr>=297))
+  sub_df_long$scenario <- as.factor(as.character(sub_df_long$scenario))
+  levels(sub_df_long$scenario) <- droplevels(sub_df_long$scenario)
+  sub_df_long  <- sub_df_long %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))%>%
+    mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
+  
+  scRed <-  scs[1]
+  scBlack <- scs[2]
+  scBlue <- scs[3]
+  scGreen <- scs[4]
+  scPurple <-scs[5]
+  scOrange <-scs[6]
+  
+  Fmsy <- as.vector(mod_sum$quants[mod_sum$quants$Label=="annF_MSY",-c(6,7,8)])
+  #Fmsy[1] <- as.vector(mod_sum$quants[mod_sum$quants$Label=="annF_MSY",-c(6,7,8)])[1]
+  
+  #sub_df_long$value[sub_df_long$scenario==scRed] <- sub_df_long$value[sub_df_long$scenario==scRed]*as.numeric(Fmsy[1])
+  ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=1.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlue),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGreen),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scPurple),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scOrange),size=1) +
+    scale_color_manual(values = c( 'red','black','blue','green','purple','orange')) +xlim(1950,2023)+ylim(0,2)+
+    xlab("Year")+ ylab("F/Fmsy")+
+    theme_fun()
+  SavePlot(paste0('Stepwise_update_F_Fmsy_',max(i),'_',nmplot),10,5)
+  
+  
+  ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+    geom_point(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=2) +
+    geom_point(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=2) +
+    geom_point(aes(color=scenario), data = . %>% subset(., scenario %in% scBlue),size=2) +
+    geom_point(aes(color=scenario), data = . %>% subset(., scenario %in% scGreen),size=2) +
+    geom_point(aes(color=scenario), data = . %>% subset(., scenario %in% scPurple),size=2) +
+    geom_point(aes(color=scenario), data = . %>% subset(., scenario %in% scOrange),size=2) +
+    
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=0.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=0.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlue),size=0.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGreen),size=0.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scPurple),size=0.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scOrange),size=0.5) +
+    scale_color_manual(values = c( 'red','black','blue','green','purple','orange')) +xlim(2000,2023)+ylim(0,2)+
+    xlab("Year")+ ylab("F/Fmsy")+
+    theme_fun()
+  SavePlot(paste0('Stepwise_update_F_Fmsy_ZOOM',max(i),'_',nmplot),10,5)
+  
+  #SavePlot(paste0('Stepwise_update_F_',max(i)),15,10)
+  
+  ### end ###
+  
+  
+  # Comparison SSB REFERENCE MDOELS
+  
+  df <- mod_sum$SpawnBio
+  df <- df %>% rename_at(1:length(sub_scs),~sub_scs)
+  df_long <- df %>% pivot_longer(cols =sub_scs, names_to = "scenario", values_to = "value")
+  sub_df_long <- df_long %>% subset(scenario %in% sub_scs)  %>% dplyr::filter(!(scenario=="0_BC_2021" & Yr>=297))
+  sub_df_long <- sub_df_long %>% subset(scenario %in% sub_scs) 
+  sub_df_long$scenario <- as.factor(as.character(sub_df_long$scenario))
+  levels(sub_df_long$scenario) <- droplevels(sub_df_long$scenario)
+  sub_df_long  <- sub_df_long %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))%>%
+    mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
+  
+  #SavePlot(paste0('Stepwise_update_SSB',max(i)),15,10)
+  scRed <-  scs[1]
+  scBlack <- scs[2]
+  scBlue <- scs[3]
+  scGreen <- scs[4]
+  scPurple <-scs[5]
+  scOrange <-scs[6]
+  
+  p1 <- ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=1.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlue),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGreen),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scPurple),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scOrange),size=1) +
+    scale_color_manual(values = c( 'red','black','blue','green','purple','orange')) +xlim(1950,2023)+ylim(0,4e6)+
+    xlab("Year")+ ylab("SSB")+
+    theme_fun()
+  p1
+  SavePlot(paste0('Stepwise_update_SSB_',max(i),'_',nmplot),10,5)
+  
+  
+  # Comparison SSB/b0
+  
+  df <- mod_sum$SpawnBio
+  B0 <- as.vector(df[df$Label=="SSB_Virgin",-c(length(i)+1,length(i)+2)])
+  df[,-c(length(i)+1,length(i)+2)] <- df[,-c(length(i)+1,length(i)+2)]/B0
+  df <- df %>% rename_at(1:length(sub_scs),~sub_scs)
+  df_long <- df %>% pivot_longer(cols =sub_scs, names_to = "scenario", values_to = "value")
+  sub_df_long <- df_long %>% subset(scenario %in% sub_scs)  %>% dplyr::filter(!(scenario=="0_BC_2021" & Yr>=297))
+  sub_df_long <- sub_df_long %>% subset(scenario %in% sub_scs) 
+  sub_df_long$scenario <- as.factor(as.character(sub_df_long$scenario))
+  levels(sub_df_long$scenario) <- droplevels(sub_df_long$scenario)
+  sub_df_long  <- sub_df_long %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))%>%
+    mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
+  
+  #SavePlot(paste0('Stepwise_update_SSB',max(i)),15,10)
+  scRed <-  scs[1]
+  scBlack <- scs[2]
+  scBlue <- scs[3]
+  scGreen <- scs[4]
+  scPurple <-scs[5]
+  scOrange <-scs[6]
+  
+  p2 <- ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=1.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlue),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGreen),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scPurple),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scOrange),size=1) +
+    scale_color_manual(values = c( 'red','black','blue','green','purple','orange')) +xlim(1950,2023)+ylim(0,1.2)+
+    xlab("Year")+ ylab("SSB/B0")+
+    theme_fun()
+  p2
+  SavePlot(paste0('Stepwise_update_SSB_B0_',max(i),'_',nmplot),10,5)
+  library(ggpubr)
+  ggarrange(p1,p2,ncol=2,common.legend = TRUE)
+  
+  SavePlot(paste0('Stepwise_update_SSB_and_SSB_B0_',max(i),'_',nmplot),15,10)
+  
+  
+  
+  
+  
+  # Comparison SSB/SSBMSY
+  
+  df <- mod_sum$SpawnBio
+  Bmsy <- as.vector(mod_sum$quants[mod_sum$quants$Label=="SSB_MSY",-c(length(i)+1,length(i)+2)])
+  #B0 <- as.vector(df[df$Label=="SSB_Virgin",-c(length(i)+1,length(i)+2)])
+  df[,-c(length(i)+1,length(i)+2)] <- df[,-c(length(i)+1,length(i)+2)]/Bmsy
+  df <- df %>% rename_at(1:length(sub_scs),~sub_scs)
+  df_long <- df %>% pivot_longer(cols =sub_scs, names_to = "scenario", values_to = "value")
+  sub_df_long <- df_long %>% subset(scenario %in% sub_scs)  %>% dplyr::filter(!(scenario=="0_BC" & Yr>=297))
+  sub_df_long <- sub_df_long %>% subset(scenario %in% sub_scs) 
+  sub_df_long$scenario <- as.factor(as.character(sub_df_long$scenario))
+  levels(sub_df_long$scenario) <- droplevels(sub_df_long$scenario)
+  sub_df_long  <- sub_df_long %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))%>%
+    mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
+  
+  #SavePlot(paste0('Stepwise_update_SSB',max(i)),15,10)
+  scRed <-  scs[1]
+  scBlack <- scs[2]
+  scBlue <- scs[3]
+  scGreen <- scs[4]
+  scPurple <-scs[5]
+  scOrange <-scs[6]
+  
+  p2 <- ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=1.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlue),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGreen),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scPurple),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scOrange),size=1) +
+    scale_color_manual(values = c( 'red','black','blue','green','purple','orange')) +xlim(1950,2024)+
+    xlab("Year")+ ylab("SSB/SSBmsy")+
+    theme_fun()
+  p2
+  SavePlot(paste0('Stepwise_update_SSB_Bmsy_',max(i),'_',nmplot),15,10)
+  # library(ggpubr)
+  
+  
+  
+  library(r4ss)
+  ####  SPLIT CPUE ######
+  
+  dir_plot <- "output/figures/"
+  
+  
+  
+  ####################################################
+  #
+  #         FIGURE cpue 2021
+  #
+  ###############################################
+  
+  
+  nmplot<- "SplitCpue_2021CPUE"
+  scs <- c("RM3_CPUE2021_tag1_endyr2021"
+           , "RM3_CPUE2021_tag01_endyr2021",
+           "RM3_CPUE2021_recdev288_endyr2023",'RM3_tag01')
+  
+  #scs <- c("0_BC_2021", "15_SplitCPUE_tag1_EC0_h0.8","18_SplitCPUE_tag01_EC0_h0.8",'21_SplitCPUE_tag1_EC1_h0.8')
+  i <- c(1:5)
+  sub_scs <- scs[i]
+  sub_scs_wd <-paste0("models/update/Sens_CPUE/",sub_scs)
   mod_sum <- aggregate.ssMod(sub_scs, sub_scs_wd)
   
   
@@ -1385,6 +1585,201 @@ Fmsy <- as.vector(mod_sum$quants[mod_sum$quants$Label=="annF_MSY",-c(6,7,8)])
   scGreen <- scs[4]
   scPurple <-scs[5]
   scOrange <-scs[6]
+  
+  p2 <- ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=1.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlue),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGreen),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scPurple),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scOrange),size=1) +
+    scale_color_manual(values = c( 'red','black','blue','green','purple','orange')) +xlim(1950,2024)+
+    xlab("Year")+ ylab("SSB/SSBmsy")+
+    theme_fun()
+  p2
+  SavePlot(paste0('Stepwise_update_SSB_Bmsy_',max(i),'_',nmplot),15,10)
+  # library(ggpubr)
+  
+  
+  ####################################################
+  #
+  #         FIGURE COMPARISON REF MODELS
+  #
+  ###############################################
+  
+  
+  ####  SPLIT CPUE ######
+  nmplot<- "RMS"
+  
+  scs <- c("0_BC_2021",
+           "1_NoSplit_tag1_ECO_h08",
+           "2_Split_tag1_EC0_h08",'3_SplitCPUE_tag1_EC0_h08',
+           "4_Split_tag01_EC0_h08","5_Split_tag1_EC1_h08")
+  
+  #scs <- c("0_BC_2021", "15_SplitCPUE_tag1_EC0_h0.8","18_SplitCPUE_tag01_EC0_h0.8",'21_SplitCPUE_tag1_EC1_h0.8')
+  i <- c(1:6)
+  sub_scs <- scs[i]
+  sub_scs_wd <-paste0("models/RefModels/",sub_scs,"/nohess_win")
+  mod_sum <- aggregate.ssMod(sub_scs, sub_scs_wd)
+  nm_scs <-c("0_BC_2021","1_OneBlock_LLsel","2_TwoBlock_LLsel","3_TwoBlockCPUE","4_Dwtag01","5_EffortCreep")
+  
+  ### Comparison f
+  df <- mod_sum$Fvalue
+  df <- df %>% rename_at(1:length(sub_scs),~nm_scs)
+  df_long <- df %>% pivot_longer(cols =nm_scs, names_to = "scenario", values_to = "value")
+  sub_df_long <- df_long %>% subset(scenario %in% nm_scs)  %>% dplyr::filter(!(scenario=="0_BC_2021" & Yr>=297))
+  sub_df_long$scenario <- as.factor(as.character(sub_df_long$scenario))
+  levels(sub_df_long$scenario) <- droplevels(sub_df_long$scenario)
+  sub_df_long  <- sub_df_long %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))%>%
+    mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
+  
+  scRed <-  nm_scs[1]
+  scBlack <- nm_scs[2]
+  scBlue <- nm_scs[3]
+  scGreen <- nm_scs[4]
+  scPurple <-nm_scs[5]
+  scOrange <-nm_scs[6]
+  
+  Fmsy <- as.vector(mod_sum$quants[mod_sum$quants$Label=="annF_MSY",-c(6,7,8)])
+  #Fmsy[1] <- as.vector(mod_sum$quants[mod_sum$quants$Label=="annF_MSY",-c(6,7,8)])[1]
+  
+  #sub_df_long$value[sub_df_long$scenario==scRed] <- sub_df_long$value[sub_df_long$scenario==scRed]*as.numeric(Fmsy[1])
+  ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=1.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlue),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGreen),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scPurple),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scOrange),size=1) +
+    scale_color_manual(values = c( 'red','black','blue','green','purple','orange')) +xlim(1950,2023)+ylim(0,2)+
+    xlab("Year")+ ylab("F/Fmsy")+
+    theme_fun()
+  SavePlot(paste0('Stepwise_update_F_Fmsy_',max(i),'_',nmplot),10,5)
+  
+  
+  ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+    geom_point(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=2) +
+    geom_point(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=2) +
+    geom_point(aes(color=scenario), data = . %>% subset(., scenario %in% scBlue),size=2) +
+    geom_point(aes(color=scenario), data = . %>% subset(., scenario %in% scGreen),size=2) +
+    geom_point(aes(color=scenario), data = . %>% subset(., scenario %in% scPurple),size=2) +
+    geom_point(aes(color=scenario), data = . %>% subset(., scenario %in% scOrange),size=2) +
+    
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=0.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=0.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlue),size=0.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGreen),size=0.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scPurple),size=0.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scOrange),size=0.5) +
+    scale_color_manual(values = c( 'red','black','blue','green','purple','orange')) +xlim(2000,2023)+ylim(0,2)+
+    xlab("Year")+ ylab("F/Fmsy")+
+    theme_fun()
+  SavePlot(paste0('Stepwise_update_F_Fmsy_ZOOM',max(i),'_',nmplot),10,5)
+  
+  #SavePlot(paste0('Stepwise_update_F_',max(i)),15,10)
+  
+  ### end ###
+  
+  
+  # Comparison SSB REFERENCE MDOELS
+  
+  df <- mod_sum$SpawnBio
+  df <- df %>% rename_at(1:length(sub_scs),~nm_scs)
+  df_long <- df %>% pivot_longer(cols =nm_scs, names_to = "scenario", values_to = "value")
+  sub_df_long <- df_long %>% subset(scenario %in% nm_scs)  %>% dplyr::filter(!(scenario=="0_BC_2021" & Yr>=297))
+  sub_df_long <- sub_df_long %>% subset(scenario %in% nm_scs) 
+  sub_df_long$scenario <- as.factor(as.character(sub_df_long$scenario))
+  levels(sub_df_long$scenario) <- droplevels(sub_df_long$scenario)
+  sub_df_long  <- sub_df_long %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))%>%
+    mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
+  
+  #SavePlot(paste0('Stepwise_update_SSB',max(i)),15,10)
+  scRed <-  nm_scs[1]
+  scBlack <- nm_scs[2]
+  scBlue <- nm_scs[3]
+  scGreen <- nm_scs[4]
+  scPurple <-nm_scs[5]
+  scOrange <-nm_scs[6]
+  
+  p1 <- ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=1.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlue),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGreen),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scPurple),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scOrange),size=1) +
+    scale_color_manual(values = c( 'red','black','blue','green','purple','orange')) +xlim(1950,2023)+ylim(0,4e6)+
+    xlab("Year")+ ylab("SSB")+
+    theme_fun()
+  p1
+  SavePlot(paste0('Stepwise_update_SSB_',max(i),'_',nmplot),10,5)
+  
+  
+  # Comparison SSB/b0
+  
+  df <- mod_sum$SpawnBio
+  B0 <- as.vector(df[df$Label=="SSB_Virgin",-c(length(i)+1,length(i)+2)])
+  df[,-c(length(i)+1,length(i)+2)] <- df[,-c(length(i)+1,length(i)+2)]/B0
+  df <- df %>% rename_at(1:length(sub_scs),~nm_scs)
+  df_long <- df %>% pivot_longer(cols =nm_scs, names_to = "scenario", values_to = "value")
+  sub_df_long <- df_long %>% subset(scenario %in% nm_scs)  %>% dplyr::filter(!(scenario=="0_BC_2021" & Yr>=297))
+  sub_df_long <- sub_df_long %>% subset(scenario %in% nm_scs) 
+  sub_df_long$scenario <- as.factor(as.character(sub_df_long$scenario))
+  levels(sub_df_long$scenario) <- droplevels(sub_df_long$scenario)
+  sub_df_long  <- sub_df_long %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))%>%
+    mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
+  
+  #SavePlot(paste0('Stepwise_update_SSB',max(i)),15,10)
+  scRed <-  nm_scs[1]
+  scBlack <- nm_scs[2]
+  scBlue <- nm_scs[3]
+  scGreen <- nm_scs[4]
+  scPurple <-nm_scs[5]
+  scOrange <-nm_scs[6]
+  
+  p2 <- ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlack),size=1.5) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scBlue),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scGreen),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scPurple),size=1) +
+    geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scOrange),size=1) +
+    scale_color_manual(values = c( 'red','black','blue','green','purple','orange')) +xlim(1950,2023)+ylim(0,1.2)+
+    xlab("Year")+ ylab("SSB/B0")+
+    theme_fun()
+  p2
+  SavePlot(paste0('Stepwise_update_SSB_B0_',max(i),'_',nmplot),10,5)
+  library(ggpubr)
+  ggarrange(p1,p2,ncol=2,common.legend = TRUE)
+  
+  SavePlot(paste0('Stepwise_update_SSB_and_SSB_B0_',max(i),'_',nmplot),15,10)
+  
+  
+  
+  
+  
+  # Comparison SSB/SSBMSY
+  
+  df <- mod_sum$SpawnBio
+  Bmsy <- as.vector(mod_sum$quants[mod_sum$quants$Label=="SSB_MSY",-c(length(i)+1,length(i)+2)])
+  #B0 <- as.vector(df[df$Label=="SSB_Virgin",-c(length(i)+1,length(i)+2)])
+  df[,-c(length(i)+1,length(i)+2)] <- df[,-c(length(i)+1,length(i)+2)]/Bmsy
+  df <- df %>% rename_at(1:length(sub_scs),~nm_scs)
+  df_long <- df %>% pivot_longer(cols =nm_scs, names_to = "scenario", values_to = "value")
+  sub_df_long <- df_long %>% subset(scenario %in% nm_scs)  %>% dplyr::filter(!(scenario=="0_BC_2021" & Yr>=297))
+  sub_df_long <- sub_df_long %>% subset(scenario %in% nm_scs) 
+  sub_df_long$scenario <- as.factor(as.character(sub_df_long$scenario))
+  levels(sub_df_long$scenario) <- droplevels(sub_df_long$scenario)
+  sub_df_long  <- sub_df_long %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))%>%
+    mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
+  
+  #SavePlot(paste0('Stepwise_update_SSB',max(i)),15,10)
+  scRed <-  nm_scs[1]
+  scBlack <- nm_scs[2]
+  scBlue <- nm_scs[3]
+  scGreen <- nm_scs[4]
+  scPurple <-nm_scs[5]
+  scOrange <-nm_scs[6]
   
   p2 <- ggplot(sub_df_long,aes(x=yrqtr,y=value,group =scenario)) +
     geom_line(aes(color=scenario), data = . %>% subset(., scenario %in% scRed),size=1) +

@@ -14,7 +14,7 @@ source(here('code', 'auxiliary_functions.R'))
 source('sharepoint_path.R')
 setwd(shrpoint_path)
 
-dir_plot <- "output/figures/LLdividedModel"
+dir_plot <- "output/figures/"
 dir_table <- "output/tables/"
 
 spat_config = '4A_io'
@@ -23,12 +23,37 @@ fish_names = gsub(pattern = ' ', replacement = '_', x = fish_names)
 fleetnames <- paste0(1:25,"_",c(fish_names,c(fish_names[c(7,10,11,13)])))
 
 
-scs <- "16_LLsplit_LL1b_LL4_DN_min"
-scs_wd <-paste0("models/update/",scs)
+#WRITE SSB TIME SERIES MODEL 6 FINAL GRID
+
+scs <- "5_NoSplit_tag01_EC0_h0.8"
+scs_wd <-paste0("models/FinalGrid/",scs)
 
   sc_ss3 <- SS_output(dir=scs_wd,  repfile = "Report.sso",covar=T)
 
-  
+    df <- sc_ss3$derived_quants[grep("SSB",sc_ss3$derived_quants$Label),][c(3:298),-c(3:5)]
+    df$yr <- as.numeric(gsub("\\D+", replacement = '', df$Label))
+    df_yrqtr <- df %>%   mutate(yrqtr=qtr2yearqtr(yr,1950,13))%>%
+      mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
+    df_yrqtr <- as.data.frame(df_yrqtr)
+    df_yrqtr$yr<- floor(df_yrqtr$yrqtr)
+    dfYFT <- df_yrqtr[,c(3,5,2)]
+    names(dfYFT)<- c("year","Quarter","SSByft")
+    write.csv(dfYFT,file="output/tables/Ratio_SSB_F_FG5_NoSplit_tag01_EC0_h0.8.csv")
+    
+ #....SSB/SSBMSY ADN F/FMSY
+    
+    sc_ss3$Kobe
+    df <- sc_ss3$Kobe
+    df$yr <- sc_ss3$Kobe$Yr
+    df_yrqtr <- df %>%   mutate(yrqtr=qtr2yearqtr(yr,1950,13))%>%
+      mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
+    df_yrqtr <- as.data.frame(df_yrqtr)
+    df_yrqtr$yr<- floor(df_yrqtr$yrqtr)
+    dfYFT <- df_yrqtr[,c(4,2,3,5,6)][ df_yrqtr$yrqtr_season==1,][,1:4]
+    names(dfYFT)<- c("year","Quarter","SSByft")
+    write.csv(dfYFT,file="output/tables/SSB_FG5_NoSplit_tag01_EC0_h0.8.csv")
+    
+    
   #................................................................
   #### PLOT RECRUITMENT DEVIATES  ####
   

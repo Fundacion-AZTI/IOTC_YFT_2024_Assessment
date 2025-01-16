@@ -411,3 +411,219 @@ SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
 # Run model:
 r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
 
+
+#.................................................................
+
+#### MODIFY CPUE ONLY UNTIL 296 BASE CASE AND RUN UNTIL 308 ####
+
+#..........................................................
+
+
+
+spat_config = '4A_io'
+# SS base files path (in Sharepoint):
+
+
+# SS configuration path (in Sharepoint):
+SS_config = 'models/update'
+
+# SS input data path (in Sharepoint):
+SS_data = 'data/ss3_inputs/4A_io'
+
+
+#D:\OneDrive - AZTI\General - IOTC_YFT_2024\models\FinalGrid
+config_name = 'Sens_CPUE/FG_6_CPUE_2021'
+tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+dir.create(tmp_dir)
+
+# Temporary files:
+# SS base files path (in Sharepoint):
+SS_base = 'models/FinalGrid/6_SplitCPUE_tag01_EC0_h0.8'
+#SS_base = 'models/update/test'
+# Temporary files:
+
+SS_base = 'models/FinalGrid/6_SplitCPUE_tag01_EC0_h0.8'
+base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+
+#base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+
+dat_1 = base_dat
+ctl_1 = base_ctl
+fore_1 = base_fore
+start_1 = base_start
+
+
+#update cpue
+Base_2021 = SS_readdat(file = file.path("models/update/00_BC", 'data.ss'))
+
+cpue_df <- Base_2021$CPUE
+
+cpue_df$index[cpue_df$index==25 & cpue_df$year>=213] <- 31
+cpue_df$index[cpue_df$index==25 & cpue_df$year<213] <- 28
+cpue_df$index[cpue_df$index==24] <- 27
+cpue_df$index[cpue_df$index==23 & cpue_df$year>=213] <- 30
+cpue_df$index[cpue_df$index==23 & cpue_df$year<213] <- 26
+cpue_df$index[cpue_df$index==22 & cpue_df$year>=213] <- 29
+cpue_df$index[cpue_df$index==22 & cpue_df$year<213] <- 25
+
+dat_1$CPUE <- cpue_df
+
+# Write SS files:
+
+SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+
+# Run model:
+r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+
+
+#.................................................................
+
+#### MODIFY CPUE ONLY UNTIL 296 BASE CASE AND RUN UNTIL 296 ####
+
+#..........................................................
+
+
+
+spat_config = '4A_io'
+# SS base files path (in Sharepoint):
+
+
+# SS configuration path (in Sharepoint):
+SS_config = 'models/update'
+
+# SS input data path (in Sharepoint):
+SS_data = 'data/ss3_inputs/4A_io'
+
+
+#D:\OneDrive - AZTI\General - IOTC_YFT_2024\models\FinalGrid
+config_name = 'Sens_CPUE/FG_6_CPUE_2021_endyr296'
+tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+dir.create(tmp_dir)
+
+# Temporary files:
+# SS base files path (in Sharepoint):
+SS_base = 'models/FinalGrid/6_SplitCPUE_tag01_EC0_h0.8'
+#SS_base = 'models/update/test'
+# Temporary files:
+
+SS_base = 'models/FinalGrid/6_SplitCPUE_tag01_EC0_h0.8'
+base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+
+#base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+
+dat_1 = base_dat
+ctl_1 = base_ctl
+fore_1 = base_fore
+start_1 = base_start
+
+
+#update cpue
+Base_2021 = SS_readdat(file = file.path("models/update/00_BC", 'data.ss'))
+
+cpue_df <- Base_2021$CPUE
+
+cpue_df$index[cpue_df$index==25 & cpue_df$year>=213] <- 31
+cpue_df$index[cpue_df$index==25 & cpue_df$year<213] <- 28
+cpue_df$index[cpue_df$index==24] <- 27
+cpue_df$index[cpue_df$index==23 & cpue_df$year>=213] <- 30
+cpue_df$index[cpue_df$index==23 & cpue_df$year<213] <- 26
+cpue_df$index[cpue_df$index==22 & cpue_df$year>=213] <- 29
+cpue_df$index[cpue_df$index==22 & cpue_df$year<213] <- 25
+
+dat_1$CPUE <- cpue_df
+
+dat_1$endyr <- 296
+# Write SS files:
+
+SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+
+# Run model:
+r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
+
+###############################################
+
+
+#.................................................................
+
+#### MODIFY CPUE ONLY UNTIL 296 BASE CASE AND RUN UNTIL 296 ####
+
+#..........................................................
+
+
+
+spat_config = '4A_io'
+# SS base files path (in Sharepoint):
+
+
+# SS configuration path (in Sharepoint):
+SS_config = 'models/update'
+
+# SS input data path (in Sharepoint):
+SS_data = 'data/ss3_inputs/4A_io'
+
+
+#D:\OneDrive - AZTI\General - IOTC_YFT_2024\models\FinalGrid
+config_name = 'Sens_CPUE/FG_6_CPUE_2021_endyr288_LF0_PSFSC'
+tmp_dir = file.path(shrpoint_path, SS_config, config_name)
+dir.create(tmp_dir)
+
+# Temporary files:
+# SS base files path (in Sharepoint):
+SS_base = 'models/update/Sens_CPUE/FG_6_CPUE_2021_recdev288'
+#SS_base = 'models/update/test'
+# Temporary files:
+
+#SS_base = 'models/FinalGrid/6_SplitCPUE_tag01_EC0_h0.8'
+base_dat = SS_readdat(file = file.path(shrpoint_path, SS_base, 'data.ss'))
+base_ctl = SS_readctl(file = file.path(shrpoint_path, SS_base, 'control.ss'), datlist = base_dat)
+base_fore = SS_readforecast(file = file.path(shrpoint_path, SS_base, 'forecast.ss'))
+base_start = SS_readstarter(file = file.path(shrpoint_path, SS_base, 'starter.ss'))
+
+#base_dat$lencomp <- base_dat$lencomp #%>% subset(!(fleet==21 & year<240))
+
+dat_1 = base_dat
+ctl_1 = base_ctl
+fore_1 = base_fore
+start_1 = base_start
+
+
+#update cpue
+Base_2021 = SS_readdat(file = file.path("models/update/00_BC", 'data.ss'))
+
+cpue_df <- Base_2021$CPUE
+
+cpue_df$index[cpue_df$index==25 & cpue_df$year>=213] <- 31
+cpue_df$index[cpue_df$index==25 & cpue_df$year<213] <- 28
+cpue_df$index[cpue_df$index==24] <- 27
+cpue_df$index[cpue_df$index==23 & cpue_df$year>=213] <- 30
+cpue_df$index[cpue_df$index==23 & cpue_df$year<213] <- 26
+cpue_df$index[cpue_df$index==22 & cpue_df$year>=213] <- 29
+cpue_df$index[cpue_df$index==22 & cpue_df$year<213] <- 25
+
+dat_1$CPUE <- cpue_df
+
+
+sublencomp <- base_dat$lencomp[!(base_dat$lencomp$fleet %in% c(4,6,8,14,16,17,19,20) & base_dat$lencomp$year>288),]
+unique(sublencomp$fleet[sublencomp$year>288])
+dat_1$lencomp <- sublencomp
+# Write SS files:
+
+SS_writedat(dat_1, outfile = file.path(tmp_dir, 'data.ss'), overwrite = T)
+SS_writectl(ctl_1, outfile = file.path(tmp_dir, 'control.ss'), overwrite = T)
+SS_writeforecast(fore_1, dir = tmp_dir, overwrite = T)
+SS_writestarter(start_1, dir = tmp_dir, overwrite = T)
+
+# Run model:
+r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = ' -nohess')
