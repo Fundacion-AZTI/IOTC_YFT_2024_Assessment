@@ -1,0 +1,889 @@
+---
+title: "Comments on the external review of Indian Ocean yellowfin stock assessment model"
+author: Giancarlo M. Correa, Agurtzane Urtizberea, Adam Langley, Gorka Merino, Dan Fu, Emmanuel Chassot, Shiham Adam
+embed-resources: false
+highlight-style: "a11y-dark"
+format: azti-revealjs
+revealjs-plugins:
+  - pointer
+include-in-header:
+  - text: |
+      <link rel = "shortcut icon" href = "azti.svg" />
+title-slide-attributes:
+    data-background-image: "title_image.jpg"
+    data-background-size: cover
+    data-background-opacity: "0.3"
+execute:
+  echo: false
+  warning: false
+csl: canadian-journal-of-fisheries-and-aquatic-sciences.csl
+bibliography: ../references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      verbose = FALSE,
+                      message = FALSE, 
+                      warning = FALSE)
+```
+
+```{r}
+# remotes::install_github("wmoldham/rbbt") # temporarily, until error is fixed
+require(knitr)
+require(rbbt)
+require(dplyr)
+require(DiagrammeR)
+require(DiagrammeRsvg)
+require(rsvg)
+require(dplyr)
+require(flextable)
+require(kableExtra)
+options(knitr.kable.NA = '')
+```
+
+```{r}
+# remotes::install_github("wmoldham/rbbt") # temporarily, until error is fixed
+# This will automatically update the BIB file:
+keys = rbbt::bbt_detect_citations('slides/slides-extreview.qmd')
+bbt_ignore = keys[grepl("fig-|tbl-|eq-|sec-", keys)]
+rbbt::bbt_update_bib(path_rmd = 'slides/slides-extreview.qmd', 
+                     ignore = bbt_ignore, overwrite = T, translator = "bibtex")
+```
+
+
+# Stock structure
+
+## Stock structure
+
+::: {.callout-tip}
+## Conceptual model
+
+Review all available information related to stock structure (e.g. genetics, oceanography including mesopelagic structure, biological information, length comps, etc.). Then build a conceptual model.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+@langleyInvestigationRecruitmentDynamics2023, @correaConceptualModelYellowfin2024, and @artetxe-arrateReviewStockStructure2024 did a thorough analysis of the available information on the dynamics of the stock. A more detailed analysis of oceanographic features might be required. A future paper might focus on summarizing these results and develop a set of conceptual models.
+:::
+:::
+
+## Stock structure
+
+::: {.callout-tip}
+## Area definitions
+
+Use regression trees or similar analysis to explore the available length frequency data and evaluate whether it is consistent with the conceptual model. Use these analyses to guide the definitions of areas and/or fisheries.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Some preliminary analysis was presented in the assessment report as well as in @correaConceptualModelYellowfin2024. Coordination with CPUE standardization team is required to explore new area definitions.
+:::
+:::
+
+## Stock structure
+
+::: {.callout-tip}
+## Connectivity
+
+Explore the connectivity with the Arabian sea. Reconsider the stock structure, area definitions, and connectivity and how much the stock is linked to both the Atlantic Ocean stock and the Pacific Ocean stock based on available evidence.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+@langleyInvestigationRecruitmentDynamics2023 analysed the connectivity between equatorial regions and the Arabian Sea using length frequency data and recruitment patterns. No consistent recruitment patterns were found. There is evidence of some degree of connectivity [@artetxe-arrateOtolithStableIsotopesinreview]. More analyses are required regarding the connectivity with Atlantic or Pacific Oceans.
+:::
+:::
+
+## Stock structure
+
+::: {.callout-tip}
+## Indices of abundance
+
+Develop an index of abundance for the Arabian Sea
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+LL has limited information from region 1a (Arabian Sea). Preliminary results from a spatiotemporal model highlighted a high uncertainty in this area.
+
+Future development using catch and effort data from other fisheries?
+:::
+:::
+
+## Stock structure
+
+::: {.callout-tip}
+## Model complexity
+
+For modelling, implement a one area model including the core of the catches to improve selectivity, growth, and natural mortality assumptions. Start by expanding Area 1 to the south and possibly to the east. Add other areas and movement dynamics as a second step, consistent with the conceptual model.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+@langleyInvestigationRecruitmentDynamics2023 did an initial exploration of this. In the current assessment, we explored alternative spatial configurations. Once a final conceptual model is presented, more analyses might be performed.
+:::
+:::
+
+# Fishery definitions
+
+## Fishery definitions
+
+::: {.callout-tip}
+## Purse-seine fishery
+
+Refine seasonal and spatial definitions of purse-seine fisheries following comprehensive review of size composition data, using, for example, regression tree analysis.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+@correaConceptualModelYellowfin2024 and the current assessment presented a cluster and mode analysis of the length frequency data. They detected a strong seasonality in PS and LL length data. Also, areas with similar length structure were identified but not used in the assessment developtment. Coordination with the LL CPUE standardization team might be required.
+:::
+:::
+
+# Catch
+
+## Catch
+
+::: {.callout-tip}
+## Reliability
+
+Include information about the reliability of the catch from each fleet in the assessment report and in the models.
+:::
+
+::: fragment
+::: {.callout-warning appearance="simple" icon=false}
+## Comment
+
+The IOTC Secretariat publishes information on reporting quality. We assumed that catch information has a very low observation error in the model, but further analyses could be performed to evaluate scenarios assuming imprecise or underreported catch in future assessments (informed by WG Data and Statistics).
+:::
+:::
+
+# Longline CPUE
+
+## Longline CPUE
+
+::: {.callout-tip}
+## Standardization analyses
+
+Further investigate the spatial analysis of CPUE data, area weighting, selectivity by fleet, temporal changes in selectivity, and the development of spatial temporal modelling approaches (e.g. using VAST) at the regional and oceanic scale.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Changes in LL selectivity was explored in the assessment. A preliminary study using spatiotemporal models to standardize LL CPUE data was presented at the WPM15. Further analyses are constrained by lack of access of logsheet data.
+:::
+:::
+
+## Longline CPUE
+
+::: {.callout-tip}
+## Precision of estimates
+
+Estimate a CV for each time step of the index and use it as indication of the relative precision of each point estimate, which can be added to the overall precision assumed for the index.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Some model runs assumed a CV derived from the CPUE standardization model. We did not explore adding an extra CV in the model.
+:::
+:::
+
+## Longline CPUE
+
+::: {.callout-tip}
+## Length composition associated with the index
+
+Spatially weight the length composition associated with the index by the estimated density (CPUE) to ensure that it represents the population rather than the catch, estimate a separate selectivity for the standardized index.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+The current LL CPUE standardization methodology does not allow to do this since a spatiotemporal model able to make fine scale (e.g., $5\times 5^\circ$) spatial predictions is required. However, some initial explorations could be carried out with the purse seine indices.
+:::
+:::
+
+## Longline CPUE
+
+::: {.callout-tip}
+## Regional differences
+
+Investigating the potential for the development of CPUE indices from the LF4 fishery which dominates the catch from the eastern equatorial (R4) region.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Possible development of an LF index?
+:::
+:::
+
+# Purse seine CPUE
+
+## Purse seine CPUE
+
+::: {.callout-tip}
+## Modelling
+
+Do not include the PS CPUE indices as a primary abundance index in the assessment model.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Free school index included as a secondary index in some explorative runs. Further analyses could be performed to account for changes in management (*quota* effect) during the last years.
+:::
+:::
+
+# Length frequency and selectivity
+
+## Length frequency and selectivity
+
+::: {.callout-tip}
+## Auxiliary analyses
+
+Investigate spatio-temporal trends in the length compositions, including looking at quarter variation, using the regression tree analysis.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+@correaConceptualModelYellowfin2024 and @langleyInvestigationRecruitmentDynamics2023 investigated these aspects and found a strong seasonality in the length data.
+:::
+:::
+
+## Length frequency and selectivity
+
+::: {.callout-tip}
+## Coverage
+
+Provide a map for the longline data to evaluate where the data was taken compared to where the catch data comes from.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+@correaConceptualModelYellowfin2024 presented some initial explorations on this topic. Additional exploratory analyses were carried out during the assessment process. 
+:::
+:::
+
+## Length frequency and selectivity
+
+::: {.callout-tip}
+## Data treatment
+
+Consider time-averaging the length distribution data for the fleets with the poorest data.
+:::
+
+::: fragment
+::: {.callout-warning appearance="simple" icon=false}
+## Comment
+
+We did not average the size information. This could be possible for some artisanal fisheries with relatively small catch (e.g., *OT*, *TR*). This recommendation can be explored in future assessments.
+:::
+:::
+
+## Length frequency and selectivity
+
+::: {.callout-tip}
+## Time-varying selectivity
+
+Investigate the potential for and impacts of relaxing the time-invariant selectivity assumption of the largest fleets (especially the longline fishery). This could be based on time blocks or by analyzing the spatio-temporal structure of the fishery.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Some model runs modelled a time-varying selectivity for the LL fisheries.
+:::
+:::
+
+## Length frequency and selectivity
+
+::: {.callout-tip}
+## Selectivity assumptions
+
+Consider moving to length-based selectivity for some of the other fleets, especially those catching smaller fish.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+The most important fisheries targeting small fish (*LS* and *FS*) used a size-based selectivity.
+:::
+:::
+
+## Length frequency and selectivity
+
+::: {.callout-tip}
+## Presentation of results
+
+Produce a table for each fishery for evaluation of the fisheries and for the assessment report including the following: name, amount of catch (average catch), amount of length frequency (sample sizes, number of years), reliability of the length frequency, selectivity type, whether or not the selectivity should be stable or change over time.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+An unique table was not produce, but the information was presented in figures or tables throughout the assessment report. The next version of the assessment report could include this table.
+:::
+:::
+
+## Length frequency and selectivity
+
+::: {.callout-tip}
+## Length composition estimation
+
+The length composition data should be spatial raise to the catches for the fisheries and spatially weighted by the CPUE for the indices. The fisheries and the indices should have different selectivity curves, with the fisheries more likely to have temporal variation in selectivity.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Catch-weighted size compositions were obtained for the fisheries. Spatial weighting was not possible for the CPUE due to spatial resolution.
+:::
+:::
+
+# Tagging data
+
+## Tagging data
+
+::: {.callout-tip}
+## Modelling
+
+Conduct initial exploratory fit of the assessment models without tagging data.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Some runs excluded or downweighted the tagging data.
+:::
+:::
+
+## Tagging data
+
+::: {.callout-tip}
+## Treatment of the tagging data
+
+Estimate tagging related mortality, tag loss, and reporting rates preferably from data collected during the tagging program (e.g., double tagging, tag seeding, pen experiments). Determine the cause of the higher return rate of larger fish (e.g., evaluate the possibility of higher tagging mortality for younger fish, comparing the time at liberty and size frequencies).
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+A few studies have explored these aspects [@hillaryTagSheddingReporting2008; @hoyleCovariatesReleaseMortality2015; @gaertnerTagSheddingTropical2015]. No additional analyses were done in the current assessment.
+:::
+:::
+
+# Growth
+
+## Growth
+
+::: {.callout-tip}
+## Ageing data
+
+Include age conditional at length data in the assessment model consistent with the conceptual model.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Some model runs included conditional age-at-length data.
+:::
+:::
+
+## Growth
+
+::: {.callout-tip}
+## Estimating growth
+
+Estimate growth in the assessment model by fitting to the conditional age-at-length data.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Some model runs estimated some growth parameters.
+:::
+:::
+
+## Growth
+
+::: {.callout-tip}
+## Growth by sex
+
+Explore the implication of growth differences by sex.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Some model runs modelled sex-specific growth.
+:::
+:::
+
+## Growth
+
+::: {.callout-tip}
+## Growth curves
+
+Try other growth curves if necessary (e.g. growth cessation model)
+:::
+
+::: fragment
+::: {.callout-warning appearance="simple" icon=false}
+## Comment
+
+We included the new growth curve [@farleyUpdatingEstimationAge2023], but did not explore other functional forms in the current assessment.
+:::
+:::
+
+## Growth
+
+::: {.callout-tip}
+## Variability of size at age
+
+Explore different assumptions for CV of length at age
+:::
+
+::: fragment
+::: {.callout-warning appearance="simple" icon=false}
+## Comment
+
+CV of length at age was assumed to be a function of mean length-at-age and estimated in some model runs. For most runs, these parameters were fixed at 0.1.
+:::
+:::
+
+# Natural mortality
+
+## Natural mortality
+
+::: {.callout-tip}
+## Parametrization
+
+Assume a vector or natural mortality at age that considers higher natural mortality for juvenile fish that declines to smaller values in adult stages.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+The Lorenzen's rescaling used in this assessment produced this shape.
+:::
+:::
+
+## Natural mortality
+
+::: {.callout-tip}
+## Adult M
+
+Use the longevity estimated for the Indian Ocean as base value and explore others as alternatives (e.g. 0.7 $\times$ $M_{adult}$ has the most support from the tagging data)
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+We used the longevity found in the Indian Ocean (GERUNDIO project) to model natural mortality. We did not explore other options.
+:::
+:::
+
+## Natural mortality
+
+::: {.callout-tip}
+## Data in the model
+
+Include sex ratio data or length composition data by sex (in a sex structured model).
+:::
+
+::: fragment
+::: {.callout-warning appearance="simple" icon=false}
+## Comment
+
+We did not explore this recommendation due to limited data is available. Future assessments could explore sex-specific CAAL data.
+:::
+:::
+
+## Natural mortality
+
+::: {.callout-tip}
+## Estimate adult M
+
+Once conditional age at length and sex ratio data is added to the model, attempt to estimate adult M (and growth).
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Some model runs estimated natural mortality, but seems that data sources (except tagging) are not informative.
+:::
+:::
+
+## Natural mortality
+
+::: {.callout-tip}
+## Differences by sex
+
+Implement a two-sex model. Consider different longevity for males and females consistent with the latest aging studies and consistent with different growth between males and females.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Some model runs modelled sex-specific growth. Further assessments could consider sex-specific natural mortality.
+:::
+:::
+
+# Maturity
+
+## Maturity
+
+::: {.callout-tip}
+## Free school behavior
+
+The presence of large fish schooling maybe related to spawning behavior. It is recommended to investigate the relationship between the occurrence of large fish in the free schools and the maturity to evaluate this hypothesis.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Future biological studies could be carried out to explore this suggestion. Current model includes a maturity ogive that approximates the availability of large fish to the *FS* fishery.
+:::
+:::
+
+## Maturity
+
+::: {.callout-tip}
+## Maturity ogive
+
+Use the maturity ogive by length rather than age, so changes in growth estimates will not require changes in the maturity ogive.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Maturity-at-length was used in the current assessment.
+:::
+:::
+
+# Spawning and recruitment
+
+## Spawning and recruitment
+
+::: {.callout-tip}
+## Length composition data
+
+Restructure the fisheries using exploratory analysis to reduce noise and increase the information about recruitment in the data. Refine the parametrization of selectivity and growth to improve the fit.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+@langleyInvestigationRecruitmentDynamics2023, @correaConceptualModelYellowfin2024, and the current assessment presented some exploratory analyses in this regard. Future assessments might further explore this aspect. Coordination with CPUE standardization teams might be required.
+:::
+:::
+
+## Spawning and recruitment
+
+::: {.callout-tip}
+## Bias correction
+
+Perform a thorough evaluation of the derivation of the bias correction factor.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Some model runs explored this aspect, although more analyses might be required, especially for the projection period.
+:::
+:::
+
+## Spawning and recruitment
+
+::: {.callout-tip}
+## Projections
+
+Compared the recruitment value used for reference points and projections to the average recruitment over the period for which historic recruitment is thought to represent that which should be used in reference points and projections.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+We presented some analyses on the projection settings on this topic.
+:::
+:::
+
+## Spawning and recruitment
+
+::: {.callout-tip}
+## Early recruitment
+
+Conduct research to determining an adequate method for the selection of the start time of the model and the method used to create the initial age-structure
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+This aspect was explored in previous assessments and small impacts were found. We did not further explore it in the current assessment. Future assessments could further explore this aspect.
+:::
+:::
+
+## Spawning and recruitment
+
+::: {.callout-tip}
+## Trends in recruitment as diagnostic
+
+Other factors, in addition to trends in recruitment, should be used to interpret whether they are real or indicate some form of model misspecification.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Trends in recruitment is one of the diagnostics explored. We also explored several diagnostics.
+:::
+:::
+
+## Spawning and recruitment
+
+::: {.callout-tip}
+## Steepness
+
+Given that there is essentially no information on the appropriate level of steepness, the review panel cannot provide any solid recommendations. The panel notes that when the stock does not go to low levels, using a steepness of 1 in the assessment may be reasonable.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Different levels of stepness were investigated.
+:::
+:::
+
+## Spawning and recruitment
+
+::: {.callout-tip}
+## Recruitment patterns
+
+Evaluate recruitment patterns in region 1 (NW) from the modal structure in LF data from PS LS, PS FS and GI fisheries. Conduct analysis using the single NW region model to evaluate coherence with LL CPUE trend from region 1. Evaluate the declining trend in recruitment estimated for region 4.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+@langleyInvestigationRecruitmentDynamics2023 presented this using the 2021 assessment model. Updated analyses with the new assessment could be conducted.
+:::
+:::
+
+## Spawning and recruitment
+
+::: {.callout-tip}
+## Regional recruitment distribution
+
+Avoid influence of movement assumptions. Preference is to estimate separate recruitment deviate parameters for each region (large number additional parameters). Reduce number of regions, excluding R3. Perform initial model testing with each region spatially discrete. Then add movement parameterization to examine interaction between recruitment and movement dynamics.
+:::
+
+::: fragment
+::: {.callout-warning appearance="simple" icon=false}
+## Comment
+
+Movement was assumed to be always present. We did not vary the four-areas spatial stratification, but some alternative spatial configurations were explored.
+:::
+:::
+
+# Movement
+
+## Movement
+
+::: {.callout-tip}
+## Model complexity
+
+It is recommended that model development start with a single model in region 1 to solve issues with the assessment. This will isolate those issues from the confounding with movement and any issues with estimating movement. Models with multiple regions and movement can then be build using that model as a foundation.
+:::
+
+::: fragment
+::: {.callout-warning appearance="simple" icon=false}
+## Comment
+
+@langleyInvestigationRecruitmentDynamics2023 did some initial exploration on this aspect. In the current assessment, alternative spatial configurations were explored. However, these two analyses were not integrated and might be an important improvement for future assessments. 
+:::
+:::
+
+# Initial conditions
+
+## Initial conditions
+
+::: {.callout-tip}
+## Initial year
+
+Compare models with alternative dates of the initial conditions (e.g., 1975 versus 1950's) and determine if the $R_0$ is similar, and if not, start in the model at a later time, when the length frequency starts or adjust $R_0$ used in the calculation of management quantities.
+:::
+
+::: fragment
+::: {.callout-warning appearance="simple" icon=false}
+## Comment
+
+Previous assessments explored this aspect. We did not do further explorations in the current assessment.
+:::
+:::
+
+# Data weighting
+
+## Data weighting
+
+::: {.callout-tip}
+## Length composition weights
+
+We would strongly encourage assigning more realistic weighting for the fleets. It may be reasonable to keep a minimum effective sample size for the data-poor fleets, but the data-rich fleets should be upweighted to reflect the better data. The Francis method be used for fisheries with adequate years of data and the McAllister and Ianneli or the Dirichlet used for the other fisheries.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+We used the reporting quality score as proxy of observation error.
+:::
+:::
+
+## Data weighting
+
+::: {.callout-tip}
+## Selectivity
+
+For fisheries with particularly problematic length composition data (e.g. highly variable over time), the composition data should not be used and the selectivity borrowed from another similar fishery or fixed appropriately. For fisheries with large catches additional effort should be taken to specify the selectivity correctly.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+The selectivity of some fisheries in the model followed this approach. Several exploratory analyses were performed to model selectivity.
+:::
+:::
+
+# Diagnostics
+
+## Diagnostics
+
+::: {.callout-tip}
+## Diagnostics tests
+
+The type of diagnostics applied to the yellowfin assessment should be expanded: recruitment trends, ASPM, retrospective, hindcasting, likelihood profiles, empirical selectivity diagnostic.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+Several diagnostics [@carvalhoCookbookUsingModel2021] were calculated for the reference models.
+:::
+:::
+
+# Uncertainty
+
+## Uncertainty
+
+::: {.callout-tip}
+## Add uncertainty
+
+Consider additional models to the grid: regional configurations, parameter uncertainty.
+:::
+
+::: fragment
+::: {.callout-note appearance="simple" icon=false}
+## Comment
+
+We evaluated several configurations, including alternative spatial stratification and parameter uncertainty.
+:::
+:::
+
+# Future research
+
+## Sampling
+
+<br>
+
+- Expand the sampled areas to the eastern and northern zones, and the temporal coverage.
+- Continue collection of gonads and include sex identification.
+- Collect more length-age data to improve growth estimates.
+- Determine batch fecundity and spawning frequency.
+
+
+## Modelling
+
+- Investigate stock connectivity using techniques such as close kin analysis.
+- The LL index needs further extensive work to improve it.
+- Development of indices from GI in the Arabian Sea and the LF fishery in Area 4.
+- Continue the development of methodological approaches using acoustic buoys data.
+- Evaluate the tagging data outside the stock assessment using fine scale spatial temporal model.
+- Modify SS3 to use tagging growth increment data.
+
+## Next assessment
+
+<br>
+
+::: incremental
+
+- Completion of a conceptual model
+- Exploration of new assessment areas: coordination with CPUE standardization team
+- Development of new CPUE indices 
+- More exploration of age data
+
+:::
+
+## Thank you {background-color="black"}
+
+<br> <br>
+
+<center>
+
+![](__AZTI_secundario_BlancoAmarillo.png){width="50%"}
+
+<br>
+
+[Contact:]{style="font-size:40px"} <br> [gmoron\@azti.es](mailto:gmoron@azti.es){style="font-size:40px"}
+
+</center>
+
+## References
+

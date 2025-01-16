@@ -573,7 +573,7 @@ get_fisheries = function(config = '4A_io') {
     fish_df = data.frame(fleet_name = c('GI_1a','HD_1a','LL_1a','OT_1a','BB_1b','FS_1b','LL_1b','LS_1b','TR_1b',
                                         'GI_1b','OT_1b','LF_1b'))
   }
-  fish_df = fish_df %>% mutate(fleet_number = 1:nrow(fish_df), .before = fleet_name)
+  fish_df = fish_df %>% dplyr::mutate(fleet_number = 1:nrow(fish_df), .before = fleet_name)
   return(fish_df)
 }
 

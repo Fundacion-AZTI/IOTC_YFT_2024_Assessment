@@ -1,0 +1,674 @@
+---
+title: "Preliminary 2024 stock assessment of yellowfin tuna in the Indian Ocean"
+author: Agurtzane Urtizberea, Giancarlo M. Correa, Adam Langley, Gorka Merino, Dan Fu, Emmanuel Chassot, Shiham Adam
+embed-resources: false
+highlight-style: "a11y-dark"
+format: azti-revealjs
+link-citations: true
+revealjs-plugins:
+  - pointer
+include-in-header:
+  - text: |
+      <link rel = "shortcut icon" href = "azti.svg" />
+title-slide-attributes:
+    data-background-image: "title_image.jpg"
+    data-background-size: cover
+    data-background-opacity: "0.3"
+execute:
+  echo: false
+  warning: false
+csl: canadian-journal-of-fisheries-and-aquatic-sciences.csl
+bibliography: ../references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      verbose = FALSE,
+                      message = FALSE, 
+                      warning = FALSE)
+```
+
+```{r}
+# To output figures and tables in sharepoint:
+source('sharepoint_path.R')
+source('code/auxiliary_functions.R')
+```
+
+```{r}
+# remotes::install_github("wmoldham/rbbt") # temporarily, until error is fixed
+require(knitr)
+require(rbbt)
+require(dplyr)
+require(flextable)
+# This will automatically update the BIB file:
+keys = rbbt::bbt_detect_citations('slides/slides-data.qmd')
+bbt_ignore = keys[grepl("fig-|tbl-|eq-", keys)]
+rbbt::bbt_update_bib(path_rmd = 'slides/slides-data.qmd', 
+                     ignore = bbt_ignore, overwrite = T, translator = "bibtex")
+```
+
+## Outline
+
+* Data inputs
+* Model parameters
+* Model implementation
+* Model results
+* Stock status and projections
+* Exploration models
+* Discussion
+
+## Reproducibility and transparency
+
+Advantages of making an assessment process reproducible [@magnussonOpenReproducibleFisheries2022]:
+
+- Easy to review the assessment process
+- Easy to make updates
+- Easy to make modifications
+- Improve traceability and credibility of the assessment process
+
+::: fragment
+
+::: {style="font-size: 80%;"}
+Anyone can reproduce this assessment process. See instructions: <https://github.com/Fundacion-AZTI/IOTC_YFT_2024_Assessment/tree/reproducible>.
+:::
+
+:::
+
+## Background
+
+::: incremental
+
+- 2018 assessment: spatially explicit implemented in Stock Synthesis 3 (SS3) [@fuPreliminaryIndianOcean2018].
+- An external review was performed in 2019, which provided recommendations to improve the assessment [@methotRecommendationsConfigurationIndian2019], some explored in @urtizbereaPreliminaryAssessmentIndian2019.
+- 2021 assessment: based on the 2018 assessment, with some improvements and new analyses [@fuPreliminaryIndianYellowfin2021].
+- An external review was carried out in 2023 [@maunderIndependentReviewRecent2023], which provided recommendations for the next assessment, some explored by @langleyInvestigationRecruitmentDynamics2023.
+
+:::
+
+## Fisheries
+
+Nine fishery groups were defined in the assessment:
+
+::: {style="font-size: 75%;"}
+
+| Fishery code | Fishery group            | Main fleets |
+|--------------|--------------------------|-------------|
+| GI           | Gillnet                  | Iran, Sri Lanka, Oman |
+| HD           | Handline                 | Oman, Yemen, Maldives |
+| LL           | Longline                 | Japan, Korea, Taiwan  |
+| OT           | Others                   | Indonesia, Sri Lanka |
+| BB           | Baitboat                 | Maldives |
+| FS           | Purse seine, free school | Spain, France, Seychelles |
+| LS           | Purse seine, log school  | Spain, France, Seychelles |
+| TR           | Troll                    | India, Iran, Comoros |
+| LF           | Longline (fresh tuna)    | Sri Lanka, Indonesia |
+
+:::
+
+## Fisheries
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_catch.png"), rel_path = FALSE)
+```
+
+## Fisheries
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "catch_grid.png"), rel_path = FALSE)
+```
+
+## Fisheries
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "size_grid.png"), rel_path = FALSE)
+```
+
+# Model structure
+
+## Spatial stratification
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_IO_4ARegions.png"), rel_path = FALSE)
+```
+
+## Temporal stratification
+
+<br>
+
+- Period: 1950 - 2023
+- Model time step: quarter (i.e., *quarters-as-years*)
+
+## Fisheries {.smaller}
+
+:::: {.columns}
+::: {.column width="50%"}
+```{r}
+my_tab = get_fisheries(config = '4A_io')
+colnames(my_tab) = c('Fishery number', 'Fishery label')
+knitr::kable(my_tab[1:10,], align=rep('l', 2))
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+my_tab = get_fisheries(config = '4A_io')
+colnames(my_tab) = c('Fishery number', 'Fishery label')
+knitr::kable(my_tab[11:21,], align=rep('l', 2), row.names = FALSE)
+```
+:::
+::::
+
+# Model inputs: Catch
+
+## Catch data
+
+<br> 
+
+::: incremental
+- Information provided by year, month, $5\times 5^\circ$ grid, fleet, gear type, type of school, and catch (in weight and numbers). 
+- Quarter, fishery group, and model region was identified.
+:::
+
+## Catch data
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_size_grid_std_4A.png"), rel_path = FALSE)
+```
+
+## Catch data
+
+<br> 
+
+- Information provided by year, month, $5\times 5^\circ$ grid, fleet, gear type, type of school, and catch (in weight and numbers). 
+- Quarter, fishery group, and model region was identified.
+
+::: incremental
+- *Catch reassignment*: reassign fishery catch in regions with small catch to main regions.
+- *Aggregation*: aggregate per year, quarter, and fishery.
+- Observation error: assumed to be known perfectly.
+:::
+
+
+
+## Catch data
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_catch.png"), rel_path = FALSE)
+```
+
+## New IDN catch
+
+A revisited IDN catch is available (but still need processing by IOTC Secretariat)
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "IDN_catch_comp.png"), rel_path = FALSE)
+```
+
+## New IDN catch
+
+Impacts on model inputs
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_catch_IDN.png"), rel_path = FALSE)
+```
+
+# Data inputs: Catch per unit effort (CPUE)
+
+## CPUE
+
+<br>
+
+Standardized LL CPUE series provided (1975/1976-2023):
+
+| Regions | Data source            | Time resolution |
+|--------------|--------------------------|-------------|
+| R1/R2/R3/R4  | Operational              | Yearly |
+| **R1/R2/R3/R4**  | **Aggregated**       | **Quarterly** |
+| R1+R2/R3+R4  | Operational               | Yearly  |
+| R1+R2+R3/R4  | Operational               | Yearly |
+| R1+R2+R3/R4  | Operational               | Quarterly |
+
+## CPUE
+
+:::: {.columns}
+::: {.column width="35%"}
+<br>
+Regional scaling [@hoyleScalingFactorsMultiregion2020]. 
+
+Observation error: constant CV (0.2) or derived from standardization model.
+:::
+
+::: {.column width="65%"}
+<br>
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_cpue_area.png"), rel_path = FALSE)
+```
+:::
+::::
+
+## CPUE
+
+:::: {.columns}
+::: {.column width="40%"}
+<br>
+Largest differences observed in region 1. Probably due to inclusion of region 1a in standardization.
+:::
+
+::: {.column width="60%"}
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_cpue.png"), rel_path = FALSE)
+```
+:::
+::::
+
+## CPUE: effort creep
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_cpue_effcreep.png"), rel_path = FALSE)
+```
+
+## CPUE: purse seine free school
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "ts_llfs_cpue.png"), rel_path = FALSE)
+```
+
+# Data inputs: Size
+
+## Size
+
+<br> 
+
+::: incremental
+
+- Information provided by year, month, $5\times 5^\circ$ grid, fleet, gear type, type of school, reporting quality, and the number of sampled fish per length bin. 
+- Length bins spanned from 10 to 340 cm, with length bin width of 2 cm &rarr standardized from 10 to 198 cm, with length bin width of 4 cm.
+- Grids at two spatial resolutions: *original* and *cwp55*.
+
+:::
+
+## Size
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_size_grid_4A.png"), rel_path = FALSE)
+```
+
+## Size
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_size_grid_std_4A.png"), rel_path = FALSE)
+```
+
+## Size
+
+<br>
+
+:::: {.columns}
+::: {.column width="40%"}
+The use of the *cwp55* dataset allowed to:
+
+1. Better assignment of model regions
+2. Catch-raising
+:::
+
+::: {.column width="60%"}
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "imputation_grid_5.png"), rel_path = FALSE)
+```
+:::
+::::
+
+<!-- ## Size {.smaller} -->
+
+<!-- | Fishery code |  Main fleets with information | -->
+<!-- |--------------|-------------| -->
+<!-- | GI           | Iran, Sri Lanka | -->
+<!-- | HD           | Maldives, Sri Lanka | -->
+<!-- | LL           | Japan, Taiwan  | -->
+<!-- | OT           | Indonesia, Sri Lanka | -->
+<!-- | BB           | Maldives | -->
+<!-- | FS           | Spain, France | -->
+<!-- | LS           | Spain, France, Seychelles | -->
+<!-- | TR           | Indonesia, Comoros, Sri Lanka | -->
+<!-- | LF           | Sri Lanka, Taiwan | -->
+
+## Size: filtering
+
+<br>
+
+In general, removed size information by fleets with inconsistent patterns (e.g., low sampling, unrealistic very large fish).
+
+- *LL*: removed data from Taiwan and Seychelles, as well as size information before 1960 [@hoyleReviewSizeData2021].
+
+## Size: filtering
+
+:::: {.columns}
+::: {.column width="50%"}
+<br>
+*HD* fishery:
+
+- Oman contributes to a large portion of the catch
+- No size information from Oman
+- Use Maldives size information to inform selectivity of this fishery
+:::
+
+::: {.column width="50%"}
+```{r}
+#| out-width: 70%
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "HD_catch-size_CPC.png"), rel_path = FALSE)
+```
+:::
+::::
+
+## Size: aggregation
+
+<br>
+
+When aggregating by year, quarter, and fishery:
+
+- *Simple aggregation*: summing the number of fish per length bin. Used in 2021 assessment, and assumed that the collection of samples was broadly representative of the
+operation of the fishery in each quarter.
+
+- *Catch-raised aggregation*: catch-weighted sum of the number of fish per length bin. 
+
+## Size: aggregation
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "agg_size.png"), rel_path = FALSE)
+```
+
+## Size
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_size.png"), rel_path = FALSE)
+```
+
+## Size
+
+:::: {.columns}
+::: {.column width="40%"}
+<br>
+Differences in longline fisheries, mainly attributed to revisions made by the IOTC Secretariat regarding the conversion from fish weights to lengths.
+:::
+
+::: {.column width="60%"}
+```{r}
+#| out-width: 80%
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "compare_mlen.png"), rel_path = FALSE)
+```
+:::
+::::
+
+## Size
+
+Reporting quality as a measure of observation error:
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "rq_size_simpagg.png"), rel_path = FALSE)
+```
+
+# Data inputs: Conditional age-at-length (CAAL)
+
+## CAAL
+
+:::: {.columns}
+::: {.column width="50%"}
+<br>
+
+- Discrimination between LS and FS made by fish size.
+- Several observations were assigned to region 1b subjectively. 
+:::
+
+::: {.column width="50%"}
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "caal_nsamp.png"), rel_path = FALSE)
+```
+:::
+::::
+
+## CAAL
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "caal.png"), rel_path = FALSE)
+```
+
+# Data inputs: Tagging
+
+## Tagging
+
+```{r}
+#| out-width: 80%
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "tag_map.png"), rel_path = FALSE)
+```
+
+## Tagging
+
+:::: {.columns}
+::: {.column width="50%"}
+```{r}
+#| out-width: 80%
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "tag_nfish_area.png"), rel_path = FALSE)
+```
+:::
+
+::: {.column width="50%"}
+<br>
+
+Most fish recovered in region 1b.
+
+Discrimination between LS and FS was based on the expected size of fish at the time of recapture.
+:::
+::::
+
+## Tagging
+
+:::: {.columns}
+::: {.column width="50%"}
+<br>
+
+SS3 requires specify the age at release. We approximate it using the new growth curve [@farleyUpdatingEstimationAge2023].
+:::
+
+::: {.column width="50%"}
+```{r}
+#| out-width: 80%
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "tag_nfish.png"), rel_path = FALSE)
+```
+:::
+::::
+
+## Tagging
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "Releases_Tag_ALK_Fonteneau_Farley.png"), rel_path = FALSE)
+```
+
+## Tagging
+
+Settings as in the 2021 assessment:
+
+::: {style="font-size: 90%;"}
+
+- **Initial tagging mortality**: the number of tags in each release group was reduced by 27.5% to account for initial tag mortality [@hoyleCovariatesReleaseMortality2015].
+- **Chronic tag loss**: annual rate of 3% [@gaertnerTagSheddingTropical2015].
+- **Reporting rate**: high variability over the years. Number of tag recoveries were corrected based on previous studies [@hillaryReportingRateAnalyses2008], and assumed a 100% recovery rate for purse seine fisheries in the model. Estimated for other fisheries.
+- **Mixing period**: 4 quarters.
+
+:::
+
+# Model parameters: Population dynamics
+
+## Population dynamics
+
+<br>
+
+- Ages in the model: 0-28+ quarters (i.e., 7 years), but also investigated 0-40+.
+- Length bins in the population: 10 to 198 cm, with length bin width of 4 cm.
+
+# Model parameters: Recruitment
+
+## Recruitment
+
+::: incremental 
+
+- Stock-recruitment relationship (SSR): Beverton-Holt.
+- Recruitment happens at the beginning of every quarter. 
+- Steepness ($h$): 0.8, but other values also tested.
+- Recruitment variability ($\sigma_R$): 0.6.
+- Recruitment deviates from 1977 to 2021.
+- SSR is global, but recruits apportioned into two regions: R1 and R4 [@regleroWorldwideDistributionsTuna2014]. Other options also explored.
+- Spatial apportionment of recruits had two time blocks (1977-2008 and 2009-2021). 
+
+:::
+
+# Model parameters: Growth
+
+## Growth
+
+New growth curve estimated by @farleyUpdatingEstimationAge2023 based on daily and annual otolith readings validated with radiocarbon [@fraileAgeValidationYellowfin2024]. Approximated in SS3 by varying the age-specific $k$ parameter.
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "growth_1.png"), rel_path = FALSE)
+```
+
+## Growth
+
+Sex-specific growth curve also explored.
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "growth_sex.png"), rel_path = FALSE)
+```
+
+## Length-weight relationship
+
+Estimated by @chassotLengthweightRelationshipsTropical2016 and also used in the 2021 assessment.
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "LW.png"), rel_path = FALSE)
+```
+
+# Model parameters: Sexual maturity
+
+## Sexual maturity
+
+:::: {.columns}
+::: {.column width="50%"}
+<br>
+
+We now used a length-based maturity based on functional maturity since it is considered a better proxy of spawning [@zudairePreliminaryEstimatesSex2022].
+:::
+
+::: {.column width="50%"}
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "maturity.png"), rel_path = FALSE)
+```
+:::
+::::
+
+# Model parameters: Natural mortality
+
+## Natural mortality
+
+$M_{ref}$ function of the maximum age. $M_{ref}$ corresponded to the age at 95% maturity. Then, $M_{ref}$ was rescaled per age and was a function of growth parameters [@lorenzenPopulationDynamicsPotential2005].
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "natmort.png"), rel_path = FALSE)
+```
+
+# Model parameters: Movement
+
+## Movement
+
+Specified movement definitions as in the 2021 assessment. Differentiated movement rates between ages 2-8 quarters and older than 9.
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_IO_4ARegions_mov.png"), rel_path = FALSE)
+```
+
+# Model parameters: Fishery dynamics
+
+## Fishing mortality
+
+<br>
+
+Modelled using the hybrid method, which uses the Pope’s equation and an iterative method to approximate the fishing mortality ($F$).
+
+## Catchability
+
+<br>
+
+Since regional scaling was performed, we only estimated $Q$ for CPUE LL 1b. The estimated $Q$ was used for LL 2, LL 3, and LL 4.
+
+## Selectivity
+
+::: {style="font-size: 65%;"}
+
+| Fishery code |  Selectivity type |
+|--------------|-------------|
+| GI           | Age-specific. Double normal parametrization. |
+| OT           | Age-specific. Double normal parametrization. |
+| BB           | Age-specific. Double normal parametrization. |
+| TR           | Age-specific. Double normal parametrization. |
+| HD           | Age-specific. Logistic shape. |
+| FS           | Size-specific. Cubic spline with five nodes. |
+| LS           | Size-specific. Cubic spline with five nodes. |
+| LF           | Age-specific. Logistic shape. |
+| LL           | Age-specific. Logistic shape, but other options also explored. |
+
+:::
+
+## Selectivity
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "LL_catch-size_CPC.png"), rel_path = FALSE)
+```
+
+## Thank you {background-color="black"}
+
+<br> <br>
+
+<center>
+
+![](__AZTI_secundario_BlancoAmarillo.png){width="50%"}
+
+<br>
+
+[Contact:]{style="font-size:40px"} <br> [gmoron\@azti.es](mailto:gmoron@azti.es){style="font-size:40px"}
+
+</center>
+
+## References
+

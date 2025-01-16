@@ -2,14 +2,11 @@ rm(list = ls())
 
 # Read path and parameters for plots:
 source('sharepoint_path.R')
-source(here('code', 'parameters_for_plots.R'))
-source(here('code', 'auxiliary_functions.R'))
+source('code/parameters_for_plots.R')
+source('code/auxiliary_functions.R')
 
 # Spatial configuration:
 spat_config = '4A_io'
-
-# Length bins
-L_labels  =  c(Paste("L0",seq(10,98,2)), Paste("L",seq(100,198,2))) 
 
 # -------------------------------------------------------------------------
 # Scale LL CPUE per time step with CV -------------------------------------
@@ -206,4 +203,35 @@ p1 = ggplot(data = plot_data, aes(x = time, y = obs)) +
   facet_grid(fleet_name ~ tstep, scales = 'free_y')
 ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_cpue_treatment', img_type)), plot = p1,
        width = img_width*0.8, height = 150, units = 'mm', dpi = img_res)
+
+
+# -------------------------------------------------------------------------
+
+# Compare yearly vs quartely LL indices: simple plot
+
+# Read data:
+dat_qt1 = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'cpue-ll-qt.csv'))
+dat_yr1 = read_csv(file.path(shrpoint_path, 'data/ss3_inputs', spat_config, 'cpue-ll-yr.csv'))
+
+# Merge:
+plot_data = rbind(dat_qt1 %>% mutate(type = 'Quarterly (aggregated data)') %>% mutate(time = ssts2yq(year)), 
+                  dat_yr1 %>% mutate(type = 'Yearly (operational data)') %>% mutate(time = ssts2yq(year) + 0.375) # mid year
+                  )
+plot_data = plot_data %>% mutate(fleet_name = if_else(index == 22, 'LL 1', 
+                                                      if_else(index == 23, 'LL 2', 
+                                                              if_else(index == 24, 'LL 3', 'LL 4'))))
+plot_data$fleet_name = factor(plot_data$fleet_name, levels = c('LL 1', 'LL 4', 'LL 2', 'LL 3'))
+
+# Make plot:
+p1 = ggplot(data = plot_data, aes(x = time, y = obs)) +
+  geom_line(aes(color = type)) +
+  ylab("Scaled CPUE") + xlab(NULL) +
+  scale_color_brewer(palette = "Dark2") +
+  theme(axis.text.y = element_text(angle = 90, vjust = 0.5, hjust=0.5),
+        legend.position = 'bottom') +
+  scale_y_continuous(breaks = breaks_extended(3)) +
+  guides(color = guide_legend(title = NULL, nrow = 1)) +
+  facet_wrap(fleet_name ~ ., scales = 'free_y')
+ggsave(file.path(shrpoint_path, plot_dir, paste0('compare_cpue_treatment_simple', img_type)), plot = p1,
+       width = img_width, height = 150, units = 'mm', dpi = img_res)
 

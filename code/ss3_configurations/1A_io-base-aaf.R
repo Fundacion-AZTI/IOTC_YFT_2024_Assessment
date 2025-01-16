@@ -9,12 +9,11 @@ spat_config = '1A_io'
 spat_subconfig = 'aaf'
 
 # SS base files path (in Sharepoint):
-# Use RM2 (16_LLsplit_LL1b_LL4_DN_min)
-SS_base = 'models/update/16_LLsplit_LL1b_LL4_DN_min'
+# Use RM3 
+SS_base = 'models/RefModels/3_SplitCPUE_tag1_EC0_h08/nohess'
 
 # SS input data path (in Sharepoint):
 SS_data = file.path('data/ss3_inputs', spat_config, spat_subconfig)
-
 
 # -------------------------------------------------------------------------
 
@@ -50,25 +49,27 @@ new_dat = base_dat
 # Get fishery names:
 fish_names = get_fisheries('4A_io')$fleet_name
 # Basic info:
-new_dat$Nfleets = new_dat$Nfleet + 1 # only one index
+new_dat$Nfleets = new_dat$Nfleet + 2 # two indices
 new_dat$N_areas = 1
 # Fleet info:
 tmp_dat = base_dat$fleetinfo
-tmp_dat = tmp_dat[1:new_dat$Nfleets,]
-tmp_dat$fleetname[nrow(tmp_dat)] = c('CPUE_LL')
+tmp_dat = tmp_dat[c(1:new_dat$Nfleet, 25, 29),]
+tmp_dat$fleetname[25:26] = c('CPUE_LL_P2000', 'CPUE_LL_A2000')
 tmp_dat$area = 1
 new_dat$fleetinfo = tmp_dat
 # Catch df: same as base model
 # CPUE info:
 tmp_dat = base_dat$CPUEinfo
-tmp_dat = tmp_dat[1:new_dat$Nfleets,]
+tmp_dat = tmp_dat[c(1:new_dat$Nfleet, 25, 29),]
+tmp_dat$fleet = 1:new_dat$Nfleets
 new_dat$CPUEinfo = tmp_dat
 # CPUE df:
-cpue_df$index = new_dat$Nfleets
-new_dat$CPUE = as.data.frame(cpue_df)
+tmp_cpue = cpue_df
+tmp_cpue = tmp_cpue %>% mutate(index = if_else(year >= 213, 25, 26)) # LL1b
+new_dat$CPUE = as.data.frame(tmp_cpue)
 # Len info:
 tmp_dat = base_dat$len_info
-tmp_dat = tmp_dat[1:new_dat$Nfleets,]
+tmp_dat = tmp_dat[c(1:new_dat$Nfleet, 25, 29),]
 new_dat$len_info = tmp_dat
 # Len df: same as base model
 # Age info:
@@ -110,25 +111,22 @@ new_ctl$MG_parms = new_ctl$MG_parms %>% dplyr::filter(!row_number() %in% c(25:26
 # change F_method later
 # Q params:
 tmp_ctl = base_ctl$Q_options
-tmp_ctl = tmp_ctl[1, ]
+tmp_ctl = tmp_ctl[c(1,5), ]
+tmp_ctl$fleet = 25:26
+tmp_ctl$link_info[2] = 25
 new_ctl$Q_options = tmp_ctl
-new_ctl$Q_parms = base_ctl$Q_parms[1, ]
+new_ctl$Q_parms = base_ctl$Q_parms[c(1,5), ]
 # Selectivity info:
 tmp_ctl = base_ctl$size_selex_types
-tmp_ctl = tmp_ctl[1:new_dat$Nfleets,]
+tmp_ctl = tmp_ctl[c(1:new_dat$Nfleet, 25, 29),]
 new_ctl$size_selex_types = tmp_ctl
 tmp_ctl = base_ctl$age_selex_types
-tmp_ctl = tmp_ctl[1:new_dat$Nfleets,]
+tmp_ctl = tmp_ctl[c(1:new_dat$Nfleet, 25, 29),]
 new_ctl$age_selex_types = tmp_ctl
 # Tagging params:
 new_ctl$TG_Loss_init = base_ctl$TG_Loss_init[1:new_dat$N_tag_groups, ]
 new_ctl$TG_Loss_chronic = base_ctl$TG_Loss_chronic[1:new_dat$N_tag_groups, ]
 new_ctl$TG_overdispersion = base_ctl$TG_overdispersion[1:new_dat$N_tag_groups, ]
-
-# Remove priors in MG parameters:
-# new_ctl$MG_parms[,6] = 0
-# Fix growth:
-# new_ctl$MG_parms[c(3:4, 17:18),7] = abs(new_ctl$MG_parms[c(3:4, 17:18),7])*-1
 
 # -------------------------------------------------------------------------
 # Write adapted files:

@@ -9,32 +9,17 @@ source(here('code', 'auxiliary_functions.R'))
 SS_config = file.path('models/configurations')
 
 # -------------------------------------------------------------------------
-# Read 2A models
+# Read 1A models
 
 # 1A aaf
-mod1Aaaf_1 = SS_output(dir = file.path(shrpoint_path, SS_config, '1A_io/aaf', '2_addCAAL'), covar = FALSE)
-mod1Aaaf_2 = SS_output(dir = file.path(shrpoint_path, SS_config, '1A_io/aaf', '3_addTag'), covar = FALSE)
+mod1Aaaf_1 = SS_output(dir = file.path(shrpoint_path, SS_config, '1A_io/aaf', '1_BC'), covar = FALSE)
+mod1Aaaf_2 = SS_output(dir = file.path(shrpoint_path, SS_config, '1A_io/aaf', '2_addTag'), covar = FALSE)
+mod1Aaaf_3 = SS_output(dir = file.path(shrpoint_path, SS_config, '1A_io/aaf', '3_addCAAL'), covar = FALSE)
 # 1A agg
-mod1Aagg_1 = SS_output(dir = file.path(shrpoint_path, SS_config, '1A_io/agg', '2_addCAAL'), covar = FALSE)
-mod1Aagg_2 = SS_output(dir = file.path(shrpoint_path, SS_config, '1A_io/agg', '3_addTag'), covar = FALSE)
+mod1Aagg_1 = SS_output(dir = file.path(shrpoint_path, SS_config, '1A_io/agg', '1_BC'), covar = FALSE)
+mod1Aagg_2 = SS_output(dir = file.path(shrpoint_path, SS_config, '1A_io/agg', '2_addTag'), covar = FALSE)
+mod1Aagg_3 = SS_output(dir = file.path(shrpoint_path, SS_config, '1A_io/agg', '3_addCAAL'), covar = FALSE)
 
-# 2A aaf
-mod2Aaaf_1 = SS_output(dir = file.path(shrpoint_path, SS_config, '2A_io/aaf', '2_addCAAL'), covar = FALSE)
-mod2Aaaf_2 = SS_output(dir = file.path(shrpoint_path, SS_config, '2A_io/aaf', '3_addTag'), covar = FALSE)
-# 2A agg
-mod2Aagg_1 = SS_output(dir = file.path(shrpoint_path, SS_config, '2A_io/agg', '2_addCAAL'), covar = FALSE)
-mod2Aagg_2 = SS_output(dir = file.path(shrpoint_path, SS_config, '2A_io/agg', '3_addTag'), covar = FALSE)
-
-# 4A config:
-mod4A = SS_output(dir = file.path(shrpoint_path, 'models/RefModels', '4_Split_tag01_EC0_h08/nohess_win'), covar = FALSE)
-
-# Define colors:
-pal_1A = brewer.pal(n = 8, name = 'Set1')
-pal_2A = brewer.pal(n = 8, name = 'Set1')
-
-mod_color = c('1A' = pal_1A[1], 
-              '2A' = pal_2A[2], 
-              '4A' = 'black')
 
 
 # -------------------------------------------------------------------------
@@ -165,3 +150,27 @@ p4 = ggplot(plot_data, aes(x = Year, y = dev, color = factor(spat))) +
          linetype = guide_legend(title = 'Aggregation type'))
 ggsave(file.path(shrpoint_path, plot_dir, paste0('alt-config-recdevs', img_type)), plot = p4,
        width = img_width, height = 130, units = 'mm', dpi = img_res)
+
+
+
+# -------------------------------------------------------------------------
+# 2A models
+
+# 2A aaf
+mod2Aaaf_1 = SS_output(dir = file.path(shrpoint_path, SS_config, '2A_io/aaf', '2_addCAAL'), covar = FALSE)
+mod2Aaaf_2 = SS_output(dir = file.path(shrpoint_path, SS_config, '2A_io/aaf', '3_addTag'), covar = FALSE)
+# 2A agg
+mod2Aagg_1 = SS_output(dir = file.path(shrpoint_path, SS_config, '2A_io/agg', '2_addCAAL'), covar = FALSE)
+mod2Aagg_2 = SS_output(dir = file.path(shrpoint_path, SS_config, '2A_io/agg', '3_addTag'), covar = FALSE)
+
+# 4A config:
+mod4A = SS_output(dir = file.path(shrpoint_path, 'models/FinalGrid', '6_SplitCPUE_tag01_EC0_h0.8'), covar = FALSE)
+
+# Define colors:
+pal_1A = brewer.pal(n = 8, name = 'Set1')
+pal_2A = brewer.pal(n = 8, name = 'Set1')
+
+mod_color = c('1A' = pal_1A[1], 
+              '2A' = pal_2A[2], 
+              '4A' = 'black')
+

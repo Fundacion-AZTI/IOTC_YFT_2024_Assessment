@@ -1,0 +1,153 @@
+---
+title: "Preliminary 2024 stock assessment of yellowfin tuna in the Indian Ocean"
+author: Giancarlo M. Correa, Agurtzane Urtizberea, Adam Langley, Gorka Merino, Dan Fu, Emmanuel Chassot, Shiham Adam
+embed-resources: false
+highlight-style: "a11y-dark"
+format: azti-revealjs
+link-citations: true
+revealjs-plugins:
+  - pointer
+include-in-header:
+  - text: |
+      <link rel = "shortcut icon" href = "azti.svg" />
+title-slide-attributes:
+    data-background-image: "title_image.jpg"
+    data-background-size: cover
+    data-background-opacity: "0.3"
+execute:
+  echo: false
+  warning: false
+csl: canadian-journal-of-fisheries-and-aquatic-sciences.csl
+bibliography: ../references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      verbose = FALSE,
+                      message = FALSE, 
+                      warning = FALSE)
+```
+
+```{r}
+# To output figures and tables in sharepoint:
+source('sharepoint_path.R')
+source('code/auxiliary_functions.R')
+```
+
+```{r}
+# remotes::install_github("wmoldham/rbbt") # temporarily, until error is fixed
+require(knitr)
+require(rbbt)
+require(dplyr)
+require(flextable)
+# This will automatically update the BIB file:
+keys = rbbt::bbt_detect_citations('slides/slides-data.qmd')
+bbt_ignore = keys[grepl("fig-|tbl-|eq-", keys)]
+rbbt::bbt_update_bib(path_rmd = 'slides/slides-data.qmd', 
+                     ignore = bbt_ignore, overwrite = T, translator = "bibtex")
+```
+
+
+# Alternative spatial configurations
+
+## Spatial stratification
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_IO_4ARegions_mov.png"), rel_path = FALSE)
+```
+
+
+## Spatial stratification
+
+:::: {.columns}
+::: {.column width="50%"}
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_IO_1ARegions.png"), rel_path = FALSE)
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "map_IO_2ARegions.png"), rel_path = FALSE)
+```
+:::
+::::
+
+## Configuration
+
+<br>
+
+- Configurations built from the RM2 (two blocks in LL selectivity)
+- Data as in the RM2 model
+- 2A model: movement between region 1 and 2, different rates for juveniles and adults
+- CPUE LL index: derived from the 4A indices
+
+## Spawning biomass
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "alt-config-ssb.png"), rel_path = FALSE)
+```
+
+## Stock status
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "alt-config-status.png"), rel_path = FALSE)
+```
+
+## Recruitment
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "alt-config-recruits.png"), rel_path = FALSE)
+```
+
+## Recruitment deviates
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "alt-config-recdevs.png"), rel_path = FALSE)
+```
+
+## Simulation study
+
+```{r}
+#| fig-align: center
+#| fig-cap: Goethel et al. (2024)
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "paper_sim_0.png"), rel_path = FALSE)
+```
+
+## Simulation study
+
+```{r}
+#| fig-align: center
+#| fig-cap: Goethel et al. (2024)
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "paper_sim_1.png"), rel_path = FALSE)
+```
+
+## Simulation study
+
+```{r}
+#| fig-align: center
+#| fig-cap: Goethel et al. (2024)
+knitr::include_graphics(file.path(shrpoint_path, 'output/figures', "paper_sim_2.png"), rel_path = FALSE)
+```
+
+## Thank you {background-color="black"}
+
+<br> <br>
+
+<center>
+
+![](__AZTI_secundario_BlancoAmarillo.png){width="50%"}
+
+<br>
+
+[Contact:]{style="font-size:40px"} <br> [gmoron\@azti.es](mailto:gmoron@azti.es){style="font-size:40px"}
+
+</center>
+
