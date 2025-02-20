@@ -477,3 +477,22 @@ out$timeseries$Yr <- qtr2yearqtr(out$timeseries$Yr ,1950,13)
 undebug(SSplotTimeseries)
 SSplotTimeseries(out,subplot=8)
 SavePlot("SSB_by_area",15,10)
+
+
+#### BIOMASS BY AREA
+
+plot(sc_ss3$timeseries[,c(1,2,3,7)])
+df <- sc_ss3$timeseries[,c(1,2,3,7)]
+#df$yr <- as.numeric(gsub("\\D+", replacement = '', df$Label))
+df_yrqtr <- df %>%   mutate(yrqtr=qtr2yearqtr(Yr,1950,13))%>%
+  mutate(yrqtr_season=floor((yrqtr-floor(yrqtr))*4+1))
+df_yrqtr <- as.data.frame(df_yrqtr)
+df_yrqtr$yr<- floor(df_yrqtr$yrqtr)
+dfYFT <- df_yrqtr[,c(7,6,1,3,4)]
+names(dfYFT)<- c("year","Quarter","Area","Era","SSByft")
+write.csv(dfYFT,file="output/tables/SSB_byArea_5_NoSplit_tag01_EC0_h0.8.csv")
+
+df  <- NULL
+df$age <- c(0:40)
+df$M <- as.vector(as.matrix(sc_ss3$Natural_Mortality[1,c(13:53)]))
+write.csv(as.data.frame(df),file="output/tables/MatAgebyQuarter.csv")
