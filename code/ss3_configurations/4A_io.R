@@ -119,7 +119,7 @@ tmp_dir = file.path(shrpoint_path, SS_config, config_name)
 dir.create(tmp_dir, showWarnings = FALSE)
 
 #update cpue
-cpue_df = read.csv(file.path(shrpoint_path, SS_data, 'cpue-ll-qt.csv'))
+cpue_df = read.csv(file.path(shrpoint_path, SS_data, 'cpue-ll.csv'))
 cpue_df$se_log = 0.2 # assuming cv = 0.2
 dat_tmp$CPUE <- cpue_df
 
