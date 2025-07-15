@@ -126,7 +126,7 @@ grid <- nms
   forecatch<-seq(0.6,1.2,0.05)
   for(j in 1:length(forecatch)){
     tmp_dir <- file.path("projections",grid[i],paste0("fore-scale20_",forecatch[j]))
-    r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-maxfn 10 -phase 10 -nohess -ams 1000000000 -cbs 1000000000 -gbs 1000000000 %1 %2 %3 %4')
+    r4ss::run(dir = tmp_dir, exe = file.path(shrpoint_path, 'ss3_3022.exe'), extras = '-maxfn 10 -phase 10 -nohess')
     tmp_dir_res <- file.path("projections",grid[i])
     file.copy(file.path(tmp_dir,"Report.sso"),
               file.path(tmp_dir_res,paste0("Report-scale20-c",forecatch[j],".sso")),overwrite=FALSE)
