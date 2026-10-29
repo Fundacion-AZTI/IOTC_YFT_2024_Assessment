@@ -1,18 +1,18 @@
 rm(list = ls())
 
 # Read functions;
-source("code/ss3_status/SS3_helper.r")
-source("code/ss3_status/SS3_support_functions.R")
+source("code/ss3_projections/SS3_helper.r")
+source("code/ss3_projections/SS3_support_functions.R")
 '%&%' <- function(x, y) paste0(x,y)
 
 # Define parameters:
-mod_dir = 'C:/Use/OneDrive - AZTI/General - IOTC_YFT_2024/models/FinalGrid-usb/'
+mod_dir = 'C:/Use/OneDrive - AZTI/General - IOTC_YFT_2024/projections/'
 save_dir = 'C:/Use/OneDrive - AZTI/General - IOTC_YFT_2024/models/stock_status'
 year_mod = 'WPTT26'
 
 # Primary settings!!!
 avgYears = '20' # '0', '12' or '20'
-tab_type = 'lim' # 'target' or 'lim'
+tab_type = 'target' # 'target' or 'lim'
 
 # Secondary settings:
 if(avgYears == '0') fore_label = ''
@@ -41,8 +41,8 @@ Grid = c(PROJ_INPUT_OBJECT[[year_mod]][['gridIO']][['proj']])
 
 if(tab_type == 'target') {
   savepng('gridIO', width = 170, height=120, units = 'mm', res = 400) 
-  plot.grid.projection(Grid, average =T, initial_year=1950, current_qtr=348, 
-                       initial_qtr=13, xlim = c(1983, 2033), avgYears = avgYears, 
+  plot.grid.projection(Grid, average =T, initial_year=1950, current_qtr=348, xlimbox = c(2023,2041),
+                       initial_qtr=13, xlim = c(2021, 2033), avgYears = avgYears, 
                        mod_dir = mod_dir, fore_label = fore_label)
   dev.off()
 }
